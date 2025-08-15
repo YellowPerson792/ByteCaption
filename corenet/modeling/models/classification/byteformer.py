@@ -343,9 +343,11 @@ class ByteFormer(BaseAnyNNModel):
             positions.
         """
         mask = torch.zeros_like(x, dtype=torch.float)
-        mask[x == -1].fill_(float("-inf"))
+        # 修复：确保布尔索引正确工作，处理int32类型
+        padding_mask = (x == -1)
+        mask[padding_mask] = float("-inf")
         mask = mask.detach().requires_grad_(False)
-        x[x == -1] = self.embeddings.padding_idx
+        x[padding_mask] = self.embeddings.padding_idx
         x = self.embeddings(x)
 
         x, mask = self.apply_token_reduction_net(x, mask)
