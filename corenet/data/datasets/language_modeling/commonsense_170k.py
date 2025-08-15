@@ -5,9 +5,14 @@
 
 
 import argparse
-import fcntl
 import os
 from typing import Dict, Iterator
+
+# fcntl is only available on Unix/Linux systems
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 
 import pandas as pd
 from torch import Tensor
@@ -95,7 +100,10 @@ class CommonSense170k(BaseLMIterableDataset):
 
         with open(local_file_path + ".lock", "a") as lock_file:
             try:
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                # Use fcntl for file locking on Unix/Linux systems only
+                if fcntl is not None:
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                
                 if os.path.isfile(local_file_path):
                     return local_file_path
 
@@ -109,7 +117,9 @@ class CommonSense170k(BaseLMIterableDataset):
                     sync_ranks=False,
                 )
             finally:
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                # Unlock file on Unix/Linux systems only
+                if fcntl is not None:
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
         return local_file_path
 

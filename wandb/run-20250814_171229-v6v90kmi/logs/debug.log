@@ -1,0 +1,30 @@
+2025-08-14 17:12:29,297 INFO    Thread-40 (_run_job):4752 [wandb_setup.py:_flush():80] Current SDK version is 0.21.1
+2025-08-14 17:12:29,297 INFO    Thread-40 (_run_job):4752 [wandb_setup.py:_flush():80] Configure stats pid to 4752
+2025-08-14 17:12:29,297 INFO    Thread-40 (_run_job):4752 [wandb_setup.py:_flush():80] Loading settings from C:\Users\yello\.config\wandb\settings
+2025-08-14 17:12:29,297 INFO    Thread-40 (_run_job):4752 [wandb_setup.py:_flush():80] Loading settings from D:\MLLMs\corenet\wandb\settings
+2025-08-14 17:12:29,297 INFO    Thread-40 (_run_job):4752 [wandb_setup.py:_flush():80] Loading settings from environment variables
+2025-08-14 17:12:29,298 INFO    Thread-40 (_run_job):4752 [wandb_init.py:setup_run_log_directory():703] Logging user logs to D:\MLLMs\corenet\wandb\run-20250814_171229-v6v90kmi\logs\debug.log
+2025-08-14 17:12:29,300 INFO    Thread-40 (_run_job):4752 [wandb_init.py:setup_run_log_directory():704] Logging internal logs to D:\MLLMs\corenet\wandb\run-20250814_171229-v6v90kmi\logs\debug-internal.log
+2025-08-14 17:12:29,300 INFO    Thread-40 (_run_job):4752 [wandb_init.py:init():830] calling init triggers
+2025-08-14 17:12:29,300 INFO    Thread-40 (_run_job):4752 [wandb_init.py:init():835] wandb.init called with sweep_config: {'learning_rate': 0.00019828592015815969, 'num_train_epochs': 5, 'per_device_train_batch_size': 16, 'warmup_ratio': 0.01668311883142695}
+config: {'_wandb': {}}
+2025-08-14 17:12:29,300 INFO    Thread-40 (_run_job):4752 [wandb_init.py:init():871] starting backend
+2025-08-14 17:12:29,510 INFO    Thread-40 (_run_job):4752 [wandb_init.py:init():874] sending inform_init request
+2025-08-14 17:12:29,513 INFO    Thread-40 (_run_job):4752 [wandb_init.py:init():882] backend started and connected
+2025-08-14 17:12:29,513 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_config_callback():1380] config_cb None None {'learning_rate': 0.00019828592015815969, 'num_train_epochs': 5, 'per_device_train_batch_size': 16, 'warmup_ratio': 0.01668311883142695}
+2025-08-14 17:12:29,514 INFO    Thread-40 (_run_job):4752 [wandb_init.py:init():953] updated telemetry
+2025-08-14 17:12:29,548 INFO    Thread-40 (_run_job):4752 [wandb_init.py:init():977] communicating run to backend with 90.0 second timeout
+2025-08-14 17:12:31,580 INFO    Thread-40 (_run_job):4752 [wandb_init.py:init():1029] starting run threads in backend
+2025-08-14 17:12:31,709 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_console_start():2494] atexit reg
+2025-08-14 17:12:31,709 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_redirect():2342] redirect: wrap_raw
+2025-08-14 17:12:31,709 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_redirect():2411] Wrapping output streams.
+2025-08-14 17:12:31,709 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_redirect():2434] Redirects installed.
+2025-08-14 17:12:31,710 INFO    Thread-40 (_run_job):4752 [wandb_init.py:init():1075] run started, returning control to user process
+2025-08-14 17:12:31,710 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_config_callback():1380] config_cb None None {'assignments': {}, 'metric': 'eval/loss'}
+2025-08-14 17:12:32,101 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_finish():2260] finishing run ypfree-/uncategorized/v6v90kmi
+2025-08-14 17:12:32,101 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_atexit_cleanup():2459] got exitcode: 0
+2025-08-14 17:12:32,101 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_restore():2441] restore
+2025-08-14 17:12:32,101 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_restore():2447] restore done
+2025-08-14 17:12:36,199 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_footer_history_summary_info():3895] rendering history
+2025-08-14 17:12:36,199 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_footer_history_summary_info():3927] rendering summary
+2025-08-14 17:12:36,199 INFO    Thread-40 (_run_job):4752 [wandb_run.py:_footer_sync_info():3856] logging synced files

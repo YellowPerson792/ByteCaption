@@ -1,0 +1,10 @@
+wandb_version: 1
+
+learning_rate:
+  value: 1.0001606282710775
+num_train_epochs:
+  value: 5
+per_device_train_batch_size:
+  value: 8
+warmup_ratio:
+  value: 0.15265705779445246

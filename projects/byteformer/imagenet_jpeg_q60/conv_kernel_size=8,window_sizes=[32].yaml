@@ -6,9 +6,15 @@ common:
   mixed_precision: true
   tensorboard_logging: false
   accum_freq: 2
+ddp:
+  enable: false
+  backend: gloo
+  world_size: 1
+  rank: 0
+  local_rank: 0
 dataset:
-  root_train: /mnt/imagenet/training
-  root_val: /mnt/imagenet/validation
+  root_train: D:\\MLLMs\\datasets\\tiny-imagenet-200\\train
+  root_val: D:\\MLLMs\\datasets\\tiny-imagenet-200\\val
   name: imagenet
   category: classification
   train_batch_size0: 48

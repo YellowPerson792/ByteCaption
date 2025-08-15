@@ -3,7 +3,12 @@
 # Copyright (C) 2024 Apple Inc. All Rights Reserved.
 #
 
-import fcntl
+# fcntl is only available on Unix/Linux systems
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
+
 import pdb
 import sys
 
@@ -33,7 +38,9 @@ class _ForkedPdb(pdb.Pdb):
         """
         with open(self.lockfile, "a") as lock:
             try:
-                fcntl.lockf(lock, fcntl.LOCK_EX)
+                # Use fcntl for file locking on Unix/Linux systems only
+                if fcntl is not None:
+                    fcntl.lockf(lock, fcntl.LOCK_EX)
 
                 _stdin = sys.stdin
                 try:
@@ -43,7 +50,9 @@ class _ForkedPdb(pdb.Pdb):
                     sys.stdin = _stdin
 
             finally:
-                fcntl.lockf(lock, fcntl.LOCK_UN)
+                # Unlock file on Unix/Linux systems only
+                if fcntl is not None:
+                    fcntl.lockf(lock, fcntl.LOCK_UN)
 
 
 def set_trace(lockfile: str = "/tmp/_corenet_fpdb.lockfile") -> None:

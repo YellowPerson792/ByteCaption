@@ -5,7 +5,6 @@
 
 
 import argparse
-import fcntl
 import math
 import os
 import pickle
@@ -13,6 +12,12 @@ import time
 from functools import partial
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterable, Iterator, List, Optional, Tuple
+
+# fcntl is only available on Unix/Linux systems
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 
 import pandas as pd
 from pyarrow import parquet as pq
@@ -257,14 +262,18 @@ class GeneralLMDataset(BaseLMIterableDataset):
         )
         with open(local_file_path + ".lock", "a") as lock_file:
             try:
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                if fcntl is not None:
+
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
                 with open(
                     f"{self.save_loc}/data_states/data_state_{self.rank}_{self.worker_id}.pkl",
                     "wb",
                 ) as fh:
                     pickle.dump(self._state, fh)
             finally:
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                if fcntl is not None:
+
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
     def _prepare_dataset(self) -> Dict[str, List[str]]:
         """Prepare the dataset.
@@ -386,7 +395,9 @@ class GeneralLMDataset(BaseLMIterableDataset):
 
         with open(local_file_path + ".lock", "a") as lock_file:
             try:
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                if fcntl is not None:
+
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
                 if os.path.isfile(local_file_path):
                     return local_file_path
 
@@ -400,7 +411,9 @@ class GeneralLMDataset(BaseLMIterableDataset):
                     sync_ranks=False,
                 )
             finally:
-                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                if fcntl is not None:
+
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
 
         return local_file_path
 

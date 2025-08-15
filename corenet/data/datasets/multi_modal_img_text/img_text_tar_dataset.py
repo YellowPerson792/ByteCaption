@@ -4,7 +4,6 @@
 #
 
 import argparse
-import fcntl
 import glob
 import io
 import os
@@ -13,6 +12,12 @@ import random
 import shutil
 import tarfile
 import time
+
+# fcntl is only available on Unix/Linux systems
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 from pathlib import Path
 from typing import Tuple
 
@@ -209,7 +214,9 @@ class ImgTextTarDataset(BaseMultiModalImgText):
             f"{self.cache_loc}/{folder_idx}.{TAR_FILE_EXTN}.lock", "a"
         ) as lock_file:
             try:
-                fcntl.flock(lock_file, fcntl.LOCK_EX)
+                if fcntl is not None:
+
+                    fcntl.flock(lock_file, fcntl.LOCK_EX)
                 if os.path.isdir(f"{self.cache_loc}/{folder_idx}"):
                     return folder_idx
 
@@ -237,7 +244,9 @@ class ImgTextTarDataset(BaseMultiModalImgText):
                 if os.path.exists(local_tar_file_path):
                     os.remove(local_tar_file_path)
             finally:
-                fcntl.flock(lock_file, fcntl.LOCK_UN)
+                if fcntl is not None:
+
+                    fcntl.flock(lock_file, fcntl.LOCK_UN)
 
         return folder_idx
 

@@ -1,0 +1,101 @@
+[34m[1mwandb[0m: [33mWARNING[0m Config item 'per_device_train_batch_size' was locked by 'sweep' (ignored update).
+[34m[1mwandb[0m: [33mWARNING[0m Config item 'learning_rate' was locked by 'sweep' (ignored update).
+[34m[1mwandb[0m: [33mWARNING[0m Config item 'num_train_epochs' was locked by 'sweep' (ignored update).
+[34m[1mwandb[0m: [33mWARNING[0m Config item 'warmup_ratio' was locked by 'sweep' (ignored update).
+  0%|                                                                                  | 0/1875 [00:00<?, ?it/s]D:\MLLMs\MLLM\.venv\Lib\site-packages\torch\nn\modules\conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ..\aten\src\ATen\native\cudnn\Conv_v8.cpp:919.)
+  return F.conv1d(input, weight, bias, self.stride,
+ 27%|███████████████████▏                                                    | 500/1875 [01:42<04:29,  5.09it/s]CorenetToHFPretrainedModel has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+{'loss': 3.5714, 'grad_norm': 12.612430572509766, 'learning_rate': 0.00028520675399550013, 'epoch': 0.13}
+{'loss': 1.9143, 'grad_norm': 12.919074058532715, 'learning_rate': 0.0002773971495596978, 'epoch': 0.27}
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+{'eval_loss': 2.047231435775757, 'eval_accuracy': 0.28, 'eval_runtime': 0.5209, 'eval_samples_per_second': 191.991, 'eval_steps_per_second': 13.439, 'epoch': 0.27}
+{'loss': 1.8266, 'grad_norm': 8.812591552734375, 'learning_rate': 0.0002695875451238955, 'epoch': 0.4}
+{'loss': 1.7028, 'grad_norm': 24.15636444091797, 'learning_rate': 0.0002617779406880932, 'epoch': 0.53}
+{'eval_loss': 1.6005122661590576, 'eval_accuracy': 0.41, 'eval_runtime': 0.5074, 'eval_samples_per_second': 197.074, 'eval_steps_per_second': 13.795, 'epoch': 0.53}
+{'loss': 1.6785, 'grad_norm': 12.714006423950195, 'learning_rate': 0.0002539683362522909, 'epoch': 0.67}
+{'loss': 1.5271, 'grad_norm': 15.332855224609375, 'learning_rate': 0.00024615873181648866, 'epoch': 0.8}
+{'eval_loss': 1.545933723449707, 'eval_accuracy': 0.49, 'eval_runtime': 0.5497, 'eval_samples_per_second': 181.914, 'eval_steps_per_second': 12.734, 'epoch': 0.8}
+{'loss': 1.4587, 'grad_norm': 14.520676612854004, 'learning_rate': 0.0002383491273806863, 'epoch': 0.93}
+{'loss': 1.3205, 'grad_norm': 18.80907440185547, 'learning_rate': 0.00023053952294488402, 'epoch': 1.07}
+{'eval_loss': 1.4423272609710693, 'eval_accuracy': 0.49, 'eval_runtime': 0.5267, 'eval_samples_per_second': 189.865, 'eval_steps_per_second': 13.291, 'epoch': 1.07}
+{'loss': 1.1645, 'grad_norm': 18.773038864135742, 'learning_rate': 0.0002227299185090817, 'epoch': 1.2}
+{'loss': 1.1566, 'grad_norm': 20.902280807495117, 'learning_rate': 0.0002149203140732794, 'epoch': 1.33}
+{'eval_loss': 1.6617861986160278, 'eval_accuracy': 0.45, 'eval_runtime': 0.5324, 'eval_samples_per_second': 187.819, 'eval_steps_per_second': 13.147, 'epoch': 1.33}
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+CorenetToHFPretrainedModel has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+ 27%|███████████████████▎                                                    | 504/1875 [01:43<06:30,  3.51it/s]D:\MLLMs\MLLM\.venv\Lib\site-packages\torch\nn\modules\conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ..\aten\src\ATen\native\cudnn\Conv_v8.cpp:919.)
+  return F.conv1d(input, weight, bias, self.stride,
+ 53%|█████████████████████████████████████▊                                 | 1000/1875 [03:24<02:58,  4.91it/s]CorenetToHFPretrainedModel has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+{'loss': 1.1519, 'grad_norm': 17.319984436035156, 'learning_rate': 0.0002071107096374771, 'epoch': 1.47}
+{'loss': 1.1259, 'grad_norm': 12.498499870300293, 'learning_rate': 0.0001993011052016748, 'epoch': 1.6}
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+{'eval_loss': 1.2523548603057861, 'eval_accuracy': 0.54, 'eval_runtime': 0.5536, 'eval_samples_per_second': 180.644, 'eval_steps_per_second': 12.645, 'epoch': 1.6}
+{'loss': 1.1154, 'grad_norm': 21.4667911529541, 'learning_rate': 0.0001914915007658725, 'epoch': 1.73}
+{'loss': 1.0905, 'grad_norm': 20.109601974487305, 'learning_rate': 0.0001836818963300702, 'epoch': 1.87}
+{'eval_loss': 1.3152788877487183, 'eval_accuracy': 0.57, 'eval_runtime': 0.5541, 'eval_samples_per_second': 180.462, 'eval_steps_per_second': 12.632, 'epoch': 1.87}
+{'loss': 1.1105, 'grad_norm': 15.100200653076172, 'learning_rate': 0.00017587229189426788, 'epoch': 2.0}
+{'loss': 0.6209, 'grad_norm': 18.700016021728516, 'learning_rate': 0.0001680626874584656, 'epoch': 2.13}
+{'eval_loss': 1.192650556564331, 'eval_accuracy': 0.64, 'eval_runtime': 0.5379, 'eval_samples_per_second': 185.906, 'eval_steps_per_second': 13.013, 'epoch': 2.13}
+{'loss': 0.6466, 'grad_norm': 19.679645538330078, 'learning_rate': 0.00016025308302266327, 'epoch': 2.27}
+{'loss': 0.6734, 'grad_norm': 17.544160842895508, 'learning_rate': 0.00015244347858686097, 'epoch': 2.4}
+{'eval_loss': 1.1511199474334717, 'eval_accuracy': 0.59, 'eval_runtime': 0.5644, 'eval_samples_per_second': 177.184, 'eval_steps_per_second': 12.403, 'epoch': 2.4}
+{'loss': 0.5886, 'grad_norm': 14.746630668640137, 'learning_rate': 0.00014463387415105866, 'epoch': 2.53}
+{'loss': 0.6683, 'grad_norm': 25.99753189086914, 'learning_rate': 0.00013682426971525636, 'epoch': 2.67}
+{'eval_loss': 1.3167566061019897, 'eval_accuracy': 0.59, 'eval_runtime': 0.553, 'eval_samples_per_second': 180.835, 'eval_steps_per_second': 12.658, 'epoch': 2.67}
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+CorenetToHFPretrainedModel has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+D:\MLLMs\MLLM\.venv\Lib\site-packages\torch\nn\modules\conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ..\aten\src\ATen\native\cudnn\Conv_v8.cpp:919.)
+  return F.conv1d(input, weight, bias, self.stride,
+ 80%|████████████████████████████████████████████████████████▊              | 1500/1875 [05:06<01:11,  5.25it/s]CorenetToHFPretrainedModel has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+{'loss': 0.6721, 'grad_norm': 13.71889591217041, 'learning_rate': 0.00012901466527945405, 'epoch': 2.8}
+{'loss': 0.5847, 'grad_norm': 12.715209007263184, 'learning_rate': 0.00012120506084365175, 'epoch': 2.93}
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+{'eval_loss': 1.2324050664901733, 'eval_accuracy': 0.63, 'eval_runtime': 0.5269, 'eval_samples_per_second': 189.782, 'eval_steps_per_second': 13.285, 'epoch': 2.93}
+{'loss': 0.4441, 'grad_norm': 62.89809799194336, 'learning_rate': 0.00011339545640784946, 'epoch': 3.07}
+{'loss': 0.2375, 'grad_norm': 29.868961334228516, 'learning_rate': 0.00010558585197204715, 'epoch': 3.2}
+{'eval_loss': 1.5955102443695068, 'eval_accuracy': 0.58, 'eval_runtime': 0.533, 'eval_samples_per_second': 187.609, 'eval_steps_per_second': 13.133, 'epoch': 3.2}
+{'loss': 0.1869, 'grad_norm': 34.24089050292969, 'learning_rate': 9.777624753624485e-05, 'epoch': 3.33}
+{'loss': 0.2322, 'grad_norm': 29.728679656982422, 'learning_rate': 8.996664310044254e-05, 'epoch': 3.47}
+{'eval_loss': 1.7842185497283936, 'eval_accuracy': 0.57, 'eval_runtime': 0.5722, 'eval_samples_per_second': 174.75, 'eval_steps_per_second': 12.232, 'epoch': 3.47}
+{'loss': 0.281, 'grad_norm': 23.609424591064453, 'learning_rate': 8.215703866464024e-05, 'epoch': 3.6}
+{'loss': 0.2381, 'grad_norm': 3.955942392349243, 'learning_rate': 7.434743422883794e-05, 'epoch': 3.73}
+{'eval_loss': 1.8718774318695068, 'eval_accuracy': 0.55, 'eval_runtime': 0.5438, 'eval_samples_per_second': 183.882, 'eval_steps_per_second': 12.872, 'epoch': 3.73}
+{'loss': 0.2248, 'grad_norm': 58.87908172607422, 'learning_rate': 6.653782979303564e-05, 'epoch': 3.87}
+{'loss': 0.2392, 'grad_norm': 8.993450164794922, 'learning_rate': 5.8728225357233326e-05, 'epoch': 4.0}
+{'eval_loss': 1.9144713878631592, 'eval_accuracy': 0.62, 'eval_runtime': 0.5287, 'eval_samples_per_second': 189.132, 'eval_steps_per_second': 13.239, 'epoch': 4.0}
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+CorenetToHFPretrainedModel has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+ 81%|█████████████████████████████████████████████████████████▋             | 1524/1875 [05:11<01:08,  5.12it/s]D:\MLLMs\MLLM\.venv\Lib\site-packages\torch\nn\modules\conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ..\aten\src\ATen\native\cudnn\Conv_v8.cpp:919.)
+  return F.conv1d(input, weight, bias, self.stride,
+100%|███████████████████████████████████████████████████████████████████████| 1875/1875 [06:24<00:00,  5.33it/s]CorenetToHFPretrainedModel has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+{'loss': 0.0683, 'grad_norm': 6.349625587463379, 'learning_rate': 5.091862092143102e-05, 'epoch': 4.13}
+{'loss': 0.0378, 'grad_norm': 0.3915722072124481, 'learning_rate': 4.310901648562872e-05, 'epoch': 4.27}
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+{'eval_loss': 2.2620677947998047, 'eval_accuracy': 0.55, 'eval_runtime': 0.5343, 'eval_samples_per_second': 187.172, 'eval_steps_per_second': 13.102, 'epoch': 4.27}
+{'loss': 0.0412, 'grad_norm': 0.4565791189670563, 'learning_rate': 3.529941204982641e-05, 'epoch': 4.4}
+{'loss': 0.0198, 'grad_norm': 0.3026641607284546, 'learning_rate': 2.748980761402411e-05, 'epoch': 4.53}
+{'eval_loss': 2.512673854827881, 'eval_accuracy': 0.62, 'eval_runtime': 0.5945, 'eval_samples_per_second': 168.203, 'eval_steps_per_second': 11.774, 'epoch': 4.53}
+{'loss': 0.0261, 'grad_norm': 26.561019897460938, 'learning_rate': 1.9680203178221807e-05, 'epoch': 4.67}
+{'loss': 0.0551, 'grad_norm': 0.03944581374526024, 'learning_rate': 1.1870598742419502e-05, 'epoch': 4.8}
+{'eval_loss': 2.6378540992736816, 'eval_accuracy': 0.61, 'eval_runtime': 0.5425, 'eval_samples_per_second': 184.343, 'eval_steps_per_second': 12.904, 'epoch': 4.8}
+{'loss': 0.0268, 'grad_norm': 0.233892560005188, 'learning_rate': 4.060994306617198e-06, 'epoch': 4.93}
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+CorenetToHFPretrainedModel has generative capabilities, as `prepare_inputs_for_generation` is explicitly defined. However, it doesn't directly inherit from `GenerationMixin`. From 👉v4.50👈 onwards, `PreTrainedModel` will NOT inherit from `GenerationMixin`, and this model will lose the ability to call `generate` and other related functions.
+  - If you're using `trust_remote_code=True`, you can get rid of this warning by loading the model with an auto class. See https://huggingface.co/docs/transformers/en/model_doc/auto#auto-classes
+  - If you are the owner of the model architecture code, please modify your model class such that it inherits from `GenerationMixin` (after `PreTrainedModel`, otherwise you'll get an exception).
+  - If you are not the owner of the model architecture class, please contact the model code owner to update it.
+100%|███████████████████████████████████████████████████████████████████████| 1875/1875 [06:24<00:00,  4.87it/s]
+{'train_runtime': 388.9569, 'train_samples_per_second': 77.129, 'train_steps_per_second': 4.821, 'train_loss': 0.7930738118489583, 'epoch': 5.0}

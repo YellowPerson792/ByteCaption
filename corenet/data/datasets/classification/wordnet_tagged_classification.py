@@ -4,7 +4,6 @@
 #
 
 import argparse
-import fcntl
 import glob
 import io
 import os
@@ -15,6 +14,12 @@ import tarfile
 from pathlib import Path
 from typing import Any, List, Mapping, Tuple
 from urllib.parse import urlsplit
+
+# fcntl is only available on Unix/Linux systems
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
 
 import pybase64
 import torch
@@ -239,7 +244,10 @@ class WordnetTaggedClassificationDataset(BaseImageDataset):
             f"{self.cache_loc}/{folder_idx}.{TAR_FILE_EXTN}.lock", "a"
         ) as lock_file:
             try:
-                fcntl.flock(lock_file, fcntl.LOCK_EX)
+                # Use fcntl for file locking on Unix/Linux systems only
+                if fcntl is not None:
+                    fcntl.flock(lock_file, fcntl.LOCK_EX)
+                
                 if os.path.isdir(f"{self.cache_loc}/{folder_idx}"):
                     return folder_idx
 
@@ -267,7 +275,9 @@ class WordnetTaggedClassificationDataset(BaseImageDataset):
                 if os.path.exists(local_tar_file_path):
                     os.remove(local_tar_file_path)
             finally:
-                fcntl.flock(lock_file, fcntl.LOCK_UN)
+                # Unlock file on Unix/Linux systems only
+                if fcntl is not None:
+                    fcntl.flock(lock_file, fcntl.LOCK_UN)
 
         return folder_idx
 
