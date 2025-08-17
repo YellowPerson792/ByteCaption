@@ -1,0 +1,1343 @@
+开始ByteFormer + GPT2 Caption训练...
+训练样本数: 413915
+验证样本数: 50
+训练参数: MySeq2SeqTrainingArguments(output_dir='./_trained_models/byteformer_gpt2_caption', train_batch_size=48, eval_batch_size=48, eval_strategy='steps', eval_steps=200, logging_steps=50, save_steps=600, warmup_steps=431, learning_rate=0.0001, num_train_epochs=5, save_total_limit=3, lr_scheduler_type='cosine', gradient_accumulation_steps=2, fp16=True, bf16=False, report_to='wandb', wandb_project='my_project', wandb_run_name=None, tb_log_dir='./runs')
+模型结构:
+CustomEncoderDecoderModel(
+  (encoder): ByteFormerWrapper(
+    (byteformer): ByteFormer(
+      (embeddings): Embedding(257, 192, padding_idx=256)
+      (token_reduction_net): Conv1d(192, 192, kernel_size=(4,), stride=(2,), bias=False)
+      (pos_embed): LearnablePositionalEmbedding(num_embeddings=50000, embedding_dim=192, padding_idx=None, sequence_first=False)
+      (emb_dropout): Dropout(p=0.0, inplace=False)
+      (downsamplers): ModuleDict(
+        (downsample_0): TokenMerging(
+          dim=192, window=2
+          (reduction): LinearLayer(in_features=384, out_features=192, bias=False, channel_first=False)
+          (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        )
+        (downsample_1): TokenMerging(
+          dim=192, window=2
+          (reduction): LinearLayer(in_features=384, out_features=192, bias=False, channel_first=False)
+          (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        )
+        (downsample_3): TokenMerging(
+          dim=192, window=2
+          (reduction): LinearLayer(in_features=384, out_features=192, bias=False, channel_first=False)
+          (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        )
+        (downsample_5): TokenMerging(
+          dim=192, window=2
+          (reduction): LinearLayer(in_features=384, out_features=192, bias=False, channel_first=False)
+          (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        )
+        (downsample_7): TokenMerging(
+          dim=192, window=2
+          (reduction): LinearLayer(in_features=384, out_features=192, bias=False, channel_first=False)
+          (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        )
+        (downsample_9): TokenMerging(
+          dim=192, window=2
+          (reduction): LinearLayer(in_features=384, out_features=192, bias=False, channel_first=False)
+          (norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+        )
+      )
+      (transformer): Sequential(
+        (0): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 0)
+        (1): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 64)
+        (2): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 0)
+        (3): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 64)
+        (4): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 0)
+        (5): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 64)
+        (6): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 0)
+        (7): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 64)
+        (8): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 0)
+        (9): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 64)
+        (10): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 0)
+        (11): WindowedTransformerEncoder(embed_dim=192, ffn_dim=768, dropout=0.0, ffn_dropout=0.0, stochastic_dropout=0.0, attn_fn=MultiHeadAttention, act_fn=GELU, norm_fn=layer_norm, 128, 64)
+      )
+      (post_transformer_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+    )
+  )
+  (decoder): CustomGPT2LMHeadModel(
+    (transformer): GPT2Model(
+      (wte): Embedding(50257, 768)
+      (wpe): Embedding(1024, 768)
+      (drop): Dropout(p=0.1, inplace=False)
+      (h): ModuleList(
+        (0-11): 12 x GPT2Block(
+          (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (attn): GPT2Attention(
+            (c_attn): Conv1D(nf=2304, nx=768)
+            (c_proj): Conv1D(nf=768, nx=768)
+            (attn_dropout): Dropout(p=0.1, inplace=False)
+            (resid_dropout): Dropout(p=0.1, inplace=False)
+          )
+          (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (crossattention): GPT2Attention(
+            (c_attn): Conv1D(nf=1536, nx=768)
+            (q_attn): Conv1D(nf=768, nx=768)
+            (c_proj): Conv1D(nf=768, nx=768)
+            (attn_dropout): Dropout(p=0.1, inplace=False)
+            (resid_dropout): Dropout(p=0.1, inplace=False)
+          )
+          (ln_cross_attn): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (mlp): GPT2MLP(
+            (c_fc): Conv1D(nf=3072, nx=768)
+            (c_proj): Conv1D(nf=768, nx=3072)
+            (act): NewGELUActivation()
+            (dropout): Dropout(p=0.1, inplace=False)
+          )
+        )
+      )
+      (ln_f): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+    )
+    (lm_head): Linear(in_features=768, out_features=50257, bias=False)
+  )
+  (enc_to_dec_proj): Linear(in_features=192, out_features=768, bias=True)
+)
+Training:   0%|                                                           | 0/43120 [00:00<?, ?it/s]/root/autodl-tmp/corenet/byteformer-hf-migration/scripts/train_byteformer_gpt2_caption.py:163: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than tensor.new_tensor(sourceTensor).
+
+==== 训练前检查 ====
+模型设备: cuda:0
+Trainer设备: cuda
+模型类型: <class '__main__.CustomEncoderDecoderModel'>
+可训练参数: 413 / 413
+==== 检查完成 ====
+
+[DEBUG] 第一个batch设备检查:
+  input_ids设备: cuda:0
+  labels设备: cuda:0
+  模型设备: cuda:0
+  decoder_attention_mask = decoder_input_ids.new_tensor(decoder_input_ids != self.config.pad_token_id)
+Training:   0%| | 200/43120 [01:47<6:42:49,  1.78it/s, ep=0.02/5, step=200, loss=3.1335, lr=1.00e-04/root/miniconda3/lib/python3.12/site-packages/torch/nn/modules/conv.py:306: UserWarning: Plan failed with a cudnnException: CUDNN_BACKEND_EXECUTION_PLAN_DESCRIPTOR: cudnnFinalize Descriptor Failed cudnn_status: CUDNN_STATUS_NOT_SUPPORTED (Triggered internally at ../aten/src/ATen/native/cudnn/Conv_v8.cpp:919.)
+[Batch    50] [Opt   25] [Ep  0.006] | Loss:  4.0477 | GradNorm: 39546.535 | LR: 1.00e-04
+[Batch   100] [Opt   50] [Ep  0.012] | Loss:  3.3333 | GradNorm: 30719.791 | LR: 1.00e-04
+[Batch   150] [Opt   75] [Ep  0.017] | Loss:  3.3682 | GradNorm: 29822.873 | LR: 1.00e-04
+[Batch   200] [Opt  100] [Ep  0.023] | Loss:  3.0108 | GradNorm: 26723.088 | LR: 1.00e-04
+  return F.conv1d(input, weight, bias, self.stride,                           | 0/2 [00:00<?, ?it/s]
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+
+                                                                                                    
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: A man riding a skateboard in the snow.
+
+
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: A man riding a skateboard in the snow.
+
+
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: A man riding a skateboard in the snow.
+
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: A man riding a skateboard in the snow.
+
+
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: A man riding a skateboard in the snow.
+
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: A man riding a skateboard in the snow.
+
+
+
+[Batch   200] [EVAL] | Loss:  3.1265 | rouge2_fmeasure: 0.0173 | bleu1: 0.2469 | bleu4: 0.0295
+[Batch   250] [Opt  125] [Ep  0.029] | Loss:  3.0385 | GradNorm: 20705.426 | LR: 1.00e-04
+[Batch   300] [Opt  150] [Ep  0.035] | Loss:  3.0523 | GradNorm: 19164.277 | LR: 1.00e-04
+[Batch   350] [Opt  175] [Ep  0.041] | Loss:  2.9632 | GradNorm: 19799.059 | LR: 1.00e-04
+[Batch   400] [Opt  200] [Ep  0.046] | Loss:  2.9060 | GradNorm: 18435.389 | LR: 1.00e-04
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: A man riding a skateboard on top of a snowboard.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: A man riding a skateboard down a snowy slope.
+
+
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: A man riding a skateboard on top of a snowboard.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: an image of a woman sitting on a couch with a laptop computer.
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: A man riding a skateboard on a sidewalk in front of a building.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: an image of a woman sitting on a couch with a laptop computer.
+
+[Batch   400] [EVAL] | Loss:  3.1089 | rouge2_fmeasure: 0.0455 | bleu1: 0.2515 | bleu4: 0.0395
+[Batch   450] [Opt  225] [Ep  0.052] | Loss:  2.6986 | GradNorm: 20094.291 | LR: 1.00e-04
+[Batch   500] [Opt  250] [Ep  0.058] | Loss:  2.7910 | GradNorm: 19461.494 | LR: 1.00e-04
+[Batch   550] [Opt  275] [Ep  0.064] | Loss:  2.8947 | GradNorm: 15854.222 | LR: 1.00e-04
+[Batch   600] [Opt  300] [Ep  0.070] | Loss:  2.7130 | GradNorm: 16843.670 | LR: 1.00e-04
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: A man in a suit and tie holding a tennis racket.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: A man riding a surfboard on a wave in the ocean.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: A man riding a surfboard on a wave in the ocean.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: A man riding a skateboard on top of a ramp.
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: A man in a suit and tie holding a tennis racket.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: A man in a suit and tie holding a tennis racket.
+
+[Batch   600] [EVAL] | Loss:  3.0801 | rouge2_fmeasure: 0.0433 | bleu1: 0.2732 | bleu4: 0.0415
+[Batch   600] [SAVE] | 保存检查点到 checkpoint-600
+[2025-08-17 00:41:27,596] [INFO] [real_accelerator.py:254:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[2025-08-17 00:41:31,205] [INFO] [logging.py:107:log_dist] [Rank -1] [TorchCheckpointEngine] Initialized with serialization = False
+                                                                                                    
+[Batch   650] [Opt  325] [Ep  0.075] | Loss:  2.8802 | GradNorm: 18134.283 | LR: 9.99e-05
+[Batch   700] [Opt  350] [Ep  0.081] | Loss:  2.7430 | GradNorm: 16020.551 | LR: 9.99e-05
+[Batch   750] [Opt  375] [Ep  0.087] | Loss:  2.6159 | GradNorm: 13184.588 | LR: 9.99e-05
+[Batch   800] [Opt  400] [Ep  0.093] | Loss:  2.8973 | GradNorm: 14094.342 | LR: 9.99e-05
+                                                                                                    
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: an image of a woman eating a hotdog in a restaurant.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: an image of a man riding a skateboard down a street.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: up to date with a picture of a man riding a skateboard down a
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: room with a couch and a couch in it.
+
+room with
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: in a bathroom with a sink, a toilet and a sink.
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: an image of a woman sitting on a couch in a living room.
+
+[Batch   800] [EVAL] | Loss:  2.9733 | rouge2_fmeasure: 0.0640 | bleu1: 0.2654 | bleu4: 0.0457
+[Batch   850] [Opt  425] [Ep  0.099] | Loss:  2.6200 | GradNorm: 14429.960 | LR: 9.99e-05
+[Batch   900] [Opt  450] [Ep  0.104] | Loss:  2.4610 | GradNorm: 13319.448 | LR: 9.99e-05
+[Batch   950] [Opt  475] [Ep  0.110] | Loss:  3.0393 | GradNorm: 13580.779 | LR: 9.99e-05
+[Batch  1000] [Opt  500] [Ep  0.116] | Loss:  2.7488 | GradNorm: 13857.938 | LR: 9.99e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: an image of a plate of food on a table with a fork.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: an image of a man riding a skateboard down a street.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: A man riding a wave on a surfboard in the ocean.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: room with a bed and a desk with a laptop and a monitor.
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: an image of a bathroom with a toilet and a sink.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: living room with a couch, chairs, and a table.
+
+[Batch  1000] [EVAL] | Loss:  2.9317 | rouge2_fmeasure: 0.0630 | bleu1: 0.2832 | bleu4: 0.0439
+[Batch  1050] [Opt  525] [Ep  0.122] | Loss:  2.5452 | GradNorm: 11529.532 | LR: 9.99e-05
+[Batch  1100] [Opt  550] [Ep  0.128] | Loss:  2.7783 | GradNorm: 14213.577 | LR: 9.98e-05
+[Batch  1150] [Opt  575] [Ep  0.133] | Loss:  2.6982 | GradNorm: 12668.188 | LR: 9.98e-05
+[Batch  1200] [Opt  600] [Ep  0.139] | Loss:  2.7338 | GradNorm: 11954.062 | LR: 9.98e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog sitting on top of a bench in front of a window.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: cyclists are parked on the side of the road in front of a building
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: cyclists are riding down the side of a dirt road.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: in a bathroom with a sink and a toilet.
+
+
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: in a bathroom with a sink and a toilet.
+
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: living room with two beds and a couch in it.
+
+
+
+[Batch  1200] [EVAL] | Loss:  2.8784 | rouge2_fmeasure: 0.0607 | bleu1: 0.2846 | bleu4: 0.0443
+[Batch  1200] [SAVE] | 保存检查点到 checkpoint-1200
+[Batch  1250] [Opt  625] [Ep  0.145] | Loss:  2.4279 | GradNorm: 11311.233 | LR: 9.98e-05
+[Batch  1300] [Opt  650] [Ep  0.151] | Loss:  2.5724 | GradNorm: 11123.405 | LR: 9.98e-05
+[Batch  1350] [Opt  675] [Ep  0.157] | Loss:  2.4827 | GradNorm: 11852.628 | LR: 9.98e-05
+[Batch  1400] [Opt  700] [Ep  0.162] | Loss:  2.5619 | GradNorm: 10536.413 | LR: 9.97e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog sitting in front of a window looking at the camera.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles parked on the side of a road near a building.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: A man riding a skateboard on top of a ramp.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: A bathroom with a toilet, sink, and toilet seat in it.
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: in a room with a couch, a chair, and a table.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: living room with a couch, a chair, and a television.
+
+[Batch  1400] [EVAL] | Loss:  2.8911 | rouge2_fmeasure: 0.0790 | bleu1: 0.3065 | bleu4: 0.0560
+[Batch  1450] [Opt  725] [Ep  0.168] | Loss:  2.4715 | GradNorm: 13302.251 | LR: 9.97e-05
+[Batch  1500] [Opt  750] [Ep  0.174] | Loss:  2.5034 | GradNorm: 10757.185 | LR: 9.97e-05
+[Batch  1550] [Opt  775] [Ep  0.180] | Loss:  2.5143 | GradNorm: 12484.332 | LR: 9.97e-05
+[Batch  1600] [Opt  800] [Ep  0.186] | Loss:  2.6189 | GradNorm: 11525.642 | LR: 9.97e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog laying on top of a bed in a bedroom.
+
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: cyclists are parked on the side of a city street.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: cyclists are riding down a city street in the rain.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I don't know how to describe this picture.
+
+I don
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: in a living room with a couch and a tv.
+
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: in a living room with a couch and a television.
+
+
+
+[Batch  1600] [EVAL] | Loss:  2.8625 | rouge2_fmeasure: 0.0510 | bleu1: 0.2719 | bleu4: 0.0385
+[Batch  1650] [Opt  825] [Ep  0.191] | Loss:  2.6698 | GradNorm: 11267.122 | LR: 9.96e-05
+[Batch  1700] [Opt  850] [Ep  0.197] | Loss:  2.7372 | GradNorm: 11284.460 | LR: 9.96e-05
+[Batch  1750] [Opt  875] [Ep  0.203] | Loss:  2.3889 | GradNorm: 11829.108 | LR: 9.96e-05
+[Batch  1800] [Opt  900] [Ep  0.209] | Loss:  2.7863 | GradNorm: 10615.003 | LR: 9.96e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog laying on top of a couch in front of a tv.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of a road.
+
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: cyclists are riding down the side of a street.
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: sitting in front of a white refrigerator in a room.
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: sitting in a room with a couch and a chair.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: room with a couch and a chair in it.
+
+room with
+
+[Batch  1800] [EVAL] | Loss:  2.8483 | rouge2_fmeasure: 0.0757 | bleu1: 0.3077 | bleu4: 0.0556
+[Batch  1800] [SAVE] | 保存检查点到 checkpoint-1800
+[Batch  1850] [Opt  925] [Ep  0.215] | Loss:  2.2297 | GradNorm: 10188.329 | LR: 9.95e-05
+[Batch  1900] [Opt  950] [Ep  0.220] | Loss:  2.3949 | GradNorm: 12574.542 | LR: 9.95e-05
+[Batch  1950] [Opt  975] [Ep  0.226] | Loss:  2.3292 | GradNorm: 11356.856 | LR: 9.95e-05
+[Batch  2000] [Opt 1000] [Ep  0.232] | Loss:  2.5308 | GradNorm: 10991.211 | LR: 9.95e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog sitting on top of a bed in a bedroom.
+
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: cyclists are parked on the side of the road in a parking lot.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: cyclists are riding down a dirt road in the rain.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am looking at a laptop computer in a room.
+
+I
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: photo of a room with a fireplace and a window.
+
+photo
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: room in a living room with two beds and a fireplace.
+
+
+
+[Batch  2000] [EVAL] | Loss:  2.8405 | rouge2_fmeasure: 0.0649 | bleu1: 0.2915 | bleu4: 0.0486
+[Batch  2050] [Opt 1025] [Ep  0.238] | Loss:  2.0289 | GradNorm: 9315.796 | LR: 9.94e-05
+[Batch  2100] [Opt 1050] [Ep  0.244] | Loss:  2.5620 | GradNorm: 11202.190 | LR: 9.94e-05
+[Batch  2150] [Opt 1075] [Ep  0.249] | Loss:  2.4565 | GradNorm: 11684.873 | LR: 9.94e-05
+[Batch  2200] [Opt 1100] [Ep  0.255] | Loss:  2.5410 | GradNorm: 11131.877 | LR: 9.94e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: A cat sitting on a couch in front of a laptop.
+
+
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of the road.
+
+Motor
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: dog sitting on a bench in the middle of the street.
+
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am looking at a little girl with a dog in the corner of a
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I am looking for someone looking for a person looking for something.
+
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: Kids are playing with kids playing with a kid playing with the kids in the
+
+[Batch  2200] [EVAL] | Loss:  2.7933 | rouge2_fmeasure: 0.0345 | bleu1: 0.2506 | bleu4: 0.0328
+[Batch  2250] [Opt 1125] [Ep  0.261] | Loss:  2.4317 | GradNorm: 12310.091 | LR: 9.93e-05
+[Batch  2300] [Opt 1150] [Ep  0.267] | Loss:  2.1394 | GradNorm: 9747.005 | LR: 9.93e-05
+[Batch  2350] [Opt 1175] [Ep  0.272] | Loss:  2.5244 | GradNorm: 9964.352 | LR: 9.93e-05
+[Batch  2400] [Opt 1200] [Ep  0.278] | Loss:  2.4098 | GradNorm: 12200.781 | LR: 9.92e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: a cat laying on top of a laptop on a desk.
+
+
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of the road in a parking lot.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: Photo of a man riding a skateboard in the snow.
+
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: This is a picture of a kitchen with a refrigerator and a window.
+
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I am looking at a picture of a cat that is sitting on the floor
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: This is a picture of a man sitting on the floor of a room.
+
+[Batch  2400] [EVAL] | Loss:  2.8021 | rouge2_fmeasure: 0.0758 | bleu1: 0.2646 | bleu4: 0.0505
+[Batch  2400] [SAVE] | 保存检查点到 checkpoint-2400
+[Batch  2450] [Opt 1225] [Ep  0.284] | Loss:  2.3423 | GradNorm: 11102.840 | LR: 9.92e-05
+[Batch  2500] [Opt 1250] [Ep  0.290] | Loss:  2.2707 | GradNorm: 9304.127 | LR: 9.92e-05
+[Batch  2550] [Opt 1275] [Ep  0.296] | Loss:  2.3821 | GradNorm: 10650.850 | LR: 9.91e-05
+[Batch  2600] [Opt 1300] [Ep  0.301] | Loss:  2.4102 | GradNorm: 9708.596 | LR: 9.91e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: Dog sitting on the back of a truck with a dog in front of him
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: cycle parked in a parking lot next to a parked motorcycle.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: Photographs of a man riding on the back of a motorcycle.
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: This is a picture of a cat sitting on the wall of a kitchen.
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I'm looking at a picture of a living room with a fireplace and a
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: I'm looking at a living room with a couch, chair, fireplace,
+
+[Batch  2600] [EVAL] | Loss:  2.8134 | rouge2_fmeasure: 0.0754 | bleu1: 0.2629 | bleu4: 0.0464
+[Batch  2650] [Opt 1325] [Ep  0.307] | Loss:  2.3450 | GradNorm: 10199.019 | LR: 9.91e-05
+[Batch  2700] [Opt 1350] [Ep  0.313] | Loss:  2.6404 | GradNorm: 11514.992 | LR: 9.90e-05
+[Batch  2750] [Opt 1375] [Ep  0.319] | Loss:  2.4841 | GradNorm: 10513.264 | LR: 9.90e-05
+[Batch  2800] [Opt 1400] [Ep  0.325] | Loss:  2.4861 | GradNorm: 9106.644 | LR: 9.90e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog lying on a bed with a stuffed animal on it's head.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles parked on the side of a road in a parking lot.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: Bicycles parked on the side of a road in a parking lot.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I'm looking at a laptop on a shelf in a kitchen.
+
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I'm looking at a cat sitting on a bed in a room.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: living room with a fireplace and a fireplace in it.
+
+
+
+[Batch  2800] [EVAL] | Loss:  2.8447 | rouge2_fmeasure: 0.0875 | bleu1: 0.2956 | bleu4: 0.0542
+[Batch  2850] [Opt 1425] [Ep  0.330] | Loss:  2.4100 | GradNorm: 11394.259 | LR: 9.89e-05
+[Batch  2900] [Opt 1450] [Ep  0.336] | Loss:  2.4612 | GradNorm: 8454.938 | LR: 9.89e-05
+[Batch  2950] [Opt 1475] [Ep  0.342] | Loss:  2.3578 | GradNorm: 10079.146 | LR: 9.88e-05
+[Batch  3000] [Opt 1500] [Ep  0.348] | Loss:  2.4750 | GradNorm: 11109.881 | LR: 9.88e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: Teddy bear sitting on the back of a couch with a stuffed animal.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: cycle parked on the side of the road next to a parked motorcycle.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: dog is sitting on the ground with his head on a skateboard.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: In the kitchen of a small kitchen, there is a white refrigerator with a
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I'm looking out the window of a living room.
+
+I
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: living in a living room with a couch, chair, table and window.
+
+[Batch  3000] [EVAL] | Loss:  2.7940 | rouge2_fmeasure: 0.0709 | bleu1: 0.2797 | bleu4: 0.0428
+[Batch  3000] [SAVE] | 保存检查点到 checkpoint-3000
+[Batch  3050] [Opt 1525] [Ep  0.354] | Loss:  2.6791 | GradNorm: 10461.523 | LR: 9.88e-05
+[Batch  3100] [Opt 1550] [Ep  0.359] | Loss:  2.4270 | GradNorm: 8990.769 | LR: 9.87e-05
+[Batch  3150] [Opt 1575] [Ep  0.365] | Loss:  2.3739 | GradNorm: 9275.256 | LR: 9.87e-05
+[Batch  3200] [Opt 1600] [Ep  0.371] | Loss:  2.5399 | GradNorm: 10960.704 | LR: 9.86e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: Dog sitting on the back of a truck with a dog in the background.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: cycle parked on the side of a street in a parking lot.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: cyclist riding on the side of a road in the rain.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: iffiffiffeeeeeeiffeeiffeesiffeeeesiffiff
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: This is a picture of a living room with a couch, chair, and
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: living in a living room with a couch, chair, television, chair and
+
+[Batch  3200] [EVAL] | Loss:  2.7823 | rouge2_fmeasure: 0.0844 | bleu1: 0.2495 | bleu4: 0.0450
+[Batch  3250] [Opt 1625] [Ep  0.377] | Loss:  2.3799 | GradNorm: 10753.187 | LR: 9.86e-05
+[Batch  3300] [Opt 1650] [Ep  0.383] | Loss:  2.3315 | GradNorm: 10112.965 | LR: 9.86e-05
+[Batch  3350] [Opt 1675] [Ep  0.388] | Loss:  2.2477 | GradNorm: 9120.745 | LR: 9.85e-05
+[Batch  3400] [Opt 1700] [Ep  0.394] | Loss:  2.4741 | GradNorm: 11233.838 | LR: 9.85e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: A man and a woman sitting on a couch with a cat.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of the road.
+
+Motor
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: cyclist riding on the back of a motorcycle on the street.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am looking at a picture of a person on a computer.
+
+
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: A cat sitting on top of a table in a room.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: living in a living room with a couch, chair and table.
+
+[Batch  3400] [EVAL] | Loss:  2.7579 | rouge2_fmeasure: 0.0883 | bleu1: 0.3014 | bleu4: 0.0622
+[Batch  3450] [Opt 1725] [Ep  0.400] | Loss:  2.2938 | GradNorm: 10084.439 | LR: 9.84e-05
+[Batch  3500] [Opt 1750] [Ep  0.406] | Loss:  2.3493 | GradNorm: 10968.965 | LR: 9.84e-05
+[Batch  3550] [Opt 1775] [Ep  0.412] | Loss:  2.4287 | GradNorm: 9765.857 | LR: 9.83e-05
+[Batch  3600] [Opt 1800] [Ep  0.417] | Loss:  2.4007 | GradNorm: 10361.424 | LR: 9.83e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: Dog sitting on the back of a dog in the back seat of a car
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of the road.
+
+Motor
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: Photo of a man riding a skateboard on the sidewalk.
+
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: A man is looking at a man in a kitchen.
+
+A
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: This is a picture of a living room with a couch, chair, and
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: A living room with a couch, a chair, a table, and a
+
+[Batch  3600] [EVAL] | Loss:  2.7443 | rouge2_fmeasure: 0.0875 | bleu1: 0.3003 | bleu4: 0.0548
+[Batch  3600] [SAVE] | 保存检查点到 checkpoint-3600
+[Batch  3650] [Opt 1825] [Ep  0.423] | Loss:  2.2336 | GradNorm: 9064.857 | LR: 9.82e-05
+[Batch  3700] [Opt 1850] [Ep  0.429] | Loss:  2.5526 | GradNorm: 10816.614 | LR: 9.82e-05
+[Batch  3750] [Opt 1875] [Ep  0.435] | Loss:  2.1695 | GradNorm: 9899.976 | LR: 9.81e-05
+[Batch  3800] [Opt 1900] [Ep  0.441] | Loss:  2.4190 | GradNorm: 9728.847 | LR: 9.81e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: I am unable to see what is wrong with this picture.
+
+I
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of the road in a parking lot.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: I am unable to see the image above.
+
+I am trying to
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: A man is looking to be a man with a skateboard sitting on a
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I am looking for a picture of a giraffe in a room.
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: I am unable to see the image above.
+
+I am looking at
+
+[Batch  3800] [EVAL] | Loss:  2.7568 | rouge2_fmeasure: 0.0346 | bleu1: 0.1724 | bleu4: 0.0343
+[Batch  3850] [Opt 1925] [Ep  0.446] | Loss:  2.3537 | GradNorm: 9675.516 | LR: 9.80e-05
+[Batch  3900] [Opt 1950] [Ep  0.452] | Loss:  2.1007 | GradNorm: 8191.124 | LR: 9.80e-05
+[Batch  3950] [Opt 1975] [Ep  0.458] | Loss:  2.5458 | GradNorm: 10561.549 | LR: 9.79e-05
+[Batch  4000] [Opt 2000] [Ep  0.464] | Loss:  2.3574 | GradNorm: 9420.448 | LR: 9.79e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog sitting in front of a window looking at the camera.
+
+
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of a road.
+
+Motor
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: Woman riding on the back of a horse on the street.
+
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am looking at a picture of a kitchen with a refrigerator, stove,
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I am looking at a picture of a bedroom with a bed and curtains.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: Doorway view of a living room with a couch, chairs, and
+
+[Batch  4000] [EVAL] | Loss:  2.7130 | rouge2_fmeasure: 0.0626 | bleu1: 0.2551 | bleu4: 0.0416
+[Batch  4050] [Opt 2025] [Ep  0.470] | Loss:  2.3558 | GradNorm: 20704.297 | LR: 9.78e-05
+[Batch  4100] [Opt 2050] [Ep  0.475] | Loss:  2.3759 | GradNorm: 19946.715 | LR: 9.78e-05
+[Batch  4150] [Opt 2075] [Ep  0.481] | Loss:  2.4357 | GradNorm: 18880.137 | LR: 9.77e-05
+[Batch  4200] [Opt 2100] [Ep  0.487] | Loss:  2.6210 | GradNorm: 22323.842 | LR: 9.77e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: cat sitting on top of a wooden table in a room.
+
+
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of the street.
+
+Motor
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: Photographs of a man riding a skateboard down a street.
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am unable to see the image in this picture.
+
+I am
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I am unable to see the image in this picture.
+
+I am
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: I am looking at a kitchen with a kitchen counter, refrigerator, cabinets,
+
+[Batch  4200] [EVAL] | Loss:  2.7105 | rouge2_fmeasure: 0.0459 | bleu1: 0.2132 | bleu4: 0.0374
+[Batch  4200] [SAVE] | 保存检查点到 checkpoint-4200
+[Batch  4250] [Opt 2125] [Ep  0.493] | Loss:  2.3976 | GradNorm: 19846.387 | LR: 9.76e-05
+[Batch  4300] [Opt 2150] [Ep  0.499] | Loss:  2.4243 | GradNorm: 24754.154 | LR: 9.76e-05
+[Batch  4350] [Opt 2175] [Ep  0.504] | Loss:  2.2541 | GradNorm: 19254.594 | LR: 9.75e-05
+[Batch  4400] [Opt 2200] [Ep  0.510] | Loss:  2.3133 | GradNorm: 19573.102 | LR: 9.75e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: I am unable to see the image above.
+
+I am looking at
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of the road.
+
+Motor
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: Photo of a man riding a skateboard down the street.
+
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am looking at a picture of a refrigerator in a kitchen.
+
+
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I am looking at a cat sitting on the floor of a room.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: I am looking at a picture of a living room with a couch and a
+
+[Batch  4400] [EVAL] | Loss:  2.7696 | rouge2_fmeasure: 0.0447 | bleu1: 0.2062 | bleu4: 0.0335
+[Batch  4450] [Opt 2225] [Ep  0.516] | Loss:  2.3096 | GradNorm: 18436.436 | LR: 9.74e-05
+[Batch  4500] [Opt 2250] [Ep  0.522] | Loss:  2.2980 | GradNorm: 17452.150 | LR: 9.73e-05
+[Batch  4550] [Opt 2275] [Ep  0.528] | Loss:  2.3927 | GradNorm: 19291.639 | LR: 9.73e-05
+[Batch  4600] [Opt 2300] [Ep  0.533] | Loss:  2.2137 | GradNorm: 15955.907 | LR: 9.72e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog sitting on the floor in front of a laptop computer.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of the street.
+
+Motor
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: Photo of a man riding a skateboard on a sidewalk.
+
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am looking at a kitchen with a refrigerator, stove, microwave, and
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I am unable to see the image above.
+
+I am looking
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: I am unable to see the image above.
+
+I am looking at
+
+[Batch  4600] [EVAL] | Loss:  2.7291 | rouge2_fmeasure: 0.0268 | bleu1: 0.1897 | bleu4: 0.0305
+[Batch  4650] [Opt 2325] [Ep  0.539] | Loss:  2.4178 | GradNorm: 17955.576 | LR: 9.72e-05
+[Batch  4700] [Opt 2350] [Ep  0.545] | Loss:  2.3494 | GradNorm: 23420.992 | LR: 9.71e-05
+[Batch  4750] [Opt 2375] [Ep  0.551] | Loss:  2.1747 | GradNorm: 17541.439 | LR: 9.70e-05
+[Batch  4800] [Opt 2400] [Ep  0.557] | Loss:  2.2578 | GradNorm: 19616.688 | LR: 9.70e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: Teddy bears sitting on top of a laptop computer.
+
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of the road in a parking lot.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: cyclist riding on the back of a motorcycle on the street.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am looking at a picture of a bathroom with a sink, toilet,
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I am unable to see the image above.
+
+This is a picture
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: A living room with a couch, chair, and a table in it.
+
+[Batch  4800] [EVAL] | Loss:  2.6951 | rouge2_fmeasure: 0.0758 | bleu1: 0.2670 | bleu4: 0.0496
+[Batch  4800] [SAVE] | 保存检查点到 checkpoint-4800
+[Batch  4850] [Opt 2425] [Ep  0.562] | Loss:  2.3206 | GradNorm: 22427.863 | LR: 9.69e-05
+[Batch  4900] [Opt 2450] [Ep  0.568] | Loss:  2.3787 | GradNorm: 19997.096 | LR: 9.68e-05
+[Batch  4950] [Opt 2475] [Ep  0.574] | Loss:  2.2257 | GradNorm: 17603.299 | LR: 9.68e-05
+[Batch  5000] [Opt 2500] [Ep  0.580] | Loss:  2.1560 | GradNorm: 16207.593 | LR: 9.67e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: People are sitting at a table with plates of food on it.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcyclists are parked on the side of the street.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: dog lying on the ground in the middle of the street.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am unable to see the image above.
+
+I am
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: we are looking at a picture of a living room with a large window.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: A living room with a couch, chair, and a table in it.
+
+[Batch  5000] [EVAL] | Loss:  2.6911 | rouge2_fmeasure: 0.0682 | bleu1: 0.2631 | bleu4: 0.0472
+[Batch  5050] [Opt 2525] [Ep  0.586] | Loss:  2.3076 | GradNorm: 16049.171 | LR: 9.67e-05
+[Batch  5100] [Opt 2550] [Ep  0.591] | Loss:  2.5031 | GradNorm: 21817.002 | LR: 9.66e-05
+[Batch  5150] [Opt 2575] [Ep  0.597] | Loss:  2.2227 | GradNorm: 19391.537 | LR: 9.65e-05
+[Batch  5200] [Opt 2600] [Ep  0.603] | Loss:  2.2996 | GradNorm: 21473.184 | LR: 9.65e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog sitting on a wooden bench in front of a laptop.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles parked on the side of the road in a parking lot.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: dog lying on the sidewalk in front of a building.
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: in a kitchen with a stove, oven, microwave, and refrigerator.
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: couple of cats sitting on top of a bed in a bedroom.
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: in a living room with a couch, chair, and coffee table.
+
+[Batch  5200] [EVAL] | Loss:  2.6379 | rouge2_fmeasure: 0.0868 | bleu1: 0.3176 | bleu4: 0.0496
+[Batch  5250] [Opt 2625] [Ep  0.609] | Loss:  2.2513 | GradNorm: 18394.412 | LR: 9.64e-05
+[Batch  5300] [Opt 2650] [Ep  0.615] | Loss:  2.3103 | GradNorm: 19391.711 | LR: 9.63e-05
+[Batch  5350] [Opt 2675] [Ep  0.620] | Loss:  2.1398 | GradNorm: 16845.436 | LR: 9.62e-05
+[Batch  5400] [Opt 2700] [Ep  0.626] | Loss:  2.1661 | GradNorm: 20931.732 | LR: 9.62e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog sitting on a chair in front of a laptop computer.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles parked on the side of the road in a parking lot.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: dog lying on the ground in the middle of the street.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: in a kitchen with a refrigerator, stove, microwave and refrigerator.
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: Vintage photograph of a man and a woman in a kitchen.
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: room with a couch, chairs and a table in it.
+
+[Batch  5400] [EVAL] | Loss:  2.6557 | rouge2_fmeasure: 0.0839 | bleu1: 0.3018 | bleu4: 0.0510
+[Batch  5400] [SAVE] | 保存检查点到 checkpoint-5400
+[Batch  5450] [Opt 2725] [Ep  0.632] | Loss:  2.4979 | GradNorm: 22696.596 | LR: 9.61e-05
+[Batch  5500] [Opt 2750] [Ep  0.638] | Loss:  2.1133 | GradNorm: 18735.041 | LR: 9.60e-05
+[Batch  5550] [Opt 2775] [Ep  0.644] | Loss:  2.4039 | GradNorm: 20249.205 | LR: 9.60e-05
+[Batch  5600] [Opt 2800] [Ep  0.649] | Loss:  2.3401 | GradNorm: 18763.277 | LR: 9.59e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: A man sitting on a couch with a laptop on his lap.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles are parked on the side of a road.
+
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: Photo of a dog laying on the ground in the street.
+
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am unable to see the image above.
+
+I have a
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I am unable to see the image above.
+
+I am looking at
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: room with a couch, table, chairs, and a table in it.
+
+[Batch  5600] [EVAL] | Loss:  2.6185 | rouge2_fmeasure: 0.0761 | bleu1: 0.2605 | bleu4: 0.0541
+[Batch  5650] [Opt 2825] [Ep  0.655] | Loss:  2.3125 | GradNorm: 21022.150 | LR: 9.58e-05
+[Batch  5700] [Opt 2850] [Ep  0.661] | Loss:  2.1830 | GradNorm: 19310.393 | LR: 9.58e-05
+[Batch  5750] [Opt 2875] [Ep  0.667] | Loss:  2.3100 | GradNorm: 17779.588 | LR: 9.57e-05
+[Batch  5800] [Opt 2900] [Ep  0.673] | Loss:  2.3154 | GradNorm: 19771.877 | LR: 9.56e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: A cat sitting on top of a wooden table next to a laptop.
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction:  a motorcycle parked on the side of a road.
+
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: dog sitting on the ground next to a trash can.
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am unable to see the image above.
+
+I can see
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: I am unable to see the image above.
+
+I'm unable to
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: I am unable to see the image above.
+
+I am looking at
+
+[Batch  5800] [EVAL] | Loss:  2.6330 | rouge2_fmeasure: 0.0606 | bleu1: 0.2158 | bleu4: 0.0444
+[Batch  5850] [Opt 2925] [Ep  0.678] | Loss:  2.3203 | GradNorm: 18599.604 | LR: 9.55e-05
+[Batch  5900] [Opt 2950] [Ep  0.684] | Loss:  2.0795 | GradNorm: 20278.283 | LR: 9.55e-05
+[Batch  5950] [Opt 2975] [Ep  0.690] | Loss:  2.2832 | GradNorm: 20052.369 | LR: 9.54e-05
+[Batch  6000] [Opt 3000] [Ep  0.696] | Loss:  2.2207 | GradNorm: 18092.885 | LR: 9.53e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: dog laying on the floor in front of a laptop computer.
+
+
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: Motorcycles parked on the side of the road in a parking lot.
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: Photograph of a man riding a skateboard down the street.
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am unable to see the image above.
+
+I am looking at
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: A cat sitting on top of a bed in a room.
+
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: A living room with a couch, couch, table, chairs, and a
+
+[Batch  6000] [EVAL] | Loss:  2.7079 | rouge2_fmeasure: 0.0697 | bleu1: 0.2746 | bleu4: 0.0521
+[Batch  6000] [SAVE] | 保存检查点到 checkpoint-6000
+[Batch  6050] [Opt 3025] [Ep  0.702] | Loss:  2.2457 | GradNorm: 17467.555 | LR: 9.52e-05
+[Batch  6100] [Opt 3050] [Ep  0.707] | Loss:  2.5008 | GradNorm: 19552.725 | LR: 9.51e-05
+[Batch  6150] [Opt 3075] [Ep  0.713] | Loss:  2.3429 | GradNorm: 19083.363 | LR: 9.51e-05
+[Batch  6200] [Opt 3100] [Ep  0.719] | Loss:  2.0779 | GradNorm: 25059.301 | LR: 9.50e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction:
+
+This is a man is looking to be a man that is looking
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: A motorcycle parked on the side of a busy street.
+
+
+This
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: This is a man is looking to be a man with a skateboard.
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am looking for a picture of a man that is looking for something to
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction:
+
+
+This is a man is looking to be a man looking to
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction:
+
+
+This is a man is looking to be a man looking to
+
+[Batch  6200] [EVAL] | Loss:  2.6672 | rouge2_fmeasure: 0.0197 | bleu1: 0.1754 | bleu4: 0.0275
+[Batch  6250] [Opt 3125] [Ep  0.725] | Loss:  2.1700 | GradNorm: 16899.258 | LR: 9.49e-05
+[Batch  6300] [Opt 3150] [Ep  0.731] | Loss:  2.2577 | GradNorm: 18567.076 | LR: 9.48e-05
+[Batch  6350] [Opt 3175] [Ep  0.736] | Loss:  2.1871 | GradNorm: 17012.570 | LR: 9.47e-05
+[Batch  6400] [Opt 3200] [Ep  0.742] | Loss:  2.3579 | GradNorm: 19266.498 | LR: 9.47e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: ightightight eyeightight of a person that is sitting on a chair
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: ightightight eyeightight sightightight of a man sitting on a
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: ightightight eyeightight of a man standing in front of a building
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: ightightight for a man in a business room.
+
+ight for
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: A man is looking at a cat sitting on a table.
+
+
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: A living room with a table and chairs in a room.
+
+
+
+
+[Batch  6400] [EVAL] | Loss:  2.7173 | rouge2_fmeasure: 0.0532 | bleu1: 0.2403 | bleu4: 0.0395
+[Batch  6450] [Opt 3225] [Ep  0.748] | Loss:  2.3803 | GradNorm: 18170.662 | LR: 9.46e-05
+[Batch  6500] [Opt 3250] [Ep  0.754] | Loss:  2.1895 | GradNorm: 20343.025 | LR: 9.45e-05
+[Batch  6550] [Opt 3275] [Ep  0.760] | Loss:  2.2632 | GradNorm: 16716.615 | LR: 9.44e-05
+[Batch  6600] [Opt 3300] [Ep  0.765] | Loss:  2.0862 | GradNorm: 19880.123 | LR: 9.43e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction:
+I am looking for a dog that is sitting on the ground.
+
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: ightightight of a man sitting on top of a bicycle.
+
+
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: I am looking for a picture of a dog in the street.
+
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am unable to see the image above.
+
+This is a picture
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: ightightight of a man sitting on a bench in a room.
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: ightightight eyeightight of a man sitting on a chair with a
+
+[Batch  6600] [EVAL] | Loss:  2.7246 | rouge2_fmeasure: 0.0578 | bleu1: 0.2629 | bleu4: 0.0468
+[Batch  6600] [SAVE] | 保存检查点到 checkpoint-6600
+[Batch  6650] [Opt 3325] [Ep  0.771] | Loss:  2.2936 | GradNorm: 22380.926 | LR: 9.42e-05
+[Batch  6700] [Opt 3350] [Ep  0.777] | Loss:  2.4502 | GradNorm: 19360.229 | LR: 9.42e-05
+[Batch  6750] [Opt 3375] [Ep  0.783] | Loss:  2.2745 | GradNorm: 19703.664 | LR: 9.41e-05
+[Batch  6800] [Opt 3400] [Ep  0.788] | Loss:  2.2017 | GradNorm: 16996.432 | LR: 9.40e-05
+Sample 1:
+  Reference: This wire metal rack holds several pairs of shoes and sandals
+  Prediction: biebiebieeeeeeebeebeebeeeebeeeeeebieee
+
+Sample 6:
+  Reference: A motorcycle parked in a parking space next to another motorcycle.
+  Prediction: A motorcycle parked on the side of a road near a truck.
+
+
+
+Sample 11:
+  Reference: A picture of a dog laying on the ground.
+  Prediction: A man riding a motorcycle down the street on a sunny day.
+
+
+Sample 16:
+  Reference: A loft bed with a dresser underneath it.
+  Prediction: I am unable to see the image above.
+
+This is a picture
+
+Sample 21:
+  Reference: Two giraffes in a room with people looking at them.
+  Prediction: A cat sitting on top of a table in a room.
+
+
+
+
+Sample 26:
+  Reference: A woman stands in the dining area at the table.
+  Prediction: A room with a desk with a table and chairs in it.
+
+
+
+[Batch  6800] [EVAL] | Loss:  2.7115 | rouge2_fmeasure: 0.0696 | bleu1: 0.2428 | bleu4: 0.0440
+[Batch  6850] [Opt 3425] [Ep  0.794] | Loss:  2.2809 | GradNorm: 20152.537 | LR: 9.39e-05
+[Batch  6900] [Opt 3450] [Ep  0.800] | Loss:  2.1136 | GradNorm: 20555.105 | LR: 9.38e-05
+    main()
+  File "/root/autodl-tmp/corenet/byteformer-hf-migration/scripts/train_byteformer_gpt2_caption.py", line 546, in main
+    trainer.train()
+  File "/root/autodl-tmp/corenet/byteformer-hf-migration/utils/hf_style_trainer.py", line 229, in train
+    for step, batch in enumerate(train_loader):
+  File "/root/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 631, in __next__
+    data = self._next_data()
+           ^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 675, in _next_data
+    data = self._dataset_fetcher.fetch(index)  # may raise StopIteration
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/torch/utils/data/_utils/fetch.py", line 51, in fetch
+    data = [self.dataset[idx] for idx in possibly_batched_index]
+            ~~~~~~~~~~~~^^^^^
+  File "/root/autodl-tmp/corenet/byteformer-hf-migration/scripts/train_byteformer_gpt2_caption.py", line 401, in __getitem__
+    item = self.dataset[dataset_idx]
+           ~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/datasets/arrow_dataset.py", line 2777, in __getitem__
+    return self._getitem(key)
+           ^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/datasets/arrow_dataset.py", line 2762, in _getitem
+    formatted_output = format_table(
+                       ^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/datasets/formatting/formatting.py", line 653, in format_table
+    return formatter(pa_table, query_type=query_type)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/datasets/formatting/formatting.py", line 406, in __call__
+    return self.format_row(pa_table)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/datasets/formatting/formatting.py", line 455, in format_row
+    row = self.python_features_decoder.decode_row(row)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/datasets/formatting/formatting.py", line 223, in decode_row
+    return self.features.decode_example(row, token_per_repo_id=self.token_per_repo_id) if self.features else row
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/datasets/features/features.py", line 2101, in decode_example
+    column_name: decode_nested_example(feature, value, token_per_repo_id=token_per_repo_id)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/datasets/features/features.py", line 1414, in decode_nested_example
+    return schema.decode_example(obj, token_per_repo_id=token_per_repo_id) if obj is not None else None
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/datasets/features/image.py", line 187, in decode_example
+    image.load()  # to avoid "Too many open files" errors
+    ^^^^^^^^^^^^
+  File "/root/miniconda3/lib/python3.12/site-packages/PIL/ImageFile.py", line 291, in load
+    n, err_code = decoder.decode(b)
+                  ^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

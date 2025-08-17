@@ -6,7 +6,7 @@
 import argparse
 from typing import Callable, List, Optional, Union
 
-# import coremltools as ct
+import coremltools as ct
 
 from corenet.constants import DEFAULT_LOGS_DIR, DEFAULT_RESULTS_DIR
 from corenet.data.collate_fns import arguments_collate_fn

@@ -1,0 +1,1625 @@
+{
+  "args": {
+    "model_path": "/root/autodl-tmp/corenet/_trained_models/byteformer_gpt2_caption/",
+    "config": "byteformer-hf-migration/configs/conv_kernel_size=4,window_sizes=[128].yaml",
+    "weights": "byteformer-hf-migration/weights/imagenet_jpeg_q60_k4_w128.pt",
+    "dataset": "/root/autodl-fs/AbdoTW___coco_2014",
+    "num_samples": 200,
+    "batch_size": 48,
+    "max_length": 16,
+    "num_beams": 5,
+    "temperature": 1.0,
+    "top_p": 0.9,
+    "output_file": "inference_results.json",
+    "device": null
+  },
+  "summary": {
+    "total_samples": 200,
+    "average_loss": 6.59289779663086,
+    "average_bleu_1": 0.308966378381652,
+    "average_bleu_4": 0.06480965713104264,
+    "average_rouge_l": 0.297292095713216
+  },
+  "results": [
+    {
+      "image_path": "image_0",
+      "generated_caption": "\n\n\nA\nA giraffe is laying down in a cage with",
+      "ground_truth_caption": "This wire metal rack holds several pairs of shoes and sandals",
+      "bleu_1": 0,
+      "bleu_4": 0,
+      "rouge_l": 0.0
+    },
+    {
+      "image_path": "image_1",
+      "generated_caption": "\n\n\nA\nA giraffe is laying down in a cage with",
+      "ground_truth_caption": "A dog sleeping on a show rack in the shoes.",
+      "bleu_1": 0.27145122541078787,
+      "bleu_4": 0.027933959628966113,
+      "rouge_l": 0.3
+    },
+    {
+      "image_path": "image_2",
+      "generated_caption": "\n\n\nA\nA giraffe is laying down in a cage with",
+      "ground_truth_caption": "Various slides and other footwear rest in a metal basket outdoors.",
+      "bleu_1": 0.1637461506155964,
+      "bleu_4": 0.0466274122943739,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_3",
+      "generated_caption": "\n\n\nA\nA giraffe is laying down in a cage with",
+      "ground_truth_caption": "A small dog is curled up on top of the shoes",
+      "bleu_1": 0.18096748360719192,
+      "bleu_4": 0.025241181889490292,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_4",
+      "generated_caption": "\n\n\nA\nA giraffe is laying down in a cage with",
+      "ground_truth_caption": "a shoe rack with some shoes and a dog sleeping on them",
+      "bleu_1": 0.24561922592339458,
+      "bleu_4": 0.025275691906194435,
+      "rouge_l": 0.1818181818181818
+    },
+    {
+      "image_path": "image_5",
+      "generated_caption": "\n\n\n\n\n\n\nA\n\n\nA pair of bikes are sitting",
+      "ground_truth_caption": "A motorcycle parked in a parking space next to another motorcycle.",
+      "bleu_1": 0.13986904558770089,
+      "bleu_4": 0.01883852621381226,
+      "rouge_l": 0.2222222222222222
+    },
+    {
+      "image_path": "image_6",
+      "generated_caption": "\n\n\n\n\n\n\nA\n\n\nA pair of bikes are sitting",
+      "ground_truth_caption": "An old motorcycle parked beside other motorcycles with a brown leather seat.",
+      "bleu_1": 0.06062469223956427,
+      "bleu_4": 0.013732428802850668,
+      "rouge_l": 0.10526315789473685
+    },
+    {
+      "image_path": "image_7",
+      "generated_caption": "\n\n\n\n\n\n\nA\n\n\nA pair of bikes are sitting",
+      "ground_truth_caption": "Motorcycle parked in the parking lot of asphalt.",
+      "bleu_1": 0.10735389901075512,
+      "bleu_4": 0.024317315608763098,
+      "rouge_l": 0.13333333333333333
+    },
+    {
+      "image_path": "image_8",
+      "generated_caption": "\n\n\n\n\n\n\nA\n\n\nA pair of bikes are sitting",
+      "ground_truth_caption": "A close up view of a motorized bicycle, sitting in a rack. ",
+      "bleu_1": 0.21021682352653848,
+      "bleu_4": 0.016835277720160215,
+      "rouge_l": 0.3157894736842105
+    },
+    {
+      "image_path": "image_9",
+      "generated_caption": "\n\n\n\n\n\n\nA\n\n\nA pair of bikes are sitting",
+      "ground_truth_caption": "The back tire of an old style motorcycle is resting in a metal stand. ",
+      "bleu_1": 0.09111615923542012,
+      "bleu_4": 0.012272151761999944,
+      "rouge_l": 0.09523809523809523
+    },
+    {
+      "image_path": "image_10",
+      "generated_caption": "\n\n\nA cat is sitting on the ground next to a bike.",
+      "ground_truth_caption": "A picture of a dog laying on the ground.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.12586898234382776,
+      "rouge_l": 0.39999999999999997
+    },
+    {
+      "image_path": "image_11",
+      "generated_caption": "\n\n\nA cat is sitting on the ground next to a bike.",
+      "ground_truth_caption": "Dog snoozing by a bike on the edge of a cobblestone street",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.07139921386902234,
+      "rouge_l": 0.34782608695652173
+    },
+    {
+      "image_path": "image_12",
+      "generated_caption": "\n\n\nA cat is sitting on the ground next to a bike.",
+      "ground_truth_caption": "The white dog lays next to the bicycle on the sidewalk.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.07139921386902234,
+      "rouge_l": 0.2727272727272727
+    },
+    {
+      "image_path": "image_13",
+      "generated_caption": "\n\n\nA cat is sitting on the ground next to a bike.",
+      "ground_truth_caption": "a white dog is sleeping on a street and a bicycle",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.028347903757100078,
+      "rouge_l": 0.36363636363636365
+    },
+    {
+      "image_path": "image_14",
+      "generated_caption": "\n\n\nA cat is sitting on the ground next to a bike.",
+      "ground_truth_caption": "A puppy rests on the street next to a bicycle.",
+      "bleu_1": 0.5833333333333334,
+      "bleu_4": 0.144769886226851,
+      "rouge_l": 0.5714285714285713
+    },
+    {
+      "image_path": "image_15",
+      "generated_caption": "\n\n\n\n\n\n\nA\nA\n\n\nA photo of a",
+      "ground_truth_caption": "A loft bed with a dresser underneath it.",
+      "bleu_1": 0.2021768865708778,
+      "bleu_4": 0.027115768487627246,
+      "rouge_l": 0.28571428571428575
+    },
+    {
+      "image_path": "image_16",
+      "generated_caption": "\n\n\n\n\n\n\nA\nA\n\n\nA photo of a",
+      "ground_truth_caption": "A bed and desk in a small room.",
+      "bleu_1": 0.2021768865708778,
+      "bleu_4": 0.027115768487627246,
+      "rouge_l": 0.28571428571428575
+    },
+    {
+      "image_path": "image_17",
+      "generated_caption": "\n\n\n\n\n\n\nA\nA\n\n\nA photo of a",
+      "ground_truth_caption": "Wooden bed on top of a white dresser.",
+      "bleu_1": 0.2021768865708778,
+      "bleu_4": 0.05894093053464023,
+      "rouge_l": 0.28571428571428575
+    },
+    {
+      "image_path": "image_18",
+      "generated_caption": "\n\n\n\n\n\n\nA\nA\n\n\nA photo of a",
+      "ground_truth_caption": "A bed sits on top of a dresser and a desk.",
+      "bleu_1": 0.24525296078096154,
+      "bleu_4": 0.042513537735162706,
+      "rouge_l": 0.3529411764705882
+    },
+    {
+      "image_path": "image_19",
+      "generated_caption": "\n\n\n\n\n\n\nA\nA\n\n\nA photo of a",
+      "ground_truth_caption": "Bunk bed with a narrow shelf sitting underneath it. ",
+      "bleu_1": 0.08556951983876535,
+      "bleu_4": 0.019301097505701307,
+      "rouge_l": 0.13333333333333333
+    },
+    {
+      "image_path": "image_20",
+      "generated_caption": "\n\nA giraffe in the middle of a field of flowers.\n",
+      "ground_truth_caption": "Two giraffes in a room with people looking at them.",
+      "bleu_1": 0.2727272727272727,
+      "bleu_4": 0.028424915360075714,
+      "rouge_l": 0.20000000000000004
+    },
+    {
+      "image_path": "image_21",
+      "generated_caption": "\n\nA giraffe in the middle of a field of flowers.\n",
+      "ground_truth_caption": "Two giraffe standing next to each other in a room.",
+      "bleu_1": 0.36363636363636365,
+      "bleu_4": 0.030544559360566513,
+      "rouge_l": 0.3
+    },
+    {
+      "image_path": "image_22",
+      "generated_caption": "\n\nA giraffe in the middle of a field of flowers.\n",
+      "ground_truth_caption": "The giraffe is being kept by itself indoors. ",
+      "bleu_1": 0.2727272727272727,
+      "bleu_4": 0.028424915360075714,
+      "rouge_l": 0.11111111111111112
+    },
+    {
+      "image_path": "image_23",
+      "generated_caption": "\n\nA giraffe in the middle of a field of flowers.\n",
+      "ground_truth_caption": "A man and woman staring at two giraffes through a window.",
+      "bleu_1": 0.24902746807698065,
+      "bleu_4": 0.02595481057554782,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_24",
+      "generated_caption": "\n\nA giraffe in the middle of a field of flowers.\n",
+      "ground_truth_caption": "a giraffe in a enclosed area is watched by some people",
+      "bleu_1": 0.36363636363636365,
+      "bleu_4": 0.12475235543331888,
+      "rouge_l": 0.380952380952381
+    },
+    {
+      "image_path": "image_25",
+      "generated_caption": "\n\nA photo of a woman in the middle of a room with a",
+      "ground_truth_caption": "A woman stands in the dining area at the table.",
+      "bleu_1": 0.30769230769230765,
+      "bleu_4": 0.06257848925179675,
+      "rouge_l": 0.34782608695652173
+    },
+    {
+      "image_path": "image_26",
+      "generated_caption": "\n\nA photo of a woman in the middle of a room with a",
+      "ground_truth_caption": "A room with chairs, a table, and a woman in it.",
+      "bleu_1": 0.49859442696124706,
+      "bleu_4": 0.1574998399257734,
+      "rouge_l": 0.33333333333333337
+    },
+    {
+      "image_path": "image_27",
+      "generated_caption": "\n\nA photo of a woman in the middle of a room with a",
+      "ground_truth_caption": "A woman standing in a kitchen by a window",
+      "bleu_1": 0.38461538461538464,
+      "bleu_4": 0.05564101947390608,
+      "rouge_l": 0.4545454545454546
+    },
+    {
+      "image_path": "image_28",
+      "generated_caption": "\n\nA photo of a woman in the middle of a room with a",
+      "ground_truth_caption": "A person standing at a table in a room.",
+      "bleu_1": 0.38461538461538464,
+      "bleu_4": 0.05564101947390608,
+      "rouge_l": 0.4545454545454546
+    },
+    {
+      "image_path": "image_29",
+      "generated_caption": "\n\nA photo of a woman in the middle of a room with a",
+      "ground_truth_caption": "A living area with a television and a table",
+      "bleu_1": 0.30769230769230765,
+      "bleu_4": 0.05262202728382899,
+      "rouge_l": 0.27272727272727276
+    },
+    {
+      "image_path": "image_30",
+      "generated_caption": "\n\nA photo of a group of birds sitting on a tree.\n",
+      "ground_truth_caption": "Birds perch on a bunch of twigs in the winter.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.06003934299439418,
+      "rouge_l": 0.28571428571428564
+    },
+    {
+      "image_path": "image_31",
+      "generated_caption": "\n\nA photo of a group of birds sitting on a tree.\n",
+      "ground_truth_caption": "A number of small birds sitting at the top of a bare tree.",
+      "bleu_1": 0.5643211499270759,
+      "bleu_4": 0.07522528241043895,
+      "rouge_l": 0.4999999999999999
+    },
+    {
+      "image_path": "image_32",
+      "generated_caption": "\n\nA photo of a group of birds sitting on a tree.\n",
+      "ground_truth_caption": "Many birds perched on the limbs of a tree.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.13929692701099317,
+      "rouge_l": 0.39999999999999997
+    },
+    {
+      "image_path": "image_33",
+      "generated_caption": "\n\nA photo of a group of birds sitting on a tree.\n",
+      "ground_truth_caption": "Eight birds perch on a branch on an overcast day.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.05678170484701192,
+      "rouge_l": 0.28571428571428564
+    },
+    {
+      "image_path": "image_34",
+      "generated_caption": "\n\nA photo of a group of birds sitting on a tree.\n",
+      "ground_truth_caption": "Several birds are sitting on small tree branches.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.06003934299439418,
+      "rouge_l": 0.4210526315789474
+    },
+    {
+      "image_path": "image_35",
+      "generated_caption": "\n\nA simple simple simple kitchen with a simple kitchen sink.\n\n",
+      "ground_truth_caption": "A small kitchen with low a ceiling ",
+      "bleu_1": 0.36363636363636365,
+      "bleu_4": 0.061729293904138435,
+      "rouge_l": 0.47058823529411764
+    },
+    {
+      "image_path": "image_36",
+      "generated_caption": "\n\nA simple simple simple kitchen with a simple kitchen sink.\n\n",
+      "ground_truth_caption": "A small kichen area with a sunlight and and angled ceiling.",
+      "bleu_1": 0.3320366241026409,
+      "bleu_4": 0.0563650624794671,
+      "rouge_l": 0.28571428571428564
+    },
+    {
+      "image_path": "image_37",
+      "generated_caption": "\n\nA simple simple simple kitchen with a simple kitchen sink.\n\n",
+      "ground_truth_caption": "an image of a kitchen loft style setting",
+      "bleu_1": 0.18181818181818182,
+      "bleu_4": 0.02568481047180467,
+      "rouge_l": 0.22222222222222224
+    },
+    {
+      "image_path": "image_38",
+      "generated_caption": "\n\nA simple simple simple kitchen with a simple kitchen sink.\n\n",
+      "ground_truth_caption": "a small kitchen with a lot of filled up shelves ",
+      "bleu_1": 0.36363636363636365,
+      "bleu_4": 0.12475235543331888,
+      "rouge_l": 0.4000000000000001
+    },
+    {
+      "image_path": "image_39",
+      "generated_caption": "\n\nA simple simple simple kitchen with a simple kitchen sink.\n\n",
+      "ground_truth_caption": "A kitchen with a slanted ceiling and skylight.",
+      "bleu_1": 0.45454545454545453,
+      "bleu_4": 0.13190955568171472,
+      "rouge_l": 0.4444444444444445
+    },
+    {
+      "image_path": "image_40",
+      "generated_caption": "\n\n\nA man in the air with a baseball in his hand.",
+      "ground_truth_caption": "A group of baseball players is crowded at the mound.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.028347903757100078,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_41",
+      "generated_caption": "\n\n\nA man in the air with a baseball in his hand.",
+      "ground_truth_caption": "A baseball player at the area where one goes to bat ",
+      "bleu_1": 0.25,
+      "bleu_4": 0.05284133043873052,
+      "rouge_l": 0.18181818181818182
+    },
+    {
+      "image_path": "image_42",
+      "generated_caption": "\n\n\nA man in the air with a baseball in his hand.",
+      "ground_truth_caption": "A man that is standing in the dirt near a plate.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.07472892616029096,
+      "rouge_l": 0.45454545454545453
+    },
+    {
+      "image_path": "image_43",
+      "generated_caption": "\n\n\nA man in the air with a baseball in his hand.",
+      "ground_truth_caption": "a baseball player on the home plate during a game",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.05678170484701192,
+      "rouge_l": 0.28571428571428564
+    },
+    {
+      "image_path": "image_44",
+      "generated_caption": "\n\n\nA man in the air with a baseball in his hand.",
+      "ground_truth_caption": "A baseball player for the Chicago Cubs stands at home plate.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.05678170484701192,
+      "rouge_l": 0.18181818181818182
+    },
+    {
+      "image_path": "image_45",
+      "generated_caption": "\n\n\nA table with plates of food sitting on top of a table",
+      "ground_truth_caption": "This table is filled with a variety of different dishes.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.028347903757100078,
+      "rouge_l": 0.2727272727272727
+    },
+    {
+      "image_path": "image_46",
+      "generated_caption": "\n\n\nA table with plates of food sitting on top of a table",
+      "ground_truth_caption": "A variety of food in dishes is displayed on a table.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.07472892616029096,
+      "rouge_l": 0.5217391304347826
+    },
+    {
+      "image_path": "image_47",
+      "generated_caption": "\n\n\nA table with plates of food sitting on top of a table",
+      "ground_truth_caption": "Table of food including carrots, peas, salad, corn, gravy, pies, bread",
+      "bleu_1": 0.16481015755011091,
+      "bleu_4": 0.03483515197905859,
+      "rouge_l": 0.2608695652173913
+    },
+    {
+      "image_path": "image_0",
+      "generated_caption": "\n\nA table with plates of food sitting on top of it.\n",
+      "ground_truth_caption": "A table layed out with food such as, salad, steamed peas and carrots, steamed corn, and bread rolls.",
+      "bleu_1": 0.1666040226436864,
+      "bleu_4": 0.024006710543400242,
+      "rouge_l": 0.27586206896551724
+    },
+    {
+      "image_path": "image_1",
+      "generated_caption": "\n\nA table with plates of food sitting on top of it.\n",
+      "ground_truth_caption": "A table full of food such as peas and carrots, bread, salad and gravy. ",
+      "bleu_1": 0.27468359591685154,
+      "bleu_4": 0.04706926274683055,
+      "rouge_l": 0.32
+    },
+    {
+      "image_path": "image_2",
+      "generated_caption": "\n\n\n\n\n\n\nA\n\n\nA\nA pair of scissors",
+      "ground_truth_caption": "A toy dinosaur standing on a sink next to a running faucet.",
+      "bleu_1": 0.15570161195729887,
+      "bleu_4": 0.015406893390736,
+      "rouge_l": 0.3333333333333333
+    },
+    {
+      "image_path": "image_3",
+      "generated_caption": "\n\n\n\n\n\n\nA\n\n\nA\nA pair of scissors",
+      "ground_truth_caption": "a faucet running next to a dinosuar holding a toothbrush",
+      "bleu_1": 0.256708559516296,
+      "bleu_4": 0.02540167284871566,
+      "rouge_l": 0.37499999999999994
+    },
+    {
+      "image_path": "image_4",
+      "generated_caption": "\n\n\n\n\n\n\nA\n\n\nA\nA pair of scissors",
+      "ground_truth_caption": "A toy lizard with a toothbrush in it's mouth standing next to a running water faucet in a bathroom.",
+      "bleu_1": 0.0410424993119494,
+      "bleu_4": 0.004061213005052115,
+      "rouge_l": 0.23076923076923075
+    },
+    {
+      "image_path": "image_5",
+      "generated_caption": "\n\n\n\n\n\n\nA\n\n\nA\nA pair of scissors",
+      "ground_truth_caption": "A fake toy dinousure has a green tooth brush in its mouth",
+      "bleu_1": 0.12262648039048077,
+      "bleu_4": 0.01644654494941559,
+      "rouge_l": 0.2222222222222222
+    },
+    {
+      "image_path": "image_6",
+      "generated_caption": "\n\n\n\n\n\n\nA\n\n\nA\nA pair of scissors",
+      "ground_truth_caption": "a sink with running water a mirror and a Godzilla toothbrush holder",
+      "bleu_1": 0.18393972058572117,
+      "bleu_4": 0.01820109393705687,
+      "rouge_l": 0.3333333333333333
+    },
+    {
+      "image_path": "image_7",
+      "generated_caption": "\n\n\nA man is sitting on the floor holding a game controller.",
+      "ground_truth_caption": "a man standing holding a game controller and two people sitting",
+      "bleu_1": 0.5833333333333334,
+      "bleu_4": 0.2620251007173262,
+      "rouge_l": 0.5454545454545454
+    },
+    {
+      "image_path": "image_8",
+      "generated_caption": "\n\n\nA man is sitting on the floor holding a game controller.",
+      "ground_truth_caption": "Young adult using video game controller with other looking on.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.05678170484701192,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_9",
+      "generated_caption": "\n\n\nA man is sitting on the floor holding a game controller.",
+      "ground_truth_caption": "A man standing on a piece of equipment for a video game while holding the remote as four other people look on",
+      "bleu_1": 0.253515621629129,
+      "bleu_4": 0.028382841491001225,
+      "rouge_l": 0.30303030303030304
+    },
+    {
+      "image_path": "image_10",
+      "generated_caption": "\n\n\nA man is sitting on the floor holding a game controller.",
+      "ground_truth_caption": "people sitting around watching a man playing a video game",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.06003934299439418,
+      "rouge_l": 0.380952380952381
+    },
+    {
+      "image_path": "image_11",
+      "generated_caption": "\n\n\nA man is sitting on the floor holding a game controller.",
+      "ground_truth_caption": "The group of friends is enjoyingplaying the video games.",
+      "bleu_1": 0.25,
+      "bleu_4": 0.026380696981716002,
+      "rouge_l": 0.19999999999999998
+    },
+    {
+      "image_path": "image_12",
+      "generated_caption": "\n\n\nA man in a striped shirt riding a giraffe in a",
+      "ground_truth_caption": "There is a small bus with several people standing next to it.",
+      "bleu_1": 0.0757957198250164,
+      "bleu_4": 0.018007616512642623,
+      "rouge_l": 0.08695652173913043
+    },
+    {
+      "image_path": "image_13",
+      "generated_caption": "\n\n\nA man in a striped shirt riding a giraffe in a",
+      "ground_truth_caption": "people standing besides a bus taking to each other",
+      "bleu_1": 0.0909090909090909,
+      "bleu_4": 0.021598265052211615,
+      "rouge_l": 0.09999999999999999
+    },
+    {
+      "image_path": "image_14",
+      "generated_caption": "\n\n\nA man in a striped shirt riding a giraffe in a",
+      "ground_truth_caption": "People eating from food trucks near a commemorative archway",
+      "bleu_1": 0.0909090909090909,
+      "bleu_4": 0.021598265052211615,
+      "rouge_l": 0.09999999999999999
+    },
+    {
+      "image_path": "image_15",
+      "generated_caption": "\n\n\nA man in a striped shirt riding a giraffe in a",
+      "ground_truth_caption": "Several people walking on a sidewalk near a large arch with figures on it.",
+      "bleu_1": 0.1263898051634325,
+      "bleu_4": 0.01785464005155096,
+      "rouge_l": 0.16
+    },
+    {
+      "image_path": "image_16",
+      "generated_caption": "\n\n\nA man in a striped shirt riding a giraffe in a",
+      "ground_truth_caption": "A very big pretty arch way with a bunch of people near it.",
+      "bleu_1": 0.1384182521267043,
+      "bleu_4": 0.019553856144420807,
+      "rouge_l": 0.16666666666666669
+    },
+    {
+      "image_path": "image_17",
+      "generated_caption": "\n\nA simple simple simple empty empty empty bottle of water sitting on a",
+      "ground_truth_caption": "A bottle on wine next to a glass of wine.",
+      "bleu_1": 0.38461538461538464,
+      "bleu_4": 0.02799946799246989,
+      "rouge_l": 0.34782608695652173
+    },
+    {
+      "image_path": "image_18",
+      "generated_caption": "\n\nA simple simple simple empty empty empty bottle of water sitting on a",
+      "ground_truth_caption": "A glass table with a bottle and glass of wine next to a chair.",
+      "bleu_1": 0.263816590510905,
+      "bleu_4": 0.02270428034239883,
+      "rouge_l": 0.29629629629629634
+    },
+    {
+      "image_path": "image_19",
+      "generated_caption": "\n\nA simple simple simple empty empty empty bottle of water sitting on a",
+      "ground_truth_caption": "A bottle and glass on red wine on a patio table",
+      "bleu_1": 0.30769230769230765,
+      "bleu_4": 0.05262202728382899,
+      "rouge_l": 0.33333333333333337
+    },
+    {
+      "image_path": "image_20",
+      "generated_caption": "\n\nA simple simple simple empty empty empty bottle of water sitting on a",
+      "ground_truth_caption": "A glass of champagne next to the champagne bottle.",
+      "bleu_1": 0.23076923076923078,
+      "bleu_4": 0.024642660404143705,
+      "rouge_l": 0.18181818181818185
+    },
+    {
+      "image_path": "image_21",
+      "generated_caption": "\n\nA simple simple simple empty empty empty bottle of water sitting on a",
+      "ground_truth_caption": "A glass of wine is shown wit a wine bottle right next to it on a table. ",
+      "bleu_1": 0.26181246089360977,
+      "bleu_4": 0.0378755318112408,
+      "rouge_l": 0.26666666666666666
+    },
+    {
+      "image_path": "image_22",
+      "generated_caption": "\n\n\nA\nA bear sitting on top of a field of grass",
+      "ground_truth_caption": "A big burly grizzly bear is show with grass in the background.",
+      "bleu_1": 0.2273871594750492,
+      "bleu_4": 0.023699356127503145,
+      "rouge_l": 0.2608695652173913
+    },
+    {
+      "image_path": "image_23",
+      "generated_caption": "\n\n\nA\nA bear sitting on top of a field of grass",
+      "ground_truth_caption": "The large brown bear has a black nose.",
+      "bleu_1": 0.18181818181818182,
+      "bleu_4": 0.02568481047180467,
+      "rouge_l": 0.2105263157894737
+    },
+    {
+      "image_path": "image_24",
+      "generated_caption": "\n\n\nA\nA bear sitting on top of a field of grass",
+      "ground_truth_caption": "Closeup of a brown bear sitting in a grassy area.",
+      "bleu_1": 0.45454545454545453,
+      "bleu_4": 0.07762047774578669,
+      "rouge_l": 0.380952380952381
+    },
+    {
+      "image_path": "image_25",
+      "generated_caption": "\n\n\nA\nA bear sitting on top of a field of grass",
+      "ground_truth_caption": "A large bear that is sitting on grass. ",
+      "bleu_1": 0.45454545454545453,
+      "bleu_4": 0.06527078148671275,
+      "rouge_l": 0.5263157894736842
+    },
+    {
+      "image_path": "image_26",
+      "generated_caption": "\n\n\nA\nA bear sitting on top of a field of grass",
+      "ground_truth_caption": "A close up picture of a brown bear's face.",
+      "bleu_1": 0.36363636363636365,
+      "bleu_4": 0.061729293904138435,
+      "rouge_l": 0.28571428571428564
+    },
+    {
+      "image_path": "image_27",
+      "generated_caption": "\n\nA man in a blue shirt playing a game with a remote controller",
+      "ground_truth_caption": "A man standing in front of a microwave next to pots and pans.",
+      "bleu_1": 0.2849111011207126,
+      "bleu_4": 0.048725949144079676,
+      "rouge_l": 0.3076923076923077
+    },
+    {
+      "image_path": "image_28",
+      "generated_caption": "\n\nA man in a blue shirt playing a game with a remote controller",
+      "ground_truth_caption": "A man displaying pots and utensils on a wall.",
+      "bleu_1": 0.23076923076923078,
+      "bleu_4": 0.048970314286134506,
+      "rouge_l": 0.27272727272727276
+    },
+    {
+      "image_path": "image_29",
+      "generated_caption": "\n\nA man in a blue shirt playing a game with a remote controller",
+      "ground_truth_caption": "A man stands in a kitchen and motions towards pots and pans. ",
+      "bleu_1": 0.30769230769230765,
+      "bleu_4": 0.06257848925179675,
+      "rouge_l": 0.32
+    },
+    {
+      "image_path": "image_30",
+      "generated_caption": "\n\nA man in a blue shirt playing a game with a remote controller",
+      "ground_truth_caption": "a man poses in front of some pots and pans ",
+      "bleu_1": 0.23076923076923078,
+      "bleu_4": 0.048970314286134506,
+      "rouge_l": 0.2608695652173913
+    },
+    {
+      "image_path": "image_31",
+      "generated_caption": "\n\nA man in a blue shirt playing a game with a remote controller",
+      "ground_truth_caption": "A man pointing to pots hanging from a pegboard on a gray wall.",
+      "bleu_1": 0.2849111011207126,
+      "bleu_4": 0.048725949144079676,
+      "rouge_l": 0.3076923076923077
+    },
+    {
+      "image_path": "image_32",
+      "generated_caption": "\n\nA man in a suit sitting on top of a bench.\n",
+      "ground_truth_caption": "Three men in military suits are sitting on a bench,",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.07139921386902234,
+      "rouge_l": 0.47619047619047616
+    },
+    {
+      "image_path": "image_33",
+      "generated_caption": "\n\nA man in a suit sitting on top of a bench.\n",
+      "ground_truth_caption": "Three persons with military attire seated on a bench",
+      "bleu_1": 0.25,
+      "bleu_4": 0.05284133043873052,
+      "rouge_l": 0.3
+    },
+    {
+      "image_path": "image_34",
+      "generated_caption": "\n\nA man in a suit sitting on top of a bench.\n",
+      "ground_truth_caption": "Three young men in decorated uniforms sit on a bench together.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.06003934299439418,
+      "rouge_l": 0.36363636363636365
+    },
+    {
+      "image_path": "image_35",
+      "generated_caption": "\n\nA man in a suit sitting on top of a bench.\n",
+      "ground_truth_caption": "a few guys sit next to each other on a bench ",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.05678170484701192,
+      "rouge_l": 0.36363636363636365
+    },
+    {
+      "image_path": "image_36",
+      "generated_caption": "\n\nA man in a suit sitting on top of a bench.\n",
+      "ground_truth_caption": "Three young men sitting on a bench wearing dress formals.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.07139921386902234,
+      "rouge_l": 0.380952380952381
+    },
+    {
+      "image_path": "image_37",
+      "generated_caption": "\n\n\nA woman in a kitchen with a machine in her hand.",
+      "ground_truth_caption": "Two people standing in a kitchen looking around. ",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.11373546463821492,
+      "rouge_l": 0.3157894736842105
+    },
+    {
+      "image_path": "image_38",
+      "generated_caption": "\n\n\nA woman in a kitchen with a machine in her hand.",
+      "ground_truth_caption": "A couple of men are standing in a kitchen",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.11373546463821492,
+      "rouge_l": 0.39999999999999997
+    },
+    {
+      "image_path": "image_39",
+      "generated_caption": "\n\n\nA woman in a kitchen with a machine in her hand.",
+      "ground_truth_caption": "Two people looking at a large kitchen ",
+      "bleu_1": 0.16666666666666669,
+      "bleu_4": 0.02383765064930276,
+      "rouge_l": 0.2222222222222222
+    },
+    {
+      "image_path": "image_40",
+      "generated_caption": "\n\n\nA woman in a kitchen with a machine in her hand.",
+      "ground_truth_caption": "An elderly man and woman looking around in a kitchen.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.12026061194250894,
+      "rouge_l": 0.380952380952381
+    },
+    {
+      "image_path": "image_41",
+      "generated_caption": "\n\n\nA woman in a kitchen with a machine in her hand.",
+      "ground_truth_caption": "Two people standing close to each other while standing in a kitchen.",
+      "bleu_1": 0.30668147154310776,
+      "bleu_4": 0.10464167898566054,
+      "rouge_l": 0.2608695652173913
+    },
+    {
+      "image_path": "image_42",
+      "generated_caption": "\n\nA photo of a person holding a kite in the air.",
+      "ground_truth_caption": "A group of men playing a game of baseball on top of a baseball field.",
+      "bleu_1": 0.29855471273907885,
+      "bleu_4": 0.04302006912176252,
+      "rouge_l": 0.30769230769230765
+    },
+    {
+      "image_path": "image_43",
+      "generated_caption": "\n\nA photo of a person holding a kite in the air.",
+      "ground_truth_caption": "Wide angled picture of a baseball field with many players.",
+      "bleu_1": 0.25,
+      "bleu_4": 0.05284133043873052,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_44",
+      "generated_caption": "\n\nA photo of a person holding a kite in the air.",
+      "ground_truth_caption": "A group of people that are standing on a baseball field.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.028347903757100078,
+      "rouge_l": 0.2727272727272727
+    },
+    {
+      "image_path": "image_45",
+      "generated_caption": "\n\nA photo of a person holding a kite in the air.",
+      "ground_truth_caption": "A group of men on a field playing baseball.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.028347903757100078,
+      "rouge_l": 0.3
+    },
+    {
+      "image_path": "image_46",
+      "generated_caption": "\n\nA photo of a person holding a kite in the air.",
+      "ground_truth_caption": "A professional baseball game in progress with a runner on 1st base.",
+      "bleu_1": 0.30668147154310776,
+      "bleu_4": 0.026081330518169535,
+      "rouge_l": 0.17391304347826086
+    },
+    {
+      "image_path": "image_47",
+      "generated_caption": "\n\nA photo of a man in the air with a pair of scissors",
+      "ground_truth_caption": "A traffic light over a street surrounded by tall buildings.",
+      "bleu_1": 0.15384615384615385,
+      "bleu_4": 0.022267157315461233,
+      "rouge_l": 0.17391304347826086
+    },
+    {
+      "image_path": "image_0",
+      "generated_caption": "\n\nA photo of a man in the air with a pair of scissors",
+      "ground_truth_caption": "A black and white shot of a city with a tall skyscraper in the distance.",
+      "bleu_1": 0.4274968157481276,
+      "bleu_4": 0.06323908794532399,
+      "rouge_l": 0.3571428571428571
+    },
+    {
+      "image_path": "image_1",
+      "generated_caption": "\n\nA photo of a man in the air with a pair of scissors",
+      "ground_truth_caption": "some buildings a traffic light and a cloudy sky",
+      "bleu_1": 0.15384615384615385,
+      "bleu_4": 0.022267157315461233,
+      "rouge_l": 0.18181818181818185
+    },
+    {
+      "image_path": "image_2",
+      "generated_caption": "\n\nA photo of a man in the air with a pair of scissors",
+      "ground_truth_caption": "A black and white photograph of a stop light from the street.",
+      "bleu_1": 0.30769230769230765,
+      "bleu_4": 0.05262202728382899,
+      "rouge_l": 0.32
+    },
+    {
+      "image_path": "image_3",
+      "generated_caption": "\n\nA photo of a man in the air with a pair of scissors",
+      "ground_truth_caption": "A traffic light and street sign surrounded by buildings. ",
+      "bleu_1": 0.07692307692307693,
+      "bleu_4": 0.018724372764461875,
+      "rouge_l": 0.09090909090909093
+    },
+    {
+      "image_path": "image_4",
+      "generated_caption": "\n\nA man in the air above a ramp with a snowboard.",
+      "ground_truth_caption": "The snowboarder has jumped high into the air from a snow ramp.",
+      "bleu_1": 0.38335183942888473,
+      "bleu_4": 0.05523886218000656,
+      "rouge_l": 0.34782608695652173
+    },
+    {
+      "image_path": "image_5",
+      "generated_caption": "\n\nA man in the air above a ramp with a snowboard.",
+      "ground_truth_caption": "A person is hanging in the air near a building.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.12586898234382776,
+      "rouge_l": 0.47619047619047616
+    },
+    {
+      "image_path": "image_6",
+      "generated_caption": "\n\nA man in the air above a ramp with a snowboard.",
+      "ground_truth_caption": "A person flying through the air on top of a snowboard.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.13929692701099317,
+      "rouge_l": 0.45454545454545453
+    },
+    {
+      "image_path": "image_7",
+      "generated_caption": "\n\nA man in the air above a ramp with a snowboard.",
+      "ground_truth_caption": "An outside photo of signs, and lamp poles among the trees.",
+      "bleu_1": 0.1533407357715539,
+      "bleu_4": 0.021931697337776064,
+      "rouge_l": 0.09090909090909091
+    },
+    {
+      "image_path": "image_8",
+      "generated_caption": "\n\nA man in the air above a ramp with a snowboard.",
+      "ground_truth_caption": "A snowboarder hitting a trick off a giant ramp.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.02997425881153643,
+      "rouge_l": 0.3
+    },
+    {
+      "image_path": "image_9",
+      "generated_caption": "\n\nA photo of a giraffe in the middle of a room.",
+      "ground_truth_caption": "A smart phone with an image of a person on it's screen.",
+      "bleu_1": 0.28216057496353797,
+      "bleu_4": 0.04806467546112839,
+      "rouge_l": 0.24999999999999994
+    },
+    {
+      "image_path": "image_10",
+      "generated_caption": "\n\nA photo of a giraffe in the middle of a room.",
+      "ground_truth_caption": "A stack of 3 computers and a cell phone.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.028347903757100078,
+      "rouge_l": 0.3
+    },
+    {
+      "image_path": "image_11",
+      "generated_caption": "\n\nA photo of a giraffe in the middle of a room.",
+      "ground_truth_caption": "A stack containing three laptop computers and a smartphone.",
+      "bleu_1": 0.25,
+      "bleu_4": 0.026380696981716002,
+      "rouge_l": 0.19999999999999998
+    },
+    {
+      "image_path": "image_12",
+      "generated_caption": "\n\nA photo of a giraffe in the middle of a room.",
+      "ground_truth_caption": "Three laptops stacked on top of each other, from largest to smallest with a cell phone on the top.",
+      "bleu_1": 0.1574555175803382,
+      "bleu_4": 0.013390601575175423,
+      "rouge_l": 0.19999999999999998
+    },
+    {
+      "image_path": "image_13",
+      "generated_caption": "\n\nA photo of a giraffe in the middle of a room.",
+      "ground_truth_caption": "a desk with three electronics stacked on each other",
+      "bleu_1": 0.08333333333333333,
+      "bleu_4": 0.020044994979069072,
+      "rouge_l": 0.09999999999999999
+    },
+    {
+      "image_path": "image_14",
+      "generated_caption": "\n\nA man in a hat is holding a pair of scissors.\n",
+      "ground_truth_caption": "A man talking on his phone in the public.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.05678170484701192,
+      "rouge_l": 0.3
+    },
+    {
+      "image_path": "image_15",
+      "generated_caption": "\n\nA man in a hat is holding a pair of scissors.\n",
+      "ground_truth_caption": "A man using a cell phone amongst a crowd of people.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.0628392861239482,
+      "rouge_l": 0.45454545454545453
+    },
+    {
+      "image_path": "image_16",
+      "generated_caption": "\n\nA man in a hat is holding a pair of scissors.\n",
+      "ground_truth_caption": "A man in a crown wears a red jacket and is on the phone.",
+      "bleu_1": 0.4543004567916529,
+      "bleu_4": 0.18990420965596824,
+      "rouge_l": 0.4
+    },
+    {
+      "image_path": "image_17",
+      "generated_caption": "\n\nA man in a hat is holding a pair of scissors.\n",
+      "ground_truth_caption": "A man standing on a busy sidewalk while talking on his cellphone.",
+      "bleu_1": 0.30668147154310776,
+      "bleu_4": 0.052241690397624094,
+      "rouge_l": 0.2608695652173913
+    },
+    {
+      "image_path": "image_18",
+      "generated_caption": "\n\nA man in a hat is holding a pair of scissors.\n",
+      "ground_truth_caption": "a man with a white beard and hat on a cellphone",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.06003934299439418,
+      "rouge_l": 0.45454545454545453
+    },
+    {
+      "image_path": "image_19",
+      "generated_caption": "\n\n\nA sliced pizza sitting on top of a table.\n\n",
+      "ground_truth_caption": "A cheesy pizza sitting on top of a table.",
+      "bleu_1": 0.9,
+      "bleu_4": 0.7825422900366437,
+      "rouge_l": 0.8888888888888888
+    },
+    {
+      "image_path": "image_20",
+      "generated_caption": "\n\n\nA sliced pizza sitting on top of a table.\n\n",
+      "ground_truth_caption": "This large pizza has a lot of cheese and tomato sauce.",
+      "bleu_1": 0.3274923012311928,
+      "bleu_4": 0.027160498528432196,
+      "rouge_l": 0.19999999999999998
+    },
+    {
+      "image_path": "image_21",
+      "generated_caption": "\n\n\nA sliced pizza sitting on top of a table.\n\n",
+      "ground_truth_caption": "A prepared pizza being served at a table.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.14619963489696408,
+      "rouge_l": 0.47058823529411764
+    },
+    {
+      "image_path": "image_22",
+      "generated_caption": "\n\n\nA sliced pizza sitting on top of a table.\n\n",
+      "ground_truth_caption": "A pizza with olive, cheese, tomato and onion.",
+      "bleu_1": 0.27145122541078787,
+      "bleu_4": 0.027933959628966113,
+      "rouge_l": 0.23529411764705882
+    },
+    {
+      "image_path": "image_23",
+      "generated_caption": "\n\n\nA sliced pizza sitting on top of a table.\n\n",
+      "ground_truth_caption": "Baked pizza with herbs displayed on serving tray at table.",
+      "bleu_1": 0.36193496721438384,
+      "bleu_4": 0.06128134109992247,
+      "rouge_l": 0.3157894736842105
+    },
+    {
+      "image_path": "image_24",
+      "generated_caption": "\n\nA photo of a man riding a boat in the water.\n",
+      "ground_truth_caption": "A dog sitting on the inside of a white boat.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.0628392861239482,
+      "rouge_l": 0.380952380952381
+    },
+    {
+      "image_path": "image_25",
+      "generated_caption": "\n\nA photo of a man riding a boat in the water.\n",
+      "ground_truth_caption": "a dog sits on a boat floating in water",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.06003934299439418,
+      "rouge_l": 0.5
+    },
+    {
+      "image_path": "image_26",
+      "generated_caption": "\n\nA photo of a man riding a boat in the water.\n",
+      "ground_truth_caption": "Dog forlornly looking out the back of a twin-hulled boat.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.06003934299439418,
+      "rouge_l": 0.2727272727272727
+    },
+    {
+      "image_path": "image_27",
+      "generated_caption": "\n\nA photo of a man riding a boat in the water.\n",
+      "ground_truth_caption": "The dog is riding on the boat in the water.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.33180774028439425,
+      "rouge_l": 0.47619047619047616
+    },
+    {
+      "image_path": "image_28",
+      "generated_caption": "\n\nA photo of a man riding a boat in the water.\n",
+      "ground_truth_caption": "a white boat is out on the water",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.05678170484701192,
+      "rouge_l": 0.4210526315789474
+    },
+    {
+      "image_path": "image_29",
+      "generated_caption": "\n\nA man in a blue shirt playing a game of tennis.\n",
+      "ground_truth_caption": "A guy jumping with a tennis racket in his hand.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.02997425881153643,
+      "rouge_l": 0.28571428571428564
+    },
+    {
+      "image_path": "image_30",
+      "generated_caption": "\n\nA man in a blue shirt playing a game of tennis.\n",
+      "ground_truth_caption": "A man standing on a tennis court holding a racquet.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.0628392861239482,
+      "rouge_l": 0.380952380952381
+    },
+    {
+      "image_path": "image_31",
+      "generated_caption": "\n\nA man in a blue shirt playing a game of tennis.\n",
+      "ground_truth_caption": "A guy holding a racket in a game of tennis.",
+      "bleu_1": 0.6666666666666666,
+      "bleu_4": 0.37700638045494705,
+      "rouge_l": 0.5714285714285713
+    },
+    {
+      "image_path": "image_32",
+      "generated_caption": "\n\nA man in a blue shirt playing a game of tennis.\n",
+      "ground_truth_caption": "A tennis player in mid air action on the court.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.028347903757100078,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_33",
+      "generated_caption": "\n\nA man in a blue shirt playing a game of tennis.\n",
+      "ground_truth_caption": "A man in black shirt and blue shorts playing a game of tennis.",
+      "bleu_1": 0.7759415811497294,
+      "bleu_4": 0.4726710158823674,
+      "rouge_l": 0.7500000000000001
+    },
+    {
+      "image_path": "image_34",
+      "generated_caption": "\n\n\nA child with a piece of paper in her hand.\n",
+      "ground_truth_caption": "a close up of a child next to a cake with balloons",
+      "bleu_1": 0.41504578012830107,
+      "bleu_4": 0.059598797327820446,
+      "rouge_l": 0.2727272727272727
+    },
+    {
+      "image_path": "image_35",
+      "generated_caption": "\n\n\nA child with a piece of paper in her hand.\n",
+      "ground_truth_caption": "A baby sitting in front of a cake wearing a tie.",
+      "bleu_1": 0.41504578012830107,
+      "bleu_4": 0.02949035842893289,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_36",
+      "generated_caption": "\n\n\nA child with a piece of paper in her hand.\n",
+      "ground_truth_caption": "The young boy is dressed in a tie that matches his cake. ",
+      "bleu_1": 0.2273871594750492,
+      "bleu_4": 0.023699356127503145,
+      "rouge_l": 0.0909090909090909
+    },
+    {
+      "image_path": "image_37",
+      "generated_caption": "\n\n\nA child with a piece of paper in her hand.\n",
+      "ground_truth_caption": "A child eating a birthday cake near some balloons.",
+      "bleu_1": 0.36363636363636365,
+      "bleu_4": 0.061729293904138435,
+      "rouge_l": 0.3157894736842105
+    },
+    {
+      "image_path": "image_38",
+      "generated_caption": "\n\n\nA child with a piece of paper in her hand.\n",
+      "ground_truth_caption": "A baby eating a cake with a tie around his/her neck with balloons in the background.",
+      "bleu_1": 0.2634446721749134,
+      "bleu_4": 0.03782952718900839,
+      "rouge_l": 0.29629629629629634
+    },
+    {
+      "image_path": "image_39",
+      "generated_caption": "\n\nA man in a suit standing in front of a window.\n",
+      "ground_truth_caption": "A man holding a camera up over his left shoulder.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.05678170484701192,
+      "rouge_l": 0.28571428571428564
+    },
+    {
+      "image_path": "image_40",
+      "generated_caption": "\n\nA man in a suit standing in front of a window.\n",
+      "ground_truth_caption": "A man with a blazer holding a camera",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.05678170484701192,
+      "rouge_l": 0.4210526315789474
+    },
+    {
+      "image_path": "image_41",
+      "generated_caption": "\n\nA man in a suit standing in front of a window.\n",
+      "ground_truth_caption": "A man in a suit snaps a mirror selfie.",
+      "bleu_1": 0.5833333333333334,
+      "bleu_4": 0.3448444257953326,
+      "rouge_l": 0.6
+    },
+    {
+      "image_path": "image_42",
+      "generated_caption": "\n\nA man in a suit standing in front of a window.\n",
+      "ground_truth_caption": "a man in a suit taking a picture of himself with a large camera",
+      "bleu_1": 0.49378100618619153,
+      "bleu_4": 0.29190450436614646,
+      "rouge_l": 0.56
+    },
+    {
+      "image_path": "image_43",
+      "generated_caption": "\n\nA man in a suit standing in front of a window.\n",
+      "ground_truth_caption": "A man wearing a suit is taking a self portrait with a camera.",
+      "bleu_1": 0.423240862445307,
+      "bleu_4": 0.06325667031538643,
+      "rouge_l": 0.41666666666666663
+    },
+    {
+      "image_path": "image_44",
+      "generated_caption": "\n\nA photo of a bird flying over a body of water.\n",
+      "ground_truth_caption": "A plane flies over water with two islands nearby.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.028347903757100078,
+      "rouge_l": 0.3
+    },
+    {
+      "image_path": "image_45",
+      "generated_caption": "\n\nA photo of a bird flying over a body of water.\n",
+      "ground_truth_caption": "An airplane flying over a body of water that has islands in it.",
+      "bleu_1": 0.49378100618619153,
+      "bleu_4": 0.36705048206502094,
+      "rouge_l": 0.4999999999999999
+    },
+    {
+      "image_path": "image_46",
+      "generated_caption": "\n\nA photo of a bird flying over a body of water.\n",
+      "ground_truth_caption": "an air plane flying in the air with water in the background",
+      "bleu_1": 0.16666666666666669,
+      "bleu_4": 0.02383765064930276,
+      "rouge_l": 0.17391304347826086
+    },
+    {
+      "image_path": "image_47",
+      "generated_caption": "\n\nA photo of a bird flying over a body of water.\n",
+      "ground_truth_caption": "A white airplane flying low over an island covered in trees.",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.028347903757100078,
+      "rouge_l": 0.2727272727272727
+    },
+    {
+      "image_path": "image_0",
+      "generated_caption": "\n\nA photo of a bird flying over a body of water.\n",
+      "ground_truth_caption": "An airplane approaching for landing over the water.",
+      "bleu_1": 0.25,
+      "bleu_4": 0.05284133043873052,
+      "rouge_l": 0.2105263157894737
+    },
+    {
+      "image_path": "image_1",
+      "generated_caption": "\n\nA man in a field with a frisbee in his hand",
+      "ground_truth_caption": "A young boy getting ready to catch a baseball in a grass field.",
+      "bleu_1": 0.3460456303167608,
+      "bleu_4": 0.04969067118584156,
+      "rouge_l": 0.33333333333333337
+    },
+    {
+      "image_path": "image_2",
+      "generated_caption": "\n\nA man in a field with a frisbee in his hand",
+      "ground_truth_caption": "a baseball player with a glove in a field ",
+      "bleu_1": 0.5454545454545454,
+      "bleu_4": 0.1527898075109779,
+      "rouge_l": 0.39999999999999997
+    },
+    {
+      "image_path": "image_3",
+      "generated_caption": "\n\nA man in a field with a frisbee in his hand",
+      "ground_truth_caption": "The boy is bent over with a baseball glove.",
+      "bleu_1": 0.18181818181818182,
+      "bleu_4": 0.05190794196013298,
+      "rouge_l": 0.19999999999999998
+    },
+    {
+      "image_path": "image_4",
+      "generated_caption": "\n\nA man in a field with a frisbee in his hand",
+      "ground_truth_caption": "A boy standing on a field with a baseball glove.",
+      "bleu_1": 0.45454545454545453,
+      "bleu_4": 0.24808415001701817,
+      "rouge_l": 0.47619047619047616
+    },
+    {
+      "image_path": "image_5",
+      "generated_caption": "\n\nA man in a field with a frisbee in his hand",
+      "ground_truth_caption": "A little boay is wearing a tie dye shirt and attempting to catch the ball.",
+      "bleu_1": 0.1154066216255058,
+      "bleu_4": 0.01630308462003315,
+      "rouge_l": 0.15384615384615383
+    },
+    {
+      "image_path": "image_6",
+      "generated_caption": "\n\nA photo of a kitchen with a table and chairs.\n\n",
+      "ground_truth_caption": "An industrial kitchen with a strainer on the counter.",
+      "bleu_1": 0.36363636363636365,
+      "bleu_4": 0.12475235543331888,
+      "rouge_l": 0.3157894736842105
+    },
+    {
+      "image_path": "image_7",
+      "generated_caption": "\n\nA photo of a kitchen with a table and chairs.\n\n",
+      "ground_truth_caption": "A dirty commercial kitchen with a bowl on the counter",
+      "bleu_1": 0.36363636363636365,
+      "bleu_4": 0.12475235543331888,
+      "rouge_l": 0.4000000000000001
+    },
+    {
+      "image_path": "image_8",
+      "generated_caption": "\n\nA photo of a kitchen with a table and chairs.\n\n",
+      "ground_truth_caption": "A kitchen with a long wooden counter and a metal pan on it.",
+      "bleu_1": 0.4844638824434651,
+      "bleu_4": 0.2054409797707584,
+      "rouge_l": 0.4347826086956522
+    },
+    {
+      "image_path": "image_9",
+      "generated_caption": "\n\nA photo of a kitchen with a table and chairs.\n\n",
+      "ground_truth_caption": "A restaurant kitchen provides everything needed to prepare food.",
+      "bleu_1": 0.2727272727272727,
+      "bleu_4": 0.028424915360075714,
+      "rouge_l": 0.2105263157894737
+    },
+    {
+      "image_path": "image_10",
+      "generated_caption": "\n\nA photo of a kitchen with a table and chairs.\n\n",
+      "ground_truth_caption": "An empty commercial kitchen with bowls on the counter and stacks of trays on the shelf above.",
+      "bleu_1": 0.24055151886365922,
+      "bleu_4": 0.03454216837290287,
+      "rouge_l": 0.22222222222222224
+    },
+    {
+      "image_path": "image_11",
+      "generated_caption": "\n\n\nA man in the air with a blue and white kite",
+      "ground_truth_caption": "A man getting ready to bunt the baseball",
+      "bleu_1": 0.2727272727272727,
+      "bleu_4": 0.057445580856132834,
+      "rouge_l": 0.3157894736842105
+    },
+    {
+      "image_path": "image_12",
+      "generated_caption": "\n\n\nA man in the air with a blue and white kite",
+      "ground_truth_caption": "A person getting ready to bunt the ball in a baseball game.",
+      "bleu_1": 0.30318287930006566,
+      "bleu_4": 0.025466615498192898,
+      "rouge_l": 0.2608695652173913
+    },
+    {
+      "image_path": "image_13",
+      "generated_caption": "\n\n\nA man in the air with a blue and white kite",
+      "ground_truth_caption": "Batter gets into a crouch for a possible ball bunt.",
+      "bleu_1": 0.18181818181818182,
+      "bleu_4": 0.02568481047180467,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_14",
+      "generated_caption": "\n\n\nA man in the air with a blue and white kite",
+      "ground_truth_caption": "A batter goes to hit the ball just thrown to him from the pitcher. ",
+      "bleu_1": 0.1263898051634325,
+      "bleu_4": 0.01785464005155096,
+      "rouge_l": 0.16
+    },
+    {
+      "image_path": "image_15",
+      "generated_caption": "\n\n\nA man in the air with a blue and white kite",
+      "ground_truth_caption": "A baseball player is stepping up to bat.",
+      "bleu_1": 0.0909090909090909,
+      "bleu_4": 0.021598265052211615,
+      "rouge_l": 0.10526315789473685
+    },
+    {
+      "image_path": "image_16",
+      "generated_caption": "\n\nA black animal sitting on top of a field of grass.\n",
+      "ground_truth_caption": "A furry, black bear standing in a rocky, weedy, area in the wild.",
+      "bleu_1": 0.2197468767334812,
+      "bleu_4": 0.01868808993769218,
+      "rouge_l": 0.24999999999999994
+    },
+    {
+      "image_path": "image_17",
+      "generated_caption": "\n\nA black animal sitting on top of a field of grass.\n",
+      "ground_truth_caption": "a black bear that is standing next to water",
+      "bleu_1": 0.16666666666666669,
+      "bleu_4": 0.04774753205784679,
+      "rouge_l": 0.19999999999999998
+    },
+    {
+      "image_path": "image_18",
+      "generated_caption": "\n\nA black animal sitting on top of a field of grass.\n",
+      "ground_truth_caption": "a close up of a bear on a hill near a body of water ",
+      "bleu_1": 0.35270071870442254,
+      "bleu_4": 0.05082220661919399,
+      "rouge_l": 0.32
+    },
+    {
+      "image_path": "image_19",
+      "generated_caption": "\n\nA black animal sitting on top of a field of grass.\n",
+      "ground_truth_caption": "A black bear stands in the wild amongst dead grass",
+      "bleu_1": 0.25,
+      "bleu_4": 0.05284133043873052,
+      "rouge_l": 0.28571428571428564
+    },
+    {
+      "image_path": "image_20",
+      "generated_caption": "\n\nA black animal sitting on top of a field of grass.\n",
+      "ground_truth_caption": "there is a black bear climbing the side of a mountain",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.06752520740605107,
+      "rouge_l": 0.36363636363636365
+    },
+    {
+      "image_path": "image_21",
+      "generated_caption": "\n\nA photo of a person flying a kite over a lake.",
+      "ground_truth_caption": "Afternoon at a dock with seagulls flying overhead.",
+      "bleu_1": 0.25,
+      "bleu_4": 0.026380696981716002,
+      "rouge_l": 0.2105263157894737
+    },
+    {
+      "image_path": "image_22",
+      "generated_caption": "\n\nA photo of a person flying a kite over a lake.",
+      "ground_truth_caption": "Some birds are flying over a beach pier",
+      "bleu_1": 0.25,
+      "bleu_4": 0.05284133043873052,
+      "rouge_l": 0.3157894736842105
+    },
+    {
+      "image_path": "image_23",
+      "generated_caption": "\n\nA photo of a person flying a kite over a lake.",
+      "ground_truth_caption": "A group of seagulls are flying over a wooden dock that is sitting in a lake during the early part of the evening.",
+      "bleu_1": 0.24525296078096154,
+      "bleu_4": 0.029541255159268056,
+      "rouge_l": 0.3529411764705882
+    },
+    {
+      "image_path": "image_24",
+      "generated_caption": "\n\nA photo of a person flying a kite over a lake.",
+      "ground_truth_caption": "Birds flock over a dock above a body of water.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.06003934299439418,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_25",
+      "generated_caption": "\n\nA photo of a person flying a kite over a lake.",
+      "ground_truth_caption": "A photo of the pier with birds flying above.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.12026061194250894,
+      "rouge_l": 0.39999999999999997
+    },
+    {
+      "image_path": "image_26",
+      "generated_caption": "\n\n\nA man and woman playing game with each other in a room",
+      "ground_truth_caption": "Three women in dresses, with two talking on the phone. ",
+      "bleu_1": 0.16666666666666669,
+      "bleu_4": 0.02383765064930276,
+      "rouge_l": 0.0909090909090909
+    },
+    {
+      "image_path": "image_27",
+      "generated_caption": "\n\n\nA man and woman playing game with each other in a room",
+      "ground_truth_caption": "A group of beautiful young women standing around together.",
+      "bleu_1": 0.08333333333333333,
+      "bleu_4": 0.020044994979069072,
+      "rouge_l": 0.09523809523809525
+    },
+    {
+      "image_path": "image_28",
+      "generated_caption": "\n\n\nA man and woman playing game with each other in a room",
+      "ground_truth_caption": "Three women in purple dresses on their cellphones at the same time. ",
+      "bleu_1": 0.07667036788577694,
+      "bleu_4": 0.01844228567176533,
+      "rouge_l": 0.08333333333333333
+    },
+    {
+      "image_path": "image_29",
+      "generated_caption": "\n\n\nA man and woman playing game with each other in a room",
+      "ground_truth_caption": "Two girls in dresses talk on mobile phones near a woman seated in a chair. ",
+      "bleu_1": 0.23884377019126307,
+      "bleu_4": 0.04068586939064354,
+      "rouge_l": 0.2962962962962963
+    },
+    {
+      "image_path": "image_30",
+      "generated_caption": "\n\n\nA man and woman playing game with each other in a room",
+      "ground_truth_caption": "Three women are dressed up and on cell phones.",
+      "bleu_1": 0.08333333333333333,
+      "bleu_4": 0.020044994979069072,
+      "rouge_l": 0.09523809523809525
+    },
+    {
+      "image_path": "image_31",
+      "generated_caption": "\n\nA man in a blue shirt playing a game of baseball.\n",
+      "ground_truth_caption": "A baseball game is going on for the crowd. ",
+      "bleu_1": 0.3333333333333333,
+      "bleu_4": 0.028347903757100078,
+      "rouge_l": 0.19999999999999998
+    },
+    {
+      "image_path": "image_32",
+      "generated_caption": "\n\nA man in a blue shirt playing a game of baseball.\n",
+      "ground_truth_caption": "A baseball player holding a bat over the top of a base.",
+      "bleu_1": 0.46002220731466165,
+      "bleu_4": 0.02886373692618645,
+      "rouge_l": 0.2608695652173913
+    },
+    {
+      "image_path": "image_33",
+      "generated_caption": "\n\nA man in a blue shirt playing a game of baseball.\n",
+      "ground_truth_caption": "The stands are packed as a baseball player in a gray uniform holds a bat as a catcher holds out his mitt.",
+      "bleu_1": 0.19992482717242366,
+      "bleu_4": 0.025126266835937647,
+      "rouge_l": 0.24242424242424246
+    },
+    {
+      "image_path": "image_34",
+      "generated_caption": "\n\nA man in a blue shirt playing a game of baseball.\n",
+      "ground_truth_caption": "A man that has a baseball bat standing in the dirt.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.0628392861239482,
+      "rouge_l": 0.36363636363636365
+    },
+    {
+      "image_path": "image_35",
+      "generated_caption": "\n\nA man in a blue shirt playing a game of baseball.\n",
+      "ground_truth_caption": "A man swinging a bat at a baseball on a field.",
+      "bleu_1": 0.5,
+      "bleu_4": 0.0628392861239482,
+      "rouge_l": 0.45454545454545453
+    },
+    {
+      "image_path": "image_36",
+      "generated_caption": "\n\n\nA young man playing a game of tennis on a court.",
+      "ground_truth_caption": "There is no image here to provide a description for.",
+      "bleu_1": 0.16666666666666669,
+      "bleu_4": 0.02383765064930276,
+      "rouge_l": 0.09523809523809525
+    },
+    {
+      "image_path": "image_37",
+      "generated_caption": "\n\n\nA young man playing a game of tennis on a court.",
+      "ground_truth_caption": "A male tennis player is in the middle of his game. ",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.02997425881153643,
+      "rouge_l": 0.18181818181818182
+    },
+    {
+      "image_path": "image_38",
+      "generated_caption": "\n\n\nA young man playing a game of tennis on a court.",
+      "ground_truth_caption": "A tennis player runs to hit the ball.",
+      "bleu_1": 0.25,
+      "bleu_4": 0.026380696981716002,
+      "rouge_l": 0.2105263157894737
+    },
+    {
+      "image_path": "image_39",
+      "generated_caption": "\n\n\nA young man playing a game of tennis on a court.",
+      "ground_truth_caption": "A person is playing tennis in a stadium.",
+      "bleu_1": 0.4166666666666667,
+      "bleu_4": 0.02997425881153643,
+      "rouge_l": 0.4210526315789474
+    },
+    {
+      "image_path": "image_40",
+      "generated_caption": "\n\n\nA young man playing a game of tennis on a court.",
+      "ground_truth_caption": "A tennis player running with tennis racket in his hand.",
+      "bleu_1": 0.25,
+      "bleu_4": 0.026380696981716002,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_41",
+      "generated_caption": "\n\n\n\n\n\n\nA\nA\n\n\nA photo of a",
+      "ground_truth_caption": "A woman in a trench coat playing with her kite",
+      "bleu_1": 0.17113903967753066,
+      "bleu_4": 0.02295300248114127,
+      "rouge_l": 0.25
+    },
+    {
+      "image_path": "image_42",
+      "generated_caption": "\n\n\n\n\n\n\nA\nA\n\n\nA photo of a",
+      "ground_truth_caption": "A man is flying  a kite near some steps",
+      "bleu_1": 0.2021768865708778,
+      "bleu_4": 0.027115768487627246,
+      "rouge_l": 0.26666666666666666
+    },
+    {
+      "image_path": "image_43",
+      "generated_caption": "\n\n\n\n\n\n\nA\nA\n\n\nA photo of a",
+      "ground_truth_caption": "A man is standing near a bunch of brightly colored flowers.",
+      "bleu_1": 0.18393972058572117,
+      "bleu_4": 0.01820109393705687,
+      "rouge_l": 0.3529411764705882
+    },
+    {
+      "image_path": "image_44",
+      "generated_caption": "\n\n\n\n\n\n\nA\nA\n\n\nA photo of a",
+      "ground_truth_caption": "a person standing with multiple kites tied together",
+      "bleu_1": 0.11942188509563156,
+      "bleu_4": 0.026936851496754878,
+      "rouge_l": 0.14285714285714288
+    },
+    {
+      "image_path": "image_45",
+      "generated_caption": "\n\n\n\n\n\n\nA\nA\n\n\nA photo of a",
+      "ground_truth_caption": "A man flying a kite on top of a cement park.",
+      "bleu_1": 0.24525296078096154,
+      "bleu_4": 0.042513537735162706,
+      "rouge_l": 0.4705882352941177
+    },
+    {
+      "image_path": "image_46",
+      "generated_caption": "\n\nA man in the air above a field with a flying object.",
+      "ground_truth_caption": "A person doing karate in a field at night",
+      "bleu_1": 0.30769230769230765,
+      "bleu_4": 0.05262202728382899,
+      "rouge_l": 0.380952380952381
+    },
+    {
+      "image_path": "image_47",
+      "generated_caption": "\n\nA man in the air above a field with a flying object.",
+      "ground_truth_caption": "A man standing on a lush green field holding a Frisbee.",
+      "bleu_1": 0.46153846153846156,
+      "bleu_4": 0.05823584617299056,
+      "rouge_l": 0.43478260869565216
+    },
+    {
+      "image_path": "image_0",
+      "generated_caption": "\n\nA man in the air over a field with a flying object.",
+      "ground_truth_caption": "A man throwing a frisbee in a dark field.",
+      "bleu_1": 0.5384615384615384,
+      "bleu_4": 0.06052392544253967,
+      "rouge_l": 0.4761904761904762
+    },
+    {
+      "image_path": "image_1",
+      "generated_caption": "\n\nA man in the air over a field with a flying object.",
+      "ground_truth_caption": "A man raring back with a frisbee in his hand while on a darkened field.",
+      "bleu_1": 0.48856778942643153,
+      "bleu_4": 0.05908275931230889,
+      "rouge_l": 0.3703703703703704
+    },
+    {
+      "image_path": "image_2",
+      "generated_caption": "\n\nA man in the air over a field with a flying object.",
+      "ground_truth_caption": "A man standing outside on the grass at night making body motions.",
+      "bleu_1": 0.30769230769230765,
+      "bleu_4": 0.05262202728382899,
+      "rouge_l": 0.25
+    },
+    {
+      "image_path": "image_3",
+      "generated_caption": "\n\n\nA simple simple simple robot robot robot sitting on top of a",
+      "ground_truth_caption": "A sink is shown with a mirror and lights.",
+      "bleu_1": 0.16666666666666669,
+      "bleu_4": 0.02383765064930276,
+      "rouge_l": 0.1904761904761905
+    },
+    {
+      "image_path": "image_4",
+      "generated_caption": "\n\n\nA simple simple simple robot robot robot sitting on top of a",
+      "ground_truth_caption": "A bathroom wall that has been papered with newspapers",
+      "bleu_1": 0.08333333333333333,
+      "bleu_4": 0.020044994979069072,
+      "rouge_l": 0.09523809523809525
+    },
+    {
+      "image_path": "image_5",
+      "generated_caption": "\n\n\nA simple simple simple robot robot robot sitting on top of a",
+      "ground_truth_caption": "A photo of a high end white bathroom.",
+      "bleu_1": 0.25,
+      "bleu_4": 0.05284133043873052,
+      "rouge_l": 0.3
+    },
+    {
+      "image_path": "image_6",
+      "generated_caption": "\n\n\nA simple simple simple robot robot robot sitting on top of a",
+      "ground_truth_caption": "A wall inside of a white room covered in lots of newspaper article clippings.",
+      "bleu_1": 0.19470019576785122,
+      "bleu_4": 0.04115286952421819,
+      "rouge_l": 0.23076923076923075
+    },
+    {
+      "image_path": "image_7",
+      "generated_caption": "\n\n\nA simple simple simple robot robot robot sitting on top of a",
+      "ground_truth_caption": "A newspaper wallpaper in a very modern bathroom.",
+      "bleu_1": 0.16666666666666669,
+      "bleu_4": 0.02383765064930276,
+      "rouge_l": 0.2
+    }
+  ]
+}
