@@ -1,0 +1,35 @@
+
+# COCO Configuration for PureT
+# Add these settings to your config file
+
+# Dataset paths
+DATA_LOADER:
+  TRAIN_ID: 'data/coco/train_ids.json'
+  VAL_ID: 'data/coco/validation_ids.json'
+  TEST_ID: 'data/coco/validation_ids.json'  # Use validation as test for now
+  
+  # Note: These will be dummy paths since we don't have precomputed features
+  # You'll need to either:
+  # 1. Precompute features for your images, or
+  # 2. Modify the data loader to load raw images (current implementation)
+  TRAIN_GV_FEAT: ''
+  VAL_GV_FEAT: ''
+  TEST_GV_FEAT: ''
+  
+  TRAIN_ATT_FEATS: ''
+  VAL_ATT_FEATS: ''
+  TEST_ATT_FEATS: ''
+
+# Evaluation settings
+INFERENCE:
+  EVAL: 'COCO'  # Use COCO evaluator
+  VAL_ANNFILE: 'data/coco/captions_validation.json'
+  TEST_ANNFILE: 'data/coco/captions_validation.json'
+  ID_KEY: 'image_id'
+  CAP_KEY: 'caption'
+  VOCAB: 'data/coco/coco_vocabulary.txt'
+
+# Model settings
+MODEL:
+  VOCAB_SIZE: 9487  # Will be updated based on actual vocabulary size
+  SEQ_LEN: 17  # Maximum sequence length for captions

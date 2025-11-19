@@ -63,6 +63,11 @@ _trained_models/*
 *.safetensors
 *.bin
 *.arrow
+PureT/data/coco/captions_train.json
+PureT/data/coco/captions_validation.json
+PureT/coco_caption/annotations/captions_val2014.json
+PureT/coco_caption/pycocoevalcap/meteor/data/paraphrase-en.gz
+PureT/coco_caption/pycocoevalcap/spice/lib/stanford-corenlp-3.6.0-models.jar
 
 # Env / virtualenv
 .env

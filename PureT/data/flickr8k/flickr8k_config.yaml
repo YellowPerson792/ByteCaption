@@ -1,0 +1,33 @@
+
+# Flickr8k Configuration for PureT
+# Add these settings to your config file
+
+# Dataset paths
+DATA_LOADER:
+  TRAIN_ID: 'data\flickr8k/train_ids.json'
+  VAL_ID: 'data\flickr8k/val_ids.json'
+  TEST_ID: 'data\flickr8k/test_ids.json'
+  
+  # Note: These will be dummy paths since we don't have precomputed features
+  # You'll need to either:
+  # 1. Precompute features for your images, or
+  # 2. Modify the data loader to load raw images
+  TRAIN_GV_FEAT: 'data\flickr8k/dummy_gv_feat.npz'
+  VAL_GV_FEAT: 'data\flickr8k/dummy_gv_feat.npz'
+  TEST_GV_FEAT: 'data\flickr8k/dummy_gv_feat.npz'
+  
+  TRAIN_ATT_FEATS: 'data\flickr8k/dummy_att_feats'
+  VAL_ATT_FEATS: 'data\flickr8k/dummy_att_feats'
+  TEST_ATT_FEATS: 'data\flickr8k/dummy_att_feats'
+
+# Evaluation settings
+INFERENCE:
+  EVAL: 'COCO'  # Use COCO evaluator with Flickr8k annotations
+  VAL_ANNFILE: 'data\flickr8k/captions_val.json'
+  TEST_ANNFILE: 'data\flickr8k/captions_test.json'
+  ID_KEY: 'image_id'
+  CAP_KEY: 'caption'
+
+# Vocabulary (you may need to build this from the captions)
+INFERENCE:
+  VOCAB: 'your_vocab_file.json'
