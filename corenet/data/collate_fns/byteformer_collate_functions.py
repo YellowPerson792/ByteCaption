@@ -41,6 +41,8 @@ def byteformer_image_collate_fn(
         The modified batch.
     """
     batch = apply_pil_save(batch, opts)
+    # 在 PILSave 之后，应用新的字节流损坏
+    batch = apply_byte_stream_corrupter(batch, opts)
     batch = apply_shuffle_bytes(batch, opts)
     batch = apply_mask_positions(batch, opts)
     batch = apply_random_uniform_noise(batch, opts)
@@ -133,6 +135,43 @@ def apply_pil_save(
         transform = image_bytes.PILSave(opts)
         for i, elem in enumerate(batch):
             batch[i] = transform(elem)
+    return batch
+
+
+# --- 损坏函数 ---
+def apply_byte_stream_corrupter(
+    batch: List[Mapping[str, Tensor]],
+    opts: argparse.Namespace,
+) -> List[Mapping[str, Tensor]]:
+    """
+    Apply the ByteStreamCorrupter transform, which may augment one sample into many.
+    """
+    if getattr(opts, "image_augmentation.byte_stream_corrupter.level", "none") != "none":
+        transform = image_bytes.ByteStreamCorrupter(opts)
+        
+        # --- 调试语句 7：打印原始批次大小 ---
+        original_batch_size = len(batch)
+        print(f"\n[DEBUG Stacking] Before corruption, batch size is: {original_batch_size}")
+        # ---------------------------------------
+
+        new_batch = []
+        for i, elem in enumerate(batch):
+            augmented_samples = transform(elem)
+            # --- 调试语句 8：显示单个样本被增强成了多少个 ---
+            print(f"  - Sample {i} augmented into {len(augmented_samples)} samples. Markers: {[s.get('corruption_marker', 'N/A') for s in augmented_samples]}")
+            # -------------------------------------------------
+            new_batch.extend(augmented_samples)
+        
+        # --- 调试语句 9：打印堆叠后的新批次大小 ---
+        new_batch_size = len(new_batch)
+        print(f"[DEBUG Stacking] After corruption, new batch size is: {new_batch_size}\n")
+        # --------------------------------------------
+        
+        # 确认批次大小是否正确
+        if new_batch_size % original_batch_size != 0:
+            print("[WARNING] New batch size is not a multiple of the original. Check augmentation logic.")
+
+        return new_batch
     return batch
 
 
