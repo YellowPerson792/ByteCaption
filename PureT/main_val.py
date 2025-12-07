@@ -33,6 +33,7 @@ except ImportError:
     WANDB_AVAILABLE = False
 
 """
+cd /d/MLLMs/ByteCaption && python PureT/main_val.py --folder PureT/experiments/ByteCaption_XE --val_samples 500 --resume -1 --disable_wandb
 cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_val.py --folder PureT/experiments/ByteCaption_XE --val_samples 500 --resume -1 --disable_wandb
 """
 

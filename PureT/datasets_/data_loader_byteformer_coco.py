@@ -310,6 +310,13 @@ def load_train(distributed: bool, epoch: int, coco_set: CocoDataset):
         epoch: 当前 epoch (用于分布式 sampler 设置 shuffle seed)
         coco_set: 已实例化的 CocoDataset
     """
+    # Windows 多进程 DataLoader 支持有限，强制单进程以避免反复 spawn / 崩溃
+    num_workers = cfg.DATA_LOADER.NUM_WORKERS
+    if sys.platform.startswith("win"):
+        num_workers = 0
+    num_workers = max(0, int(num_workers))
+    persistent_workers = num_workers > 0 and not sys.platform.startswith("win")
+
     sampler = distributed_samplers.DistributedSampler(coco_set, epoch=epoch) if distributed else None
     shuffle = cfg.DATA_LOADER.SHUFFLE if sampler is None else False
     loader = torch.utils.data.DataLoader(
@@ -317,9 +324,9 @@ def load_train(distributed: bool, epoch: int, coco_set: CocoDataset):
         batch_size=cfg.TRAIN.BATCH_SIZE,
         shuffle=shuffle,
         sampler=sampler,
-        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+        num_workers=num_workers,
         pin_memory=True if torch.cuda.is_available() else False,
-        persistent_workers=True if cfg.DATA_LOADER.NUM_WORKERS > 0 else False,
+        persistent_workers=persistent_workers,
         collate_fn=byteformer_collate,
         worker_init_fn=_worker_init_fn,
         drop_last=False,
@@ -348,14 +355,20 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
     else:
         raise ValueError(f"未知的模型类型 '{cfg.MODEL.TYPE}' 在配置文件中。")
 
+    # Windows 下强制单进程 DataLoader，避免反复 spawn
+    num_workers = cfg.DATA_LOADER.NUM_WORKERS
+    if sys.platform.startswith("win"):
+        num_workers = 0
+    num_workers = max(0, int(num_workers))
+    persistent_workers = num_workers > 0 and not sys.platform.startswith("win")
 
     loader = torch.utils.data.DataLoader(
         coco_set,
         batch_size=cfg.TEST.BATCH_SIZE,
         shuffle=False,
-        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+        num_workers=num_workers,
         pin_memory=True if torch.cuda.is_available() else False,
-        persistent_workers=True if cfg.DATA_LOADER.NUM_WORKERS > 0 else False,
+        persistent_workers=persistent_workers,
         collate_fn=active_collate_fn,
         worker_init_fn=_worker_init_fn,
         drop_last=False,

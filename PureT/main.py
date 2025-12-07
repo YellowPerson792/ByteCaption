@@ -41,7 +41,7 @@ from lib.config import cfg, cfg_from_file
 
 
 """
-cd /d/MLLMs/corenet && python PureT/main_byteformer.py --folder PureT/experiments_PureT/PureT_XE --eval_steps 100 --dataset coco --freeze_backbone
+cd /d/MLLMs/ByteCaption && python PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 100 --dataset coco --freeze_backbone --disable_wandb
 cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main.py --folder PureT/experiments/ByteCaption_XE --dataset coco --eval_steps 100 --val_samples 0 --load_weights --freeze_backbone --disable_wandb
 cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption torchrun --nproc_per_node=2 --master_port=12355 PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 600 --val_samples 50 --dataset coco --load_weights --freeze_backbone
 """
