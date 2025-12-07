@@ -41,6 +41,8 @@ exp_results/
 exp_results*
 results_*
 wandb/
+encoding_compare_samples/
+evaluation_samples/
 mscoco/feature
 mscoco/misc
 mscoco/sent
