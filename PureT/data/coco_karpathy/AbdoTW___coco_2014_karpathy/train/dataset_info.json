@@ -1,0 +1,365 @@
+{
+  "builder_name": "parquet",
+  "citation": "",
+  "config_name": "default",
+  "dataset_name": "abdo_tw___coco_2014",
+  "dataset_size": 26852561971,
+  "description": "",
+  "download_checksums": {
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00000-of-00028.parquet": {
+      "num_bytes": 488124421,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00001-of-00028.parquet": {
+      "num_bytes": 483282037,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00002-of-00028.parquet": {
+      "num_bytes": 480878383,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00003-of-00028.parquet": {
+      "num_bytes": 481129148,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00004-of-00028.parquet": {
+      "num_bytes": 484384959,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00005-of-00028.parquet": {
+      "num_bytes": 483012443,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00006-of-00028.parquet": {
+      "num_bytes": 477612393,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00007-of-00028.parquet": {
+      "num_bytes": 481464590,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00008-of-00028.parquet": {
+      "num_bytes": 480452737,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00009-of-00028.parquet": {
+      "num_bytes": 477866894,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00010-of-00028.parquet": {
+      "num_bytes": 484140801,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00011-of-00028.parquet": {
+      "num_bytes": 478098259,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00012-of-00028.parquet": {
+      "num_bytes": 479969948,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00013-of-00028.parquet": {
+      "num_bytes": 482099524,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00014-of-00028.parquet": {
+      "num_bytes": 487369078,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00015-of-00028.parquet": {
+      "num_bytes": 484370943,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00016-of-00028.parquet": {
+      "num_bytes": 479205357,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00017-of-00028.parquet": {
+      "num_bytes": 477502829,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00018-of-00028.parquet": {
+      "num_bytes": 473397041,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00019-of-00028.parquet": {
+      "num_bytes": 483077270,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00020-of-00028.parquet": {
+      "num_bytes": 483345377,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00021-of-00028.parquet": {
+      "num_bytes": 485658642,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00022-of-00028.parquet": {
+      "num_bytes": 478703713,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00023-of-00028.parquet": {
+      "num_bytes": 484669238,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00024-of-00028.parquet": {
+      "num_bytes": 482999224,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00025-of-00028.parquet": {
+      "num_bytes": 482234277,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00026-of-00028.parquet": {
+      "num_bytes": 481783729,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/train-00027-of-00028.parquet": {
+      "num_bytes": 481225360,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00000-of-00014.parquet": {
+      "num_bytes": 478448277,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00001-of-00014.parquet": {
+      "num_bytes": 471793108,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00002-of-00014.parquet": {
+      "num_bytes": 473882708,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00003-of-00014.parquet": {
+      "num_bytes": 477396109,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00004-of-00014.parquet": {
+      "num_bytes": 474401253,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00005-of-00014.parquet": {
+      "num_bytes": 471399095,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00006-of-00014.parquet": {
+      "num_bytes": 468940097,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00007-of-00014.parquet": {
+      "num_bytes": 480090581,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00008-of-00014.parquet": {
+      "num_bytes": 476671824,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00009-of-00014.parquet": {
+      "num_bytes": 473816520,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00010-of-00014.parquet": {
+      "num_bytes": 473366395,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00011-of-00014.parquet": {
+      "num_bytes": 470087639,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00012-of-00014.parquet": {
+      "num_bytes": 472411783,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/validation-00013-of-00014.parquet": {
+      "num_bytes": 470695589,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00000-of-00014.parquet": {
+      "num_bytes": 473986824,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00001-of-00014.parquet": {
+      "num_bytes": 470879978,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00002-of-00014.parquet": {
+      "num_bytes": 479596371,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00003-of-00014.parquet": {
+      "num_bytes": 478656114,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00004-of-00014.parquet": {
+      "num_bytes": 476118299,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00005-of-00014.parquet": {
+      "num_bytes": 475440695,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00006-of-00014.parquet": {
+      "num_bytes": 474496357,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00007-of-00014.parquet": {
+      "num_bytes": 472332945,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00008-of-00014.parquet": {
+      "num_bytes": 468631295,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00009-of-00014.parquet": {
+      "num_bytes": 476101904,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00010-of-00014.parquet": {
+      "num_bytes": 471541033,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00011-of-00014.parquet": {
+      "num_bytes": 478757271,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00012-of-00014.parquet": {
+      "num_bytes": 467929675,
+      "checksum": null
+    },
+    "/root/autodl-fs/AbdoTW___coco_2014/data/test-00013-of-00014.parquet": {
+      "num_bytes": 477155073,
+      "checksum": null
+    }
+  },
+  "download_size": 26763083427,
+  "features": {
+    "image": {
+      "_type": "Image"
+    },
+    "license": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "coco_url": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "height": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "width": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "date_captured": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "flickr_url": {
+      "dtype": "string",
+      "_type": "Value"
+    },
+    "id": {
+      "dtype": "int64",
+      "_type": "Value"
+    },
+    "caption": {
+      "feature": {
+        "dtype": "string",
+        "_type": "Value"
+      },
+      "_type": "List"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "size_in_bytes": 53615645398,
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_bytes": 13535713675,
+      "num_examples": 82783,
+      "shard_lengths": [
+        3057,
+        3057,
+        3157,
+        3157,
+        3057,
+        3057,
+        3057,
+        3157,
+        3157,
+        3157,
+        3057,
+        3157,
+        3157,
+        3057,
+        3057,
+        3156,
+        3156,
+        3156,
+        3056,
+        3112,
+        3056,
+        3156,
+        3056,
+        3056,
+        3156,
+        3056,
+        2056
+      ],
+      "dataset_name": "abdo_tw___coco_2014"
+    },
+    "validation": {
+      "name": "validation",
+      "num_bytes": 6657541681,
+      "num_examples": 40504,
+      "shard_lengths": [
+        3094,
+        3094,
+        3093,
+        3093,
+        3093,
+        3093,
+        3093,
+        3093,
+        3093,
+        3093,
+        3093,
+        3093,
+        3093,
+        293
+      ],
+      "dataset_name": "abdo_tw___coco_2014"
+    },
+    "test": {
+      "name": "test",
+      "num_bytes": 6659306615,
+      "num_examples": 40775,
+      "shard_lengths": [
+        3113,
+        3113,
+        3113,
+        3113,
+        3113,
+        3113,
+        3113,
+        3112,
+        3112,
+        3112,
+        3112,
+        3112,
+        3112,
+        312
+      ],
+      "dataset_name": "abdo_tw___coco_2014"
+    }
+  },
+  "version": {
+    "version_str": "0.0.0",
+    "major": 0,
+    "minor": 0,
+    "patch": 0
+  }
+}

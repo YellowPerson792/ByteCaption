@@ -268,8 +268,8 @@ class CocoEvaler(object):
                     unique_image_id = original_image_id * 100 + augmentation_idx
 
                     # --- 调试语句：打印ID转换过程 ---
-                    if global_idx < 20: # 只打印前几个样本的调试信息
-                        print(f"[DEBUG ID] sid: {sid}, original_idx: {original_sample_idx}, aug_idx: {augmentation_idx}, original_id: {original_image_id}, unique_id: {unique_image_id}")
+                    # if global_idx < 20: # 只打印前几个样本的调试信息
+                    #     print(f"[DEBUG ID] sid: {sid}, original_idx: {original_sample_idx}, aug_idx: {augmentation_idx}, original_id: {original_image_id}, unique_id: {unique_image_id}")
                     # ------------------------------------
 
                     result = {cfg.INFERENCE.ID_KEY: original_image_id, cfg.INFERENCE.CAP_KEY: sent}

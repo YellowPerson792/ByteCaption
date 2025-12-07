@@ -1,0 +1,25 @@
+# Flickr8k学习率调度器配置建议
+# 
+# 方案1: 调整后的Noam调度器 (当前使用)
+# - WARMUP: 500 (相当于COCO 10000步的1/20)
+# - FACTOR: 0.5 (提高学习率强度)
+#
+# 方案2: Step调度器 (更保守，适合小数据集)
+# 如果想使用Step调度器，可以替换LR_POLICY部分为：
+#
+# LR_POLICY:
+#   TYPE: 'Step'              
+#   GAMMA: 0.5                # 每次衰减到一半
+#   STEP_SIZE: 5              # 每5个epoch衰减一次
+#   SETP_TYPE: 'Epoch'        # 按epoch计算
+#
+# 方案3: 余弦退火调度器 (平滑变化)
+# LR_POLICY:
+#   TYPE: 'Plateau'           
+#   PLATEAU_FACTOR: 0.5       # 性能不提升时衰减倍数
+#   PLATEAU_PATIENCE: 3       # 等待3个epoch后衰减
+#
+# 建议:
+# 1. 先使用调整后的Noam调度器训练
+# 2. 如果训练不稳定，改用Step调度器
+# 3. 监控验证集指标，根据收敛情况调整

@@ -68,8 +68,49 @@ class Meteor:
         return self.meteor_p.stdout.readline().strip()
  
     def __del__(self):
-        self.lock.acquire()
-        self.meteor_p.stdin.close()
-        self.meteor_p.kill()
-        self.meteor_p.wait()
-        self.lock.release()
+        """Best-effort cleanup without blocking interpreter shutdown.
+
+        The original implementation could hang at program exit because it
+        always tried to acquire the lock and wait on the Java process even
+        when Python was already shutting down (e.g. after Ctrl+C or during
+        GC of globals). Here we:
+        - Guard against missing attributes during interpreter teardown.
+        - Use a non-blocking acquire so that we never deadlock on exit.
+        - Swallow all exceptions, since this runs in garbage collection
+          context where reliability is more important than strict cleanup.
+        """
+        try:
+            lock = getattr(self, "lock", None)
+            proc = getattr(self, "meteor_p", None)
+            if lock is None or proc is None:
+                return
+
+            # Try non-blocking acquire; if we can't get it immediately,
+            # just give up to avoid hanging at shutdown.
+            acquired = lock.acquire(blocking=False)
+            if not acquired:
+                return
+
+            try:
+                # stdin may already be closed; ignore any errors.
+                try:
+                    if proc.stdin and not proc.stdin.closed:
+                        proc.stdin.close()
+                except Exception:
+                    pass
+
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+
+                try:
+                    # Use small timeout to avoid blocking indefinitely.
+                    proc.wait(timeout=1.0)
+                except Exception:
+                    pass
+            finally:
+                lock.release()
+        except Exception:
+            # Never raise from __del__
+            pass

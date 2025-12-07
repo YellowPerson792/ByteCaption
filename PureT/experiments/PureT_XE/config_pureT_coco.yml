@@ -1,0 +1,145 @@
+LOGGER_NAME: 'log'
+SEED: 1234.
+
+############################ TRAIN ############################
+TRAIN:
+  BATCH_SIZE: 10
+  #################### REINFORCEMENT ####################
+  REINFORCEMENT:
+    START: 9999
+
+############################ TEST ############################  
+TEST:
+  BATCH_SIZE: 25
+
+############################ DATA_LOADER ############################
+DATA_LOADER:
+  NUM_WORKERS: 8
+  SHUFFLE: True
+  TRAIN_GV_FEAT: ''                         # Not used for COCO (computed dynamically)
+  TRAIN_ATT_FEATS: ''                       # Not used for COCO (loaded from HF dataset)
+  VAL_GV_FEAT: ''                           # Not used for COCO
+  VAL_ATT_FEATS: ''                         # Not used for COCO
+  TEST_GV_FEAT: ''                          # Not used for COCO
+  TEST_ATT_FEATS: ''                        # Not used for COCO
+  TRAIN_ID: './PureT/data/coco/train_ids.json'
+  VAL_ID: './PureT/data/coco/validation_ids.json'
+  TEST_ID: './PureT/data/coco/validation_ids.json'
+  TEST_4W_ID: './PureT/data/coco/validation_ids.json'
+  INPUT_SEQ_PATH: ''                        # Not used for COCO (auto-generated)
+  TARGET_SEQ_PATH: ''                       # Not used for COCO (auto-generated)
+  SEQ_PER_IMG: 5
+  MAX_FEAT: -1
+
+############################ MODEL ############################
+MODEL:
+  TYPE: 'PureT'
+  SEQ_LEN: 17                               # include <EOS>/<BOS>
+  VOCAB_SIZE: 9487                          # exclude <EOS>/<BOS> - COCO vocabulary size
+  ########## word embedding ##########
+  WORD_EMBED_DIM: 512
+  WORD_EMBED_ACT: 'CELU'
+  WORD_EMBED_NORM: False
+  DROPOUT_WORD_EMBED: 0.1
+  ########## global features ##########
+  GVFEAT_DIM: 1                             # Placeholder (computed dynamically)
+  GVFEAT_EMBED_DIM: -1                      # Not used
+  GVFEAT_EMBED_ACT: 'NONE'                  # Not used
+  DROPOUT_GV_EMBED: 0.0                     # Not used
+  ########## attention features ##########
+  ATT_FEATS_DIM: 1536                      # Swin Transformer output dimension
+  ATT_FEATS_EMBED_DIM: 512                  # Embedding dimension
+  ATT_FEATS_EMBED_ACT: 'CELU'
+  DROPOUT_ATT_EMBED: 0.1
+  ATT_FEATS_NORM: False
+  ########## attention param ##########
+  ATT_HIDDEN_SIZE: -1
+  ATT_HIDDEN_DROP: 0.0
+  ATT_ACT: 'TANH'
+  ########## rnn param ##########
+  RNN_SIZE: 512
+  DROPOUT_LM: 0.1
+
+  ########## BOTTOM_UP ##########
+  BOTTOM_UP:
+    DROPOUT_FIRST_INPUT: 0.0
+    DROPOUT_SEC_INPUT: 0.0
+
+  ########## BILINEAR ##########
+  BILINEAR:
+    DIM: 512
+    ENCODE_ATT_MID_DIM: [64, 32, 64]
+    DECODE_ATT_MID_DIM: [64, 32, 64]
+    ENCODE_ATT_MID_DROPOUT: 0.1
+    DECODE_ATT_MID_DROPOUT: 0.1
+    ATT_DIM: 512
+    ACT: 'CELU'
+    ENCODE_DROPOUT: 0.1
+    DECODE_DROPOUT: 0.1
+    ENCODE_LAYERS: 3
+    DECODE_LAYERS: 3
+    TYPE: 'LowRank'
+    ATTTYPE: 'SCAtt' # SCAtt, BasicAtt
+    HEAD: 8
+    ENCODE_FF_DROPOUT: 0.1
+    DECODE_FF_DROPOUT: 0.1
+    ELU_ALPHA: 1.3
+    BIFEAT_EMB_ACT: 'RELU'
+    ENCODE_BIFEAT_EMB_DROPOUT: 0.1
+    DECODE_BIFEAT_EMB_DROPOUT: 0.1
+
+############################ SOLVER ############################  
+SOLVER:
+  BASE_LR: 0.0005               # 0.0005
+  TYPE: 'ADAM'                 # 'ADAM', 'SGD', 'RADAM'
+  MAX_EPOCH: 20
+  MAX_ITER: -1
+  GRAD_CLIP: 0.1                # Norm:0.5 , Clamp:0.1
+  GRAD_CLIP_TYPE: 'Clamp'       # 'Clamp'  , 'Norm'
+  WEIGHT_DECAY: 0.0000
+  WEIGHT_DECAY_BIAS: 0.0
+  BIAS_LR_FACTOR: 1
+  DISPLAY: 20
+  TEST_INTERVAL: 1
+  SNAPSHOT_ITERS: 1
+  MAX_CHECKPOINTS: 2            # 最大保存的checkpoint数量，设置为-1则不限制
+
+  ########## SGD ##########
+  SGD:
+    MOMENTUM: 0.9
+  ########## ADAM ##########
+  ADAM:
+    BETAS: [0.9, 0.98]
+    EPS: 1.0e-9
+  ########## LR_POLICY ##########
+  LR_POLICY:
+    TYPE: 'Noam'              # 'Fix', 'Step', 'Noam', 'Plateau'
+    GAMMA: 0.8
+    STEP_SIZE: 3
+    SETP_TYPE: 'Iter'         # 'Epoch', 'Iter'
+    WARMUP: 10000              # COCO数据集预热步数
+    FACTOR: 1.0              # COCO数据集学习率因子
+    MODEL_SIZE: 512           # For Noam only
+
+############################ LOSSES ############################
+LOSSES:
+  XE_TYPE: 'LabelSmoothing'
+  LABELSMOOTHING: 0.1
+  RL_TYPE: 'RewardCriterion'
+
+############################ SCORER ############################
+SCORER:
+  TYPES: ['Bleu_1', 'Bleu_2', 'Bleu_3', 'Bleu_4', 'ROUGE_L', 'CIDEr', 'METEOR']
+  WEIGHTS: [0.1, 0.1, 0.1, 0.2, 0.1, 0.3, 0.1]
+  
+############################ INFERENCE ############################
+INFERENCE:
+  VOCAB: './PureT/data/coco/coco_vocabulary.txt'
+  ID_KEY: 'image_id'
+  CAP_KEY: 'caption'
+  EVAL: 'CocoHFEvaluer'                              # Use original coco evaluator with JSON files
+  VAL_ANNFILE: './PureT/data/coco/captions_validation.json'
+  TEST_ANNFILE: './PureT/data/coco/captions_test.json'
+  BEAM_SIZE: 5
+  GREEDY_DECODE: True
+

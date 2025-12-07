@@ -191,7 +191,7 @@ def byteformer_collate_val(batch: Sequence[Tuple[Any, ...]]):
         return indices, gv_feat, augmented_att_feats, att_mask
 
     # 4. 关键修复：将所有元数据复制 N 份以匹配增强后的数据
-    print(f"[DEBUG Metadata] Augmentation factor is {augmentation_factor}. Duplicating metadata.")
+    # print(f"[DEBUG Metadata] Augmentation factor is {augmentation_factor}. Duplicating metadata.")
     
     # 复制 indices
     indices_np = np.stack(indices, axis=0).reshape(-1)

@@ -1,97 +1,69 @@
-# PureT
-Implementation of __End-to-End Transformer Based Model for Image Captioning__ [[PDF/AAAI]](https://ojs.aaai.org/index.php/AAAI/article/view/20160) [[PDF/Arxiv]](https://arxiv.org/abs/2203.15350) [AAAI 2022]
+# ByteCaption（ByteFormer + PureT）
 
-+ Implementation of PureT using pre-extracted features. [232525/PureT_F](https://github.com/232525/PureT_F)
-+ Implementation of Image Captioning task with various miscellaneous codes (verbose). [232525/ImageCaptioning_Verbose](https://github.com/232525/ImageCaptioning_Verbose)
+从 JPEG 码流直接生成图像描述：利用 CoreNet 中的 ByteFormer 作为字节级编码器，接上 PureT Caption 解码器完成端到端训练与评估。
 
-中文介绍请参考[README_CN.md](README_CN.md)
+## 目录速览
+- `PureT/main.py`：训练入口（支持 COCO / Flickr8k），默认每个 epoch 评估，也可通过 `--eval_steps` 按步评估。
+- `PureT/main_val.py`：仅评估入口，便于在已有 checkpoint 上做离线验证。
+- `PureT/datasets_`：数据集封装（`coco_dataset_hf.py` 从 HF `AbdoTW___coco_2014_karpathy` 读取图像；`data_loader_byteformer_coco.py` 将图像送入 ByteFormer 的 collate 流程）。
+- `corenet/data/transforms/image_bytes.py`：字节级数据增强（PIL 编码、字节损坏、掩码、置换、噪声等）。
+- `corenet/data/collate_fns/byteformer_collate_functions.py`：ByteFormer 专用 collate，负责调用上述增强并对变长字节序列做 padding。
+- `PureT/byteformer_immigration.py`：将 CoreNet ByteFormer 封装为 HF `PreTrainedModel`，并提供 `get_opts()` 读取 ByteFormer 配置/权重。
+- `PureT/experiments/ByteCaption_XE/`：当前使用的配置与输出目录（`config_coco.yml`、`snapshot/`、`result/` 等）。
+- 实用脚本：`PureT/analyze_stream_length.py`（统计 JPEG 码流长度），`PureT/compare_encoding.py`、`encoding_compare_samples/`（编码对比样例）。
 
-![architecture](./imgs/architecture.png)
-
-## Requirements (Our Main Enviroment)
-+ Python 3.7.4
-+ PyTorch 1.5.1
-+ TorchVision 0.6.0
-+ [coco-caption](https://github.com/tylin/coco-caption)
-+ numpy
-+ tqdm
-
-## Preparation
-### 1. coco-caption preparation
-Refer coco-caption [README.md](./coco_caption/README.md), you will first need to download the [Stanford CoreNLP 3.6.0](http://stanfordnlp.github.io/CoreNLP/index.html) code and models for use by SPICE. To do this, run:
+## 环境准备
 ```bash
-cd coco_caption
-bash get_stanford_models.sh
+cd ByteCaption
+python -m pip install -r requirements.txt
+# 需要额外工具时：python -m pip install -r requirements-optional.txt
+
+# 建议设置 PYTHONPATH，方便直接运行 PureT 入口
+export PYTHONPATH=$(pwd)
 ```
-### 2. Data preparation
-The necessary files in training and evaluation are saved in __`mscoco`__ folder, which is organized as follows:
-```
-mscoco/
-|--feature/
-    |--coco2014/
-       |--train2014/
-       |--val2014/
-       |--test2014/
-       |--annotations/
-|--misc/
-|--sent/
-|--txt/
-```
-where the `mscoco/feature/coco2014` folder contains the raw image and annotation files of [MSCOCO 2014](https://cocodataset.org/#download) dataset. You can download other files from [GoogleDrive](https://drive.google.com/drive/folders/1HBw5NGGw8DjkyNurksCP5v8a5f0FG7zU?usp=sharing) or [百度网盘](https://pan.baidu.com/s/1tyXGJx50sllS-zylN62ZAw)(提取码: hryh). 
 
-__NOTE:__ You can also extract image features of MSCOCO 2014 using [Swin-Transformer](https://github.com/microsoft/Swin-Transformer) or others and save them as `***.npz` files into `mscoco/feature` for training speed up, refer to [coco_dataset.py](datasets/coco_dataset.py) and [data_loader.py](datasets/data_loader.py) for how to read and prepare features. 
-__In this case, you need to make some modifications to [pure_transformer.py](models/pure_transformer.py) (delete the backbone module). For you smart and excellent people, I think it is an easy work.__
+## 数据准备
+- HF COCO 数据集：`PureT/data/coco_karpathy/AbdoTW___coco_2014_karpathy/{train,validation,test}`（`coco_dataset_hf.py` 默认读取此路径）。
+- 图像 ID 列表：`PureT/data/coco_karpathy/train_ids.json`、`validation_ids.json`（`config_coco.yml` 中指定）。
+- 词表：首次运行会在 `PureT/data/coco_karpathy/coco_vocabulary.txt` 自动生成（也可提前准备）。
+- 若切换 Flickr8k，请对应修改 `config_flickr8k.yml` 与启动参数 `--dataset flickr8k`。
 
-
-## Training
-*Note: our repository is mainly based on [JDAI-CV/image-captioning](https://github.com/JDAI-CV/image-captioning), and we directly reused their config.yml files, so there are many useless parameter in our model. （__waiting for further sorting__）*
-
-### 1. Training under XE loss
-Download pre-trained Backbone model (Swin-Transformer) from [GoogleDrive](https://drive.google.com/drive/folders/1HBw5NGGw8DjkyNurksCP5v8a5f0FG7zU?usp=sharing) or [百度网盘](https://pan.baidu.com/s/1tyXGJx50sllS-zylN62ZAw)(提取码: hryh) and save it in the root directory.
-
-Before training, you may need check and modify the parameters in `config.yml` and `train.sh` files. Then run the script:
-
-```
-# for XE training
-bash experiments_PureT/PureT_XE/train.sh
-```
-### 2. Training using SCST (self-critical sequence training)
-Copy the pre-trained model under XE loss into folder of `experiments_PureT/PureT_SCST/snapshot/` and modify `config.yml` and `train.sh` files. Then run the script:
-
+## 训练示例
 ```bash
-# for SCST training
-bash experiments_PureT/PureT_SCST/train.sh
+# 单机单卡/多卡都会在 main.py 内自动选择 DataParallel 或 DDP
+python PureT/main.py \
+  --folder PureT/experiments/ByteCaption_XE \
+  --dataset coco \
+  --eval_steps 600 \
+  --val_samples 50 \
+  --load_weights \
+  --freeze_backbone \
+  --disable_wandb
+# 说明：移除 --disable_wandb 即可开启 wandb；移除 --freeze_backbone 可端到端微调。
+
+# 多卡示例
+# torchrun --nproc_per_node=2 --master_port=12355 PureT/main.py --folder ...（其余参数同上）
 ```
 
-## Evaluation
-You can download the pre-trained model from [GoogleDrive](https://drive.google.com/drive/folders/1HBw5NGGw8DjkyNurksCP5v8a5f0FG7zU?usp=sharing) or [百度网盘](https://pan.baidu.com/s/1tyXGJx50sllS-zylN62ZAw)(提取码: hryh). 
+关键行为：
+- ByteFormer 配置与预训练权重：在 `PureT/byteformer_immigration.py:get_opts()` 中固定为 `byteformer_hf_migration/configs/conv_kernel_size=4,window_sizes=[128].yaml` 与 `byteformer_hf_migration/weights/imagenet_jpeg_q60_k4_w128.pt`，可按需修改路径或参数。
+- 数据流：`CocoDataset` 读取 PIL 图 → `byteformer_collate` 将每张图包装为 CoreNet batch → `byteformer_image_collate_fn` 执行 PIL 编码 (`PILSave`)，然后按配置叠加字节损坏、掩码、置换、噪声，最后 padding 并返回字节序列张量。
+- 训练配置：`PureT/experiments/ByteCaption_XE/config_coco.yml` 控制批大小、学习率、保存频率、模型维度等；`MODEL.TYPE` 设为 `PureT_byteformer` 以走字节流分支。
 
+## 验证 / 推理
 ```bash
-CUDA_VISIBLE_DEVICES=0 python main_test.py --folder experiments_PureT/PureT_SCST/ --resume 27
+# 仅验证，不进入训练循环
+python PureT/main_val.py \
+  --folder PureT/experiments/ByteCaption_XE \
+  --dataset coco \
+  --val_samples 500 \
+  --resume -1 \                 # -1 表示加载 best_model.pth；>0 加载指定 epoch
+  --disable_wandb
 ```
+评估器将使用 `config_coco.yml` 中的 `INFERENCE.VAL_ANNFILE` 与 `VOCAB`，并自动复用 ByteFormer collate 逻辑（或 BLIP 模式，取决于 `MODEL.TYPE`）。
 
-|BLEU-1|BLEU-2|BLEU-3|BLEU-4|METEOR|ROUGE-L| CIDEr |SPICE |
-| ---: | ---: | ---: | ---: | ---: | ---:  | ---:  | ---: |
-| 82.1 | 67.3 | 52.0 | 40.9 | 30.2 | 60.1  | 138.2 | 24.2 |
-
-
-## Reference
-If you find this repo useful, please consider citing (no obligation at all):
-```
-@inproceedings{wangyiyu2022PureT,
-  author       = {Yiyu Wang and
-                  Jungang Xu and
-                  Yingfei Sun},
-  title        = {End-to-End Transformer Based Model for Image Captioning},
-  booktitle    = {Proceedings of the AAAI Conference on Artificial Intelligence},
-  pages        = {2585--2594},
-  publisher    = {{AAAI} Press},
-  year         = {2022},
-  url          = {https://ojs.aaai.org/index.php/AAAI/article/view/20160}, 
-  doi          = {10.1609/aaai.v36i3.20160},
-}
-
-```
-
-## Acknowledgements
-This repository is based on [JDAI-CV/image-captioning](https://github.com/JDAI-CV/image-captioning), [ruotianluo/self-critical.pytorch](https://github.com/ruotianluo/self-critical.pytorch) and [microsoft/Swin-Transformer](https://github.com/microsoft/Swin-Transformer).
+## 调试与排错提示
+- 查看训练日志：`PureT/experiments/ByteCaption_XE/log.txt`；模型快照保存在 `snapshot/`，评估结果在 `result/`。
+- 字节流统计：`python PureT/analyze_stream_length.py --dataset_path PureT/data/coco_karpathy/validation_ids.json --max_samples 2000 --quality 95`。
+- 字节增强配置：在 `image_bytes.py` 中支持 `--image-augmentation.pil-save.*`、`--image-augmentation.byte-stream-corrupter.*` 等参数（由 `get_opts()` 生成的 CoreNet opts 读取）。需要更多/更少损坏可调整 `level` 或 `types`。
+- 训练/验证样本调试：`data_loader_byteformer_coco.py` 的 `blip_collate_val` 会尝试将损坏后码流解码回图像并写入 `evaluation_samples/` 便于检查。

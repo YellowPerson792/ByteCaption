@@ -69,14 +69,33 @@ class Spice:
         # Start job
         out_file = tempfile.NamedTemporaryFile(delete=False, dir=temp_dir)
         out_file.close()
+        # Ensure that the required Stanford CoreNLP models jar is present next to spice-1.0.jar
+        # This avoids the 'Unable to open edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz' exception
+        exists_model = False
+        for fname in os.listdir(cwd):
+          if fname.endswith('-models.jar') and fname.startswith('stanford-corenlp'):
+            exists_model = True
+            break
+        if not exists_model:
+          raise RuntimeError('\nSPICE evaluation requires the Stanford CoreNLP models jar (e.g. stanford-corenlp-3.6.0-models.jar) to be present under %s.\n' \
+                     'You can download it from https://stanfordnlp.github.io/CoreNLP/ and place it in this folder, or run: \n' \
+                     '    bash get_stanford_models.sh\n' \
+                     'If you prefer to skip SPICE, remove SPICE from config SCORER.TYPES or run with a smaller scorer set.\n' % cwd)
+
         spice_cmd = ['java', '-jar', '-Xmx8G', SPICE_JAR, in_file.name,
           '-cache', self.cache_dir,
           '-out', out_file.name,
           '-subset',
           '-silent'
         ]
-        subprocess.check_call(spice_cmd, 
-            cwd=os.path.dirname(os.path.abspath(__file__)))
+        try:
+          subprocess.check_call(spice_cmd, 
+           cwd=os.path.dirname(os.path.abspath(__file__)))
+        except subprocess.CalledProcessError as e:
+          # Provide a clearer error message for the user
+          raise RuntimeError('SPICE scoring failed, please ensure Java is installed and the CoreNLP models jar is present in %s. Error: %s' % (cwd, e))
+        except FileNotFoundError as e:
+          raise RuntimeError('SPICE scoring failed because Java is not found in PATH. Please install Java (JRE/JDK) and ensure `java` is available in your PATH. Error: %s' % e)
 
         # Read and process results
         with open(out_file.name) as data_file:    
