@@ -2,14 +2,17 @@ from models.pure_transformer import PureT
 from models.pure_transformer import PureT_Base
 from models.pure_transformer import PureT_Base_22K
 from models.pure_byteformer import PureT_byteformer
-from .blip_wrapper import BlipWrapper
+from .hf_caption_model import HFCaptionModel
 
 __factory = {
     'PureT': PureT,
     'PureT_Base': PureT_Base,
     'PureT_Base_22K': PureT_Base_22K,
     'PureT_byteformer': PureT_byteformer,
-    'BLIP': BlipWrapper,
+    # Unified HuggingFace/Transformer vision captioner
+    'BLIP': HFCaptionModel,
+    'HF_BLIP': HFCaptionModel,
+    'HF': HFCaptionModel,
 }
 
 def names():

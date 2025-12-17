@@ -9,7 +9,7 @@ import torch
 import numpy as np
 from typing import Any, List, Sequence, Tuple
 
-from PureT.lib.config import cfg
+from lib.config import cfg
 from PureT.datasets_.flickr8k_dataset_hf import Flickr8kDataset
 import PureT.samplers.distributed as distributed_samplers
 from corenet.data.collate_fns.byteformer_collate_functions import byteformer_image_collate_fn

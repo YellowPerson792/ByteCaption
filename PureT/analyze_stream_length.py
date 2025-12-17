@@ -20,7 +20,7 @@ if project_root not in sys.path:
 # -----------------------------------------
 
 from PureT.datasets_.coco_dataset_hf import CocoDataset
-from PureT.lib.config import cfg, cfg_from_file
+from lib.config import cfg, cfg_from_file
 
 def analyze_lengths(args):
     """

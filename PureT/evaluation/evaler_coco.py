@@ -130,6 +130,8 @@ class CocoEvaler(object):
         undecodable_count = 0
         # --- 获取对数据集内部ID列表的引用(与之前获取的方式有一点不同，我觉得有道理，因为之前加了数据样本后需要重新对齐一下) ---
         dataset_image_ids = self.eval_loader.dataset.image_ids
+        sample_limit = getattr(getattr(cfg, "INFERENCE", {}), "SAMPLE_PREVIEW", 5)
+        sample_preview = []
 
         with torch.no_grad():
             pbar = tqdm.tqdm(self.eval_loader, desc=f"Evaluating {rname} ({cfg.MODEL.TYPE})", leave=False)
@@ -153,11 +155,13 @@ class CocoEvaler(object):
                 
                 # --- 根据模型类型选择数据并传递 ---
                 # ByteFormer 需要 Tensor，BLIP 需要 PIL Image 列表
-                if cfg.MODEL.TYPE == 'PureT_byteformer':
+                model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
+                is_byteformer = "byteformer" in model_type or model_type == "puret"
+                if is_byteformer:
                     att_feats = data.to(device)
                     if att_mask is not None:
                         att_mask = att_mask.to(device)
-                else: # BLIP
+                else: # BLIP / HF
                     att_feats = data 
                 
                 kwargs = self.make_kwargs(indices, ids, gv_feat, att_feats, att_mask)
@@ -276,7 +280,7 @@ class CocoEvaler(object):
                     results.append(result)
 
                     # 后续的打印逻辑也需要使用新的 unique_id 来查找参考标题
-                    if global_idx < 5:
+                    if len(sample_preview) < sample_limit:
                         # 使用 original_image_id 来查找参考标题
                         gt_captions = []
                         if hasattr(self.evaler, 'id_to_captions') and original_image_id in self.evaler.id_to_captions:
@@ -286,6 +290,15 @@ class CocoEvaler(object):
                                 if ann['image_id'] == original_image_id:
                                     gt_captions.append(ann['caption'])
                         gt_str = gt_captions[0] if gt_captions else "N/A"
+
+                        sample_preview.append(
+                            {
+                                "image_id": int(original_image_id),
+                                "generated": sent,
+                                "reference": gt_str,
+                                "augmentation_idx": int(augmentation_idx),
+                            }
+                        )
                         
                         pbar.clear()
                         print(f"\n[Eval Sample {global_idx} (Original ID: {original_image_id}, Aug: {augmentation_idx})]")
@@ -362,6 +375,13 @@ class CocoEvaler(object):
         ratio = undecodable_count / len(results) if len(results) > 0 else 0.0
         print(f"the ratio of undecodable images: {ratio:.4f}")
         # --- END: 关键修复 ---
+
+        # 额外统计，便于批量实验脚本读取
+        eval_res['Undecodable_Count'] = undecodable_count
+        eval_res['Undecodable_Ratio'] = ratio
+        eval_res['Total_Samples'] = len(results)
+        if sample_preview:
+            eval_res['Sample_Preview'] = sample_preview
         
         # --- START: 添加码流长度统计报告 ---
         if data_loader._BYTE_STREAM_LENGTHS:

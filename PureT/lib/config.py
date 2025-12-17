@@ -1,8 +1,14 @@
 import os
 import os.path as osp
 import numpy as np
+import sys
 
 from easydict import EasyDict as edict
+
+# Ensure all imports (`lib.config` or `PureT.lib.config`) share the same module/state.
+_this_module = sys.modules[__name__]
+sys.modules.setdefault("PureT.lib.config", _this_module)
+sys.modules.setdefault("lib.config", _this_module)
 
 __C = edict()
 # Consumers can get config by:
@@ -85,11 +91,38 @@ __C.DATA_LOADER.SEQ_PER_IMG = 5
 __C.DATA_LOADER.MAX_FEAT = -1
 
 # ---------------------------------------------------------------------------- #
+# Corruption options (byte-stream level)
+# ---------------------------------------------------------------------------- #
+__C.CORRUPTION = edict()
+
+# Active corruption types for byte streams (rbbf/rbsl/metadata_loss/none)
+__C.CORRUPTION.BYTE_STREAM_TYPES = []
+
+# Severity level shared across active corruption types
+__C.CORRUPTION.BYTE_STREAM_LEVEL = 'S0'
+
+# Optional overrides; negative values disable overrides
+__C.CORRUPTION.RBBF = edict()
+__C.CORRUPTION.RBBF.TRIGGER_PROB = -1.0
+__C.CORRUPTION.RBBF.BURST_LAMBDA = -1.0
+__C.CORRUPTION.RBBF.BIT_ERROR_RATE = -1.0
+
+__C.CORRUPTION.RBSL = edict()
+__C.CORRUPTION.RBSL.TRIGGER_PROB = -1.0
+__C.CORRUPTION.RBSL.BURST_LAMBDA = -1.0
+__C.CORRUPTION.RBSL.MAX_DROP_RATIO = -1.0
+
+__C.CORRUPTION.METADATA = edict()
+__C.CORRUPTION.METADATA.STRIP_APP_SEGMENTS = -1
+__C.CORRUPTION.METADATA.ZERO_PREFIX_BYTES = -1
+__C.CORRUPTION.METADATA.BODY_TRIM_RATIO = -1.0
+
+# ---------------------------------------------------------------------------- #
 # Model options
 # ---------------------------------------------------------------------------- #
 __C.MODEL = edict()
 
-__C.MODEL.TYPE = 'PureT_byteformer'               # PureT_byteformer/BLIP
+__C.MODEL.TYPE = 'BLIP'               # PureT_byteformer/BLIP
 
 __C.MODEL.SEQ_LEN = 17                  # include <EOS>/<BOS>
 
@@ -191,6 +224,17 @@ __C.MODEL.BILINEAR.ENCODE_BIFEAT_EMB_DROPOUT = 0.3
 
 __C.MODEL.BILINEAR.DECODE_BIFEAT_EMB_DROPOUT = 0.3
 
+# HuggingFace/Transformer vision captioner options (used for BLIP and future models)
+__C.MODEL.HF = edict()
+__C.MODEL.HF.MODEL_ID = 'Salesforce/blip-image-captioning-base'  # HF repo id
+__C.MODEL.HF.PROCESSOR_ID = ''  # Defaults to MODEL_ID when empty
+__C.MODEL.HF.LOCAL_DIR = 'blip-image-captioning-base'  # Optional local cache dir
+__C.MODEL.HF.DEVICE = 'cuda'  # auto: cuda if available else cpu
+__C.MODEL.HF.SAFE_SERIALIZATION = True
+__C.MODEL.HF.TRUST_REMOTE_CODE = False
+__C.MODEL.HF.GENERATION = edict()
+__C.MODEL.HF.GENERATION.MAX_LENGTH = 50
+__C.MODEL.HF.GENERATION.NUM_BEAMS = 3
 # ---------------------------------------------------------------------------- #
 # Solver options
 # ---------------------------------------------------------------------------- #

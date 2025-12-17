@@ -17,8 +17,8 @@ from PIL import Image
 from datasets import load_dataset
 from torchvision import transforms
 
-from PureT.lib.config import cfg
-import PureT.lib.utils as utils
+from lib.config import cfg
+import lib.utils as utils
 from .feature_extractor import get_feature_extractor  # noqa: F401 (预留未来使用)
 
 

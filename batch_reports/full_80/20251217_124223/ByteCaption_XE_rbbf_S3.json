@@ -1,0 +1,58 @@
+{
+  "model_folder": "PureT\\experiments\\ByteCaption_XE",
+  "model_name": "ByteCaption_XE",
+  "model_type": "PureT_byteformer",
+  "corrupt_type": "rbbf",
+  "corrupt_level": "S3",
+  "metrics": {
+    "Bleu_1": 0.594594594593791,
+    "Bleu_2": 0.4015734817698985,
+    "Bleu_3": 0.2569275237503266,
+    "Bleu_4": 0.1633692427506316,
+    "ROUGE_L": 0.43365377550485534,
+    "CIDEr": 0.6114842288604339,
+    "METEOR": 0.0,
+    "SPICE": 0.0,
+    "XE_Loss": 2.3896482288837433,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 80,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "a living room filled with furniture and furniture",
+        "reference": "A woman stands in the dining area at the table.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a brown bear standing next to a brown bear",
+        "reference": "A big burly grizzly bear is show with grass in the background.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "a group of young men playing a game of frisbee",
+        "reference": "A young boy getting ready to catch a baseball in a grass field.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "a hot dog sitting on top of a paper plate",
+        "reference": "A chicken sandwich in a wrapper near a cell phone.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "a bathroom with a sink and a mirror",
+        "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+        "augmentation_idx": 0
+      }
+    ],
+    "corruption_params": {
+      "trigger_prob": 0.0006,
+      "burst_lambda": 220.0,
+      "bit_error_rate": 0.3
+    }
+  }
+}

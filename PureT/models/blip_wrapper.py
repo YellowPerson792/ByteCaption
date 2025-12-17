@@ -16,7 +16,11 @@ class BlipWrapper(nn.Module):
         
         print(f"[BlipWrapper] Initializing model '{model_name}' on device '{device}'...")
         self.processor = BlipProcessor.from_pretrained(model_name)
-        self.model = BlipForConditionalGeneration.from_pretrained(model_dir,use_safetensors=True)
+        try:
+            self.model = BlipForConditionalGeneration.from_pretrained(model_dir, use_safetensors=True)
+        except OSError:
+            # fallback to pytorch_model.bin if safetensors not available
+            self.model = BlipForConditionalGeneration.from_pretrained(model_dir, use_safetensors=False)
         self.model.to(device)
         self.model.eval() # BLIP模型仅用于评估，始终处于eval模式
 

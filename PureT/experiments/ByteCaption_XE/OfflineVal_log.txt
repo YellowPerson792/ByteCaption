@@ -736,3 +736,45 @@
 [INFO: 2025-12-07 12:15:03,900] ######## Offline VAL best ########
 [INFO: 2025-12-07 12:15:03,900] {'Bleu_1': 0.4435643564347652, 'Bleu_2': 0.2336504572571312, 'Bleu_3': 0.10254694926224465, 'Bleu_4': 0.04964693810414473, 'ROUGE_L': 0.3371007511874845, 'CIDEr': 0.18741994412690055, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': 2.701068105697632}
 [INFO: 2025-12-07 12:15:03,900] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 09:36:16,060] Loaded best model: PureT/experiments/ByteCaption_XE\snapshot\best_model.pth
+[INFO: 2025-12-17 09:39:22,463] ######## Offline VAL best ########
+[INFO: 2025-12-17 09:39:22,463] {'Bleu_1': 0.49385074626864695, 'Bleu_2': 0.2932220013567423, 'Bleu_3': 0.17305042612215266, 'Bleu_4': 0.11014080436144184, 'ROUGE_L': 0.3621389136268617, 'CIDEr': 0.2447815362247292, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': 2.578843070745468}
+[INFO: 2025-12-17 09:39:22,463] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 09:42:57,964] Loaded best model: PureT/experiments/ByteCaption_XE\snapshot\best_model.pth
+[INFO: 2025-12-17 09:43:17,471] ######## Offline VAL best ########
+[INFO: 2025-12-17 09:43:17,471] {'Bleu_1': 0.49999999999990064, 'Bleu_2': 0.30580330191448984, 'Bleu_3': 0.182452539582392, 'Bleu_4': 0.11778779828611925, 'ROUGE_L': 0.36928295192527505, 'CIDEr': 0.27422627250294324, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': 2.5679965934753417}
+[INFO: 2025-12-17 09:43:17,472] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 10:44:16,975] Loaded best model: PureT/experiments/ByteCaption_XE\snapshot\best_model.pth
+[INFO: 2025-12-17 10:44:18,961] ######## Offline VAL best ########
+[INFO: 2025-12-17 10:44:18,961] {'Bleu_1': 0.5294117646435987, 'Bleu_2': 0.3253956866884264, 'Bleu_3': 0.20119942894659662, 'Bleu_4': 2.933404044945445e-05, 'ROUGE_L': 0.4413714360279245, 'CIDEr': 0.6311524961686692, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': 2.612584114074707}
+[INFO: 2025-12-17 10:44:18,964] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 10:44:55,273] Loaded best model: PureT/experiments/ByteCaption_XE\snapshot\best_model.pth
+[INFO: 2025-12-17 10:44:56,500] ######## Offline VAL best ########
+[INFO: 2025-12-17 10:44:56,500] {'Bleu_1': 0.6666666665185187, 'Bleu_2': 0.40824829037030635, 'Bleu_3': 2.8768479126408824e-06, 'Bleu_4': 7.936880924121685e-09, 'ROUGE_L': 0.5555555555555556, 'CIDEr': 0.0, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': 2.444612503051758}
+[INFO: 2025-12-17 10:44:56,500] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 11:23:16,146] Loaded best model: PureT/experiments/ByteCaption_XE\snapshot\best_model.pth
+[INFO: 2025-12-17 11:23:22,528] ######## Offline VAL best ########
+[INFO: 2025-12-17 11:23:22,529] {'Bleu_1': 0.6142270861824702, 'Bleu_2': 0.4289348107786221, 'Bleu_3': 0.28520665712378723, 'Bleu_4': 0.188990646980571, 'ROUGE_L': 0.4504034913389711, 'CIDEr': 0.6693189424469401, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': 2.349649852514267}
+[INFO: 2025-12-17 11:23:22,529] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 11:25:15,093] Loaded best model: PureT/experiments/ByteCaption_XE\snapshot\best_model.pth
+[INFO: 2025-12-17 11:25:20,798] ######## Offline VAL best ########
+[INFO: 2025-12-17 11:25:20,798] {'Bleu_1': 0.6142270861824702, 'Bleu_2': 0.4289348107786221, 'Bleu_3': 0.28520665712378723, 'Bleu_4': 0.188990646980571, 'ROUGE_L': 0.4504034913389711, 'CIDEr': 0.6693189424469401, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': 2.349649852514267}
+[INFO: 2025-12-17 11:25:20,798] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 11:41:59,277] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:45:12,688] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:45:33,016] ######## Offline VAL best ########
+[INFO: 2025-12-17 11:45:33,016] {'Bleu_1': 0.7292464878662461, 'Bleu_2': 0.5707216329758513, 'Bleu_3': 0.4202905794292956, 'Bleu_4': 0.3105199535455328, 'ROUGE_L': 0.5326737644698127, 'CIDEr': 1.1737010883336416, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': None}
+[INFO: 2025-12-17 11:45:33,017] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 11:51:32,370] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:52:23,278] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:52:36,939] ######## Offline VAL best ########
+[INFO: 2025-12-17 11:52:36,939] {'Bleu_1': 0.7292464878662461, 'Bleu_2': 0.5707216329758513, 'Bleu_3': 0.4202905794292956, 'Bleu_4': 0.3105199535455328, 'ROUGE_L': 0.5326737644698127, 'CIDEr': 1.1737010883336416, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': None}
+[INFO: 2025-12-17 11:52:36,939] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 12:05:19,827] Loaded best model: PureT/experiments/ByteCaption_XE\snapshot\best_model.pth
+[INFO: 2025-12-17 12:05:25,624] ######## Offline VAL best ########
+[INFO: 2025-12-17 12:05:25,624] {'Bleu_1': 0.6059760154038937, 'Bleu_2': 0.42120912963726687, 'Bleu_3': 0.2729908413808091, 'Bleu_4': 0.18077019088981466, 'ROUGE_L': 0.4419190951207369, 'CIDEr': 0.6595645042114634, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': 2.3477587550878525}
+[INFO: 2025-12-17 12:05:25,624] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 12:06:23,916] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 12:07:44,946] ######## Offline VAL best ########
+[INFO: 2025-12-17 12:07:44,947] {'Bleu_1': 0.7292464878662461, 'Bleu_2': 0.5707216329758513, 'Bleu_3': 0.4202905794292956, 'Bleu_4': 0.3105199535455328, 'ROUGE_L': 0.5326737644698127, 'CIDEr': 1.1737010883336416, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': None}
+[INFO: 2025-12-17 12:07:44,947] TEST evaluation skipped (no test_evaler).

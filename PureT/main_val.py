@@ -25,6 +25,7 @@ from scorer.coco_scorer import CocoScorer
 from scorer.flickr8k_scorer import Flickr8kScorer
 from scorer.scorer import Scorer  # 新增导入
 from lib.config import cfg, cfg_from_file
+from corenet.data.transforms import jpeg_corruption
 
 try:
     import wandb
@@ -33,7 +34,7 @@ except ImportError:
     WANDB_AVAILABLE = False
 
 """
-cd /d/MLLMs/ByteCaption && python PureT/main_val.py --folder PureT/experiments/ByteCaption_XE --val_samples 500 --resume -1 --disable_wandb
+cd /d/MLLMs/ByteCaption && python PureT/main_val.py --folder PureT/experiments/ByteCaption_XE_blip --val_samples 80 --resume -1 --disable_wandb
 cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_val.py --folder PureT/experiments/ByteCaption_XE --val_samples 500 --resume -1 --disable_wandb
 """
 
@@ -42,7 +43,11 @@ class Tester(object):
         super(Tester, self).__init__()
         self.args = args
 
-        self.corrupt_level = getattr(args, "corrupt_level", "none")
+        self.corrupt_level = jpeg_corruption.normalize_level(getattr(args, "corrupt_level", "S0"))
+        self.corrupt_types = getattr(args, "corrupt_types", [])
+        # 将 CLI 设置同步到 cfg，供数据加载器读取
+        cfg.CORRUPTION.BYTE_STREAM_LEVEL = self.corrupt_level
+        cfg.CORRUPTION.BYTE_STREAM_TYPES = self.corrupt_types
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -147,8 +152,9 @@ class Tester(object):
     def setup_logging(self):
         self.logger = logging.getLogger(cfg.LOGGER_NAME)
         self.logger.setLevel(logging.INFO)
-        
-        ch = logging.StreamHandler(stream=sys.stdout)
+
+        # Use the original stdout to avoid flush issues on some terminals
+        ch = logging.StreamHandler(stream=sys.__stdout__)
         ch.setLevel(logging.INFO)
         formatter = logging.Formatter("[%(levelname)s: %(asctime)s] %(message)s")
         ch.setFormatter(formatter)
@@ -172,8 +178,10 @@ class Tester(object):
             self.model = model.to(self.device)
 
         # 仅在模型不是BLIP时才加载本地检查点。
-        if cfg.MODEL.TYPE == 'BLIP':
-            self.logger.info("BLIP model is used. Skipping local checkpoint loading.")
+        model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
+        is_hf = model_type.startswith("hf") or "blip" in model_type
+        if is_hf:
+            self.logger.info(f"{cfg.MODEL.TYPE} model uses HF weights. Skipping local checkpoint loading.")
             return
 
         if self.args.resume > 0:
@@ -226,7 +234,8 @@ class Tester(object):
 
         self._log_section("EVALUATION CONFIGURATION")
         print(f"  Dataset Type         : {self.dataset_type.upper()}")
-        print(f"  Corrupt Level        : {getattr(self, 'corrupt_level', 'none')}")
+        print(f"  Corrupt Level        : {self.corrupt_level}")
+        print(f"  Corrupt Types        : {', '.join(self.corrupt_types) if self.corrupt_types else 'NONE'}")
         resume = getattr(args, "resume", -1)
         mode = "best (--resume==-1)" if resume == -1 else ("checkpoint" if resume > 0 else "auto-latest")
         print(f"  Evaluation Mode      : {mode} (resume={resume})")
@@ -314,8 +323,12 @@ def parse_args():
     parser.add_argument('--folder', dest='folder', default=None, type=str)
     parser.add_argument("--resume", type=int, default=-1, help="Checkpoint epoch to load (caption_model_<N>.pth)")
     parser.add_argument("--val_samples", type=int, default=0, help="Number of validation samples to use (0 for all)")
-    parser.add_argument("--corrupt_level", type=str, default="light", choices=["none","light","medium","heavy"],
-                        help="If provided, apply corruption to image byte streams for evaluation")
+    level_choices = sorted(set(jpeg_corruption.available_levels() + ["none", "light", "medium", "heavy"]))
+    parser.add_argument("--corrupt_level", type=str, default="S0", choices=level_choices,
+                        help="JPEG bitstream corruption severity (S0-S5/M0-M1; legacy none/light/medium/heavy aliases)")
+    parser.add_argument("--corrupt_types", type=str, nargs="+", default=["rbbf"],
+                        choices=["rbbf", "rbsl", "metadata_loss", "none"],
+                        help="Corruption types to apply to JPEG bitstreams")
     # Wandb arguments
     parser.add_argument("--wandb_project", type=str, default="ByteCaption-Eval", help="Wandb project name for logging.")
     parser.add_argument("--wandb_name", type=str, default=None, help="A specific name for the wandb run.")
@@ -339,6 +352,10 @@ if __name__ == '__main__':
         if os.path.exists(config_path):
             cfg_from_file(config_path)
             print(f"[CONFIG] Loaded config: {config_path}")
+            # 若文件夹名包含 blip，强制切换模型类型，避免默认值覆盖
+            if "blip" in args.folder.lower() or os.getenv("FORCE_BLIP", "").lower() in ("1", "true", "yes"):
+                cfg.MODEL.TYPE = "BLIP"
+                print(f"[CONFIG] FORCE_BLIP active or folder contains 'blip'; cfg.MODEL.TYPE set to BLIP")
         else:
             # 若找不到，仍尝试读取 generic config.yml（兼容旧项目）
             alt = os.path.join(args.folder, 'config.yml')
