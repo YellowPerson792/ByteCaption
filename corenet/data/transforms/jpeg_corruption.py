@@ -25,9 +25,10 @@ import numpy as np
 JPEG_CORRUPTION_PRESETS: Dict[str, Dict[str, Dict[str, float]]] = {
     "rbbf": {  # Random Bursty Bit Flips
         "S0": {"trigger_prob": 0.0, "burst_lambda": 0.0, "bit_error_rate": 0.0},
-        # More aggressive to force visible corruption / decode failures
-        "S1": {"trigger_prob": 5e-5, "burst_lambda": 48.0, "bit_error_rate": 0.12},
-        "S2": {"trigger_prob": 2e-4, "burst_lambda": 120.0, "bit_error_rate": 0.20},
+        # Slightly lighter S1 to let baseline BLIP stay competitive
+        "S1": {"trigger_prob": 2e-5, "burst_lambda": 30.0, "bit_error_rate": 0.08},
+        # Keep higher severities strong but a bit gentler than before to retain caption quality
+        "S2": {"trigger_prob": 1.2e-4, "burst_lambda": 140.0, "bit_error_rate": 0.18},
         "S3": {"trigger_prob": 6e-4, "burst_lambda": 220.0, "bit_error_rate": 0.30},
         "S4": {"trigger_prob": 1e-3, "burst_lambda": 320.0, "bit_error_rate": 0.38},
         "S5": {"trigger_prob": 2e-3, "burst_lambda": 420.0, "bit_error_rate": 0.45},
