@@ -1,0 +1,58 @@
+{
+  "model_folder": "PureT\\experiments\\ByteCaption_XE_blip",
+  "model_name": "ByteCaption_XE_blip",
+  "model_type": "BLIP",
+  "corrupt_type": "rbbf",
+  "corrupt_level": "S3",
+  "metrics": {
+    "Bleu_1": 0.3648170011802068,
+    "Bleu_2": 0.16320515267379376,
+    "Bleu_3": 0.061501741727712146,
+    "Bleu_4": 0.02958870020194519,
+    "ROUGE_L": 0.2644135721638884,
+    "CIDEr": 0.03864852726886213,
+    "METEOR": 0.0,
+    "SPICE": 0.0,
+    "XE_Loss": null,
+    "Undecodable_Count": 26,
+    "Undecodable_Ratio": 0.325,
+    "Total_Samples": 80,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "an image of a city with lots of buildings",
+        "reference": "A woman stands in the dining area at the table.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a black and white photo of a man in a suit",
+        "reference": "A big burly grizzly bear is show with grass in the background.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "a man in a suit and tie standing in front of a building",
+        "reference": "A young boy getting ready to catch a baseball in a grass field.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "a black and white photo of a man in a suit",
+        "reference": "A chicken sandwich in a wrapper near a cell phone.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "a black and white photo of a man in a suit",
+        "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+        "augmentation_idx": 0
+      }
+    ],
+    "corruption_params": {
+      "trigger_prob": 0.0006,
+      "burst_lambda": 220.0,
+      "bit_error_rate": 0.3
+    }
+  }
+}

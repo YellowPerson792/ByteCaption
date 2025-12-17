@@ -1,0 +1,18 @@
+[INFO: 2025-12-17 11:33:18,922] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:34:45,961] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:35:32,530] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:36:04,922] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:37:11,922] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:38:12,275] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:50:02,168] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:50:03,531] ######## Offline VAL best ########
+[INFO: 2025-12-17 11:50:03,531] {'Bleu_1': 0.5999999998800002, 'Bleu_2': 0.3651483715950527, 'Bleu_3': 2.55436477410356e-06, 'Bleu_4': 6.985342055045127e-09, 'ROUGE_L': 0.5313588850174217, 'CIDEr': 0.0, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': None}
+[INFO: 2025-12-17 11:50:03,531] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 11:55:45,844] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 11:56:04,912] ######## Offline VAL best ########
+[INFO: 2025-12-17 11:56:04,913] {'Bleu_1': 0.7292464878662461, 'Bleu_2': 0.5707216329758513, 'Bleu_3': 0.4202905794292956, 'Bleu_4': 0.3105199535455328, 'ROUGE_L': 0.5326737644698127, 'CIDEr': 1.1737010883336416, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': None}
+[INFO: 2025-12-17 11:56:04,913] TEST evaluation skipped (no test_evaler).
+[INFO: 2025-12-17 12:08:35,277] BLIP model is used. Skipping local checkpoint loading.
+[INFO: 2025-12-17 12:09:56,159] ######## Offline VAL best ########
+[INFO: 2025-12-17 12:09:56,160] {'Bleu_1': 0.7292464878662461, 'Bleu_2': 0.5707216329758513, 'Bleu_3': 0.4202905794292956, 'Bleu_4': 0.3105199535455328, 'ROUGE_L': 0.5326737644698127, 'CIDEr': 1.1737010883336416, 'METEOR': 0.0, 'SPICE': 0.0, 'XE_Loss': None}
+[INFO: 2025-12-17 12:09:56,160] TEST evaluation skipped (no test_evaler).

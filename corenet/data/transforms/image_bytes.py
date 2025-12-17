@@ -5,13 +5,14 @@
 
 import argparse
 import io
-from typing import Dict, Union, List
+from typing import Any, Dict, Union, List
 
 import numpy as np
 import torch
 from PIL import Image
 
 from corenet.data.transforms import TRANSFORMATIONS_REGISTRY, BaseTransformation
+from corenet.data.transforms import jpeg_corruption
 
 
 def _image_to_bytes(x: torch.Tensor, **kwargs) -> io.BytesIO:
@@ -60,155 +61,154 @@ class ByteStreamCorrupter(BaseTransformation):
     def __init__(self, opts: argparse.Namespace, *args, **kwargs) -> None:
         super().__init__(opts=opts, *args, **kwargs)
         self.corruption_types = getattr(opts, "image_augmentation.byte_stream_corrupter.types", [])
-        self.level = getattr(opts, "image_augmentation.byte_stream_corrupter.level", "none")
-        
-        self.cfg_map = {
-            "light": {"bit_flip": 0.001, "drop": 0.60, "head": 256, "tail": 0.6},
-            "medium": {"bit_flip": 0.05, "drop": 0.20, "head": 64, "tail": 512},
-            "heavy": {"bit_flip": 0.1, "drop": 0.30, "head": 256, "tail": 1024},
+        raw_level = getattr(opts, "image_augmentation.byte_stream_corrupter.level", "S0")
+        self.level = jpeg_corruption.normalize_level(raw_level)
+        self.param_overrides = self._read_overrides(opts)
+        self.pipeline = jpeg_corruption.JPEGCorruptionPipeline(
+            corruption_types=self.corruption_types,
+            level=self.level,
+            overrides=self.param_overrides,
+        )
+
+    def _read_overrides(self, opts: argparse.Namespace) -> Dict[str, Dict[str, Any]]:
+        overrides: Dict[str, Dict[str, Any]] = {
+            "rbbf": {},
+            "rbsl": {},
+            "metadata_loss": {},
         }
-        self.params = self.cfg_map.get(self.level, {})
-
-    # -- 将原有的损坏函数变成类的静态方法，方便管理 --
-    @staticmethod
-    def _random_bit_flip(data: bytes, flip_prob: float) -> bytes:
-        ba = bytearray(data)
-        total_bits = max(1, len(ba) * 8)
-        num_flips = max(1, int(total_bits * flip_prob))
-        for _ in range(num_flips):
-            bit_index = np.random.randint(0, total_bits)
-            byte_index, bit_pos = divmod(bit_index, 8)
-            ba[byte_index] ^= (1 << bit_pos)
-        return bytes(ba)
-
-    @staticmethod
-    def _segment_dropout(data: bytes, drop_ratio: float) -> bytes:
-        """
-        从字节流中随机丢弃一个连续的片段。
-        优化后的逻辑确保每个字节被丢弃的概率是均匀的。
-        """
-        data_len = len(data)
-        if data_len <= 1:
-            return data
-
-        # 1. 计算要丢弃的片段长度
-        seg_len = max(1, int(data_len * drop_ratio))
-        # 确保不会丢弃所有数据，至少保留一个字节
-        if seg_len >= data_len:
-            seg_len = data_len - 1
-        
-        if seg_len == 0:
-            return data
-
-        # 2. 扩展随机选择的范围
-        # 旧范围: [0, data_len - seg_len]
-        # 新范围: [-seg_len + 1, data_len - 1]
-        # 这允许丢弃的片段可以“部分悬挂”在数据流的开始或结束位置之外，
-        # 从而确保了头部和尾部字节有相同的机会被丢弃。
-        start = np.random.randint(-seg_len + 1, data_len)
-
-        # 3. 计算实际要操作的切片索引
-        # 如果 start 是负数，实际的切片从 0 开始
-        clip_start = max(0, start)
-        # 如果 start + seg_len 超出范围，实际的切片到末尾结束
-        clip_end = min(data_len, start + seg_len)
-
-        # 如果计算出的切片无效（例如，整个片段都在数据流外部），则不进行任何操作
-        if clip_start >= clip_end:
-            return data
-
-        # 4. 拼接字节流，跳过 [clip_start, clip_end) 这个区间
-        return data[:clip_start] + data[clip_end:]
-    
-    @staticmethod
-    def _header_truncation(data: bytes, trunc_size: int) -> bytes:
-        if len(data) <= 1: return data
-        trunc_size = min(max(0, trunc_size), len(data) - 1)
-        return data[trunc_size:] if trunc_size > 0 else data
-
-    # @staticmethod
-    # def _tail_truncation(data: bytes, trunc_size: int) -> bytes:
-    #     if len(data) <= 1: return data
-    #     trunc_size = min(max(0, trunc_size), len(data) - 1)
-    #     print(f"The length :", len(data))
-    #     print(f"The trunc_size :", trunc_size)
-    #     print(f"After truncation length :", len(data[:-trunc_size]))
-    #     return data[:-trunc_size] if trunc_size > 0 else data
-    @staticmethod
-    def _tail_truncation(data: bytes, trunc_ratio: float) -> bytes:
-        """根据给定的比例截断字节流的尾部。"""
-        if len(data) <= 1 or not (0 < trunc_ratio < 1):
-            return data
-        
-        # 1. 根据比例计算要截断的字节数
-        trunc_size = int(len(data) * trunc_ratio)
-        
-        # 2. 确保截断大小在安全范围内（至少保留一个字节）
-        trunc_size = min(max(0, trunc_size), len(data) - 1)
-        
-        # 3. 执行截断
-        return data[:-trunc_size] if trunc_size > 0 else data
+        overrides["rbbf"]["trigger_prob"] = getattr(
+            opts, "image_augmentation.byte_stream_corrupter.rbbf.trigger_prob", None
+        )
+        overrides["rbbf"]["burst_lambda"] = getattr(
+            opts, "image_augmentation.byte_stream_corrupter.rbbf.burst_lambda", None
+        )
+        overrides["rbbf"]["bit_error_rate"] = getattr(
+            opts, "image_augmentation.byte_stream_corrupter.rbbf.bit_error_rate", None
+        )
+        overrides["rbsl"]["trigger_prob"] = getattr(
+            opts, "image_augmentation.byte_stream_corrupter.rbsl.trigger_prob", None
+        )
+        overrides["rbsl"]["burst_lambda"] = getattr(
+            opts, "image_augmentation.byte_stream_corrupter.rbsl.burst_lambda", None
+        )
+        overrides["rbsl"]["max_drop_ratio"] = getattr(
+            opts, "image_augmentation.byte_stream_corrupter.rbsl.max_drop_ratio", None
+        )
+        overrides["metadata_loss"]["strip_app_segments"] = getattr(
+            opts, "image_augmentation.byte_stream_corrupter.metadata_loss.strip_app_segments", None
+        )
+        overrides["metadata_loss"]["zero_prefix_bytes"] = getattr(
+            opts, "image_augmentation.byte_stream_corrupter.metadata_loss.zero_prefix_bytes", None
+        )
+        overrides["metadata_loss"]["body_trim_ratio"] = getattr(
+            opts, "image_augmentation.byte_stream_corrupter.metadata_loss.body_trim_ratio", None
+        )
+        cleaned: Dict[str, Dict[str, Any]] = {}
+        for ctype, params in overrides.items():
+            valid = {k: v for k, v in params.items() if v is not None}
+            if valid:
+                cleaned[ctype] = valid
+        return cleaned
 
     def __call__(self, data: Dict[str, Union[torch.Tensor, int]]) -> List[Dict[str, Union[torch.Tensor, int]]]:
         """
         将单个样本的 'samples' 字段增强为多个损坏版本。
         返回一个字典列表，每个字典只包含 'samples' 和 'corruption_marker'。
         """
-        if self.level == "none" or not self.corruption_types or not self.params:
+        if not self.pipeline.is_enabled():
             return [{"samples": data["samples"], "corruption_marker": "none"}]
 
         int_tensor = data["samples"]
         byte_values = (int_tensor.numpy() & 0xFF).astype(np.uint8)
         original_bytes = byte_values.tobytes()
 
-        # (这里的调试语句可以保留或移除)
-        # print(f"[DEBUG Corrupter] Received original byte stream. len={len(original_bytes)}, startswith={original_bytes[:16].hex(' ')}")
-
         augmented_samples = []
-
-        for corruption_type in self.corruption_types:
-            corrupted_bytes = None
-            # (这里的调试语句可以保留或移除)
-            # print(f"[DEBUG Corrupter] Applying '{corruption_type}' with level '{self.level}'...")
-
-            if corruption_type == "bit_flip":
-                corrupted_bytes = self._random_bit_flip(original_bytes, self.params["bit_flip"])
-            elif corruption_type == "segment_dropout":
-                corrupted_bytes = self._segment_dropout(original_bytes, self.params["drop"])
-            elif corruption_type == "header_truncation":
-                corrupted_bytes = self._header_truncation(original_bytes, self.params["head"])
-            elif corruption_type == "tail_truncation":
-                corrupted_bytes = self._tail_truncation(original_bytes, self.params["tail"])
-            
-            if corrupted_bytes is not None:
-                # (这里的调试语句可以保留或移除)
-                # print(f"    -> Original len: {len(original_bytes)}, Corrupted len: {len(corrupted_bytes)}")
-
-                # 只创建包含 'samples' 和标记的新字典
-                new_sample_dict = {}
-                buf = np.frombuffer(corrupted_bytes, dtype=np.uint8)
-                new_sample_dict["samples"] = torch.from_numpy(buf.copy()).to(dtype=torch.int32)
-                new_sample_dict["corruption_marker"] = f"{corruption_type}_{self.level}"
-                
-                augmented_samples.append(new_sample_dict)
+        for corrupted_bytes, marker in self.pipeline.apply(original_bytes):
+            new_sample_dict: Dict[str, Union[torch.Tensor, str]] = {}
+            buf = np.frombuffer(corrupted_bytes, dtype=np.uint8)
+            new_sample_dict["samples"] = torch.from_numpy(buf.copy()).to(dtype=torch.int32)
+            new_sample_dict["corruption_marker"] = marker
+            augmented_samples.append(new_sample_dict)
 
         return augmented_samples if augmented_samples else [{"samples": data["samples"], "corruption_marker": "none"}]
 
     @classmethod
     def add_arguments(cls, parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         group = parser.add_argument_group(title=cls.__name__)
+        level_choices = sorted(
+            set(jpeg_corruption.available_levels() + ["none", "light", "medium", "heavy"])
+        )
         group.add_argument(
             "--image-augmentation.byte-stream-corrupter.level",
-            type=str, default="light", choices=["none", "light", "medium", "heavy"],
-            help="强度级别，控制所有损坏的参数。"
+            type=str,
+            default="S0",
+            choices=level_choices,
+            help="强度级别（S0-S5/M0-M1），兼容 none/light/medium/heavy 别名。"
         )
         group.add_argument(
             "--image-augmentation.byte-stream-corrupter.types",
-            type=str, nargs="+", default=["tail_truncation"],
-            choices=["bit_flip", "segment_dropout", "header_truncation", "tail_truncation"],
+            type=str,
+            nargs="+",
+            default=["rbbf"],
+            choices=["rbbf", "rbsl", "metadata_loss", "none"],
             help="要应用的损坏类型列表。每种类型都会生成一个独立的样本。"
         )
+        group.add_argument(
+            "--image-augmentation.byte-stream-corrupter.rbbf.trigger-prob",
+            type=float,
+            default=None,
+            help="RBBF：每个位触发突发的概率（覆盖 preset）。"
+        )
+        group.add_argument(
+            "--image-augmentation.byte-stream-corrupter.rbbf.burst-lambda",
+            type=float,
+            default=None,
+            help="RBBF：突发长度 Poisson 均值（覆盖 preset）。"
+        )
+        group.add_argument(
+            "--image-augmentation.byte-stream-corrupter.rbbf.bit-error-rate",
+            type=float,
+            default=None,
+            help="RBBF：突发内每个位翻转概率（覆盖 preset）。"
+        )
+        group.add_argument(
+            "--image-augmentation.byte-stream-corrupter.rbsl.trigger-prob",
+            type=float,
+            default=None,
+            help="RBSL：每个字节触发丢失片段的概率（覆盖 preset）。"
+        )
+        group.add_argument(
+            "--image-augmentation.byte-stream-corrupter.rbsl.burst-lambda",
+            type=float,
+            default=None,
+            help="RBSL：丢失片段长度 Poisson 均值（覆盖 preset）。"
+        )
+        group.add_argument(
+            "--image-augmentation.byte-stream-corrupter.rbsl.max-drop-ratio",
+            type=float,
+            default=None,
+            help="RBSL：最多允许丢失的比例（覆盖 preset）。"
+        )
+        group.add_argument(
+            "--image-augmentation.byte-stream-corrupter.metadata-loss.strip-app-segments",
+            type=int,
+            default=None,
+            help="ML：删除的 APP 段数量（覆盖 preset）。"
+        )
+        group.add_argument(
+            "--image-augmentation.byte-stream-corrupter.metadata-loss.zero-prefix-bytes",
+            type=int,
+            default=None,
+            help="ML：将头部前若干字节置零（覆盖 preset）。"
+        )
+        group.add_argument(
+            "--image-augmentation.byte-stream-corrupter.metadata-loss.body-trim-ratio",
+            type=float,
+            default=None,
+            help="ML：对 SOS 之后熵编码区的截断比例（覆盖 preset）。"
+        )
         return parser
+
 
 
 @TRANSFORMATIONS_REGISTRY.register(name="pil_save", type="image_torch")

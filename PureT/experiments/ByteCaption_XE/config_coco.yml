@@ -31,6 +31,11 @@ DATA_LOADER:
   SEQ_PER_IMG: 5
   MAX_FEAT: -1
 
+############################ CORRUPTION ############################
+CORRUPTION:
+  BYTE_STREAM_TYPES: ['rbbf', 'rbsl', 'metadata_loss']
+  BYTE_STREAM_LEVEL: 'S0'                    # S0 disables corruption; override for evaluation
+
 ############################ MODEL ############################
 MODEL:
   TYPE: 'PureT_byteformer'                  # PureT_byteformer/BLIP
@@ -153,4 +158,3 @@ INFERENCE:
   TEST_ANNFILE: './PureT/data/coco_karpathy/captions_test.json'
   BEAM_SIZE: 5
   GREEDY_DECODE: True
-

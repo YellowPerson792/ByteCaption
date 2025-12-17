@@ -9,7 +9,7 @@ import torch
 import numpy as np
 from typing import Any, List, Sequence, Tuple
 
-from PureT.lib.config import cfg
+from lib.config import cfg
 from PureT.datasets_.flickr8k_dataset_hf import Flickr8kDataset
 import PureT.samplers.distributed as distributed_samplers
 from corenet.data.collate_fns.byteformer_collate_functions import byteformer_image_collate_fn
@@ -112,15 +112,22 @@ def load_train(distributed, epoch, flickr_set):
     )
     shuffle = cfg.DATA_LOADER.SHUFFLE if sampler is None else False
 
+    # Windows 多进程 DataLoader 支持有限，强制单进程避免 spawn 造成卡死/日志噪声
+    num_workers = cfg.DATA_LOADER.NUM_WORKERS
+    if sys.platform.startswith("win"):
+        num_workers = 0
+    num_workers = max(0, int(num_workers))
+    persistent_workers = num_workers > 0 and not sys.platform.startswith("win")
+
     loader = torch.utils.data.DataLoader(
         flickr_set,
         batch_size=cfg.TRAIN.BATCH_SIZE,
         shuffle=shuffle,
         sampler=sampler,
-        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+        num_workers=num_workers,
         collate_fn=byteformer_collate,
         pin_memory=True,
-        persistent_workers=cfg.DATA_LOADER.NUM_WORKERS > 0,
+        persistent_workers=persistent_workers,
         worker_init_fn=_worker_init_fn,
     )
     return loader
@@ -137,14 +144,21 @@ def load_val(image_ids_path, gv_feat_path='', att_feats_folder=None, max_samples
         max_samples=max_samples,
     )
 
+    # Windows 下强制单进程 DataLoader
+    num_workers = cfg.DATA_LOADER.NUM_WORKERS
+    if sys.platform.startswith("win"):
+        num_workers = 0
+    num_workers = max(0, int(num_workers))
+    persistent_workers = num_workers > 0 and not sys.platform.startswith("win")
+
     loader = torch.utils.data.DataLoader(
         flickr_set,
         batch_size=cfg.TEST.BATCH_SIZE,
         shuffle=False,
-        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+        num_workers=num_workers,
         collate_fn=byteformer_collate_val,
         pin_memory=True,
-        persistent_workers=cfg.DATA_LOADER.NUM_WORKERS > 0,
+        persistent_workers=persistent_workers,
         worker_init_fn=_worker_init_fn,
     )
     return loader

@@ -11,7 +11,7 @@ import torch
 import numpy as np
 from torchvision import transforms  # noqa: F401 (预留未来扩展)
 
-from PureT.lib.config import cfg
+from lib.config import cfg
 from PureT.datasets_.coco_dataset_hf import CocoDataset
 import PureT.samplers.distributed as distributed_samplers
 from corenet.data.collate_fns.byteformer_collate_functions import byteformer_image_collate_fn
@@ -46,6 +46,59 @@ if not hasattr(opts.image_augmentation, "pil_save"):
     opts.image_augmentation.pil_save = _argparse.Namespace()
 if not hasattr(opts.image_augmentation.pil_save, "corrupt_level"):
     opts.image_augmentation.pil_save.corrupt_level = "none"
+if not hasattr(opts.image_augmentation, "byte_stream_corrupter"):
+    opts.image_augmentation.byte_stream_corrupter = _argparse.Namespace()
+
+def _apply_corruption_cfg_overrides():
+    """Align CoreNet opts with cfg.CORRUPTION for byte-stream corruption."""
+    bs_cfg = getattr(cfg, "CORRUPTION", None)
+    if bs_cfg is None:
+        return
+    bs_opts = opts.image_augmentation.byte_stream_corrupter
+    # types and level
+    if hasattr(bs_cfg, "BYTE_STREAM_TYPES") and bs_cfg.BYTE_STREAM_TYPES is not None:
+        bs_opts.types = list(bs_cfg.BYTE_STREAM_TYPES)
+    if hasattr(bs_cfg, "BYTE_STREAM_LEVEL") and bs_cfg.BYTE_STREAM_LEVEL:
+        bs_opts.level = bs_cfg.BYTE_STREAM_LEVEL
+    setattr(opts, "image_augmentation.byte_stream_corrupter.types", getattr(bs_opts, "types", []))
+    setattr(opts, "image_augmentation.byte_stream_corrupter.level", getattr(bs_opts, "level", "S0"))
+    # overrides for RBBF/RBSL/Metadata
+    def _assign_if_valid(namespace, key, value):
+        if value is None:
+            return
+        # allow negative to mean "no override"
+        if isinstance(value, (int, float)) and value < 0:
+            return
+        setattr(namespace, key, value)
+
+    if not hasattr(bs_opts, "rbbf"):
+        bs_opts.rbbf = _argparse.Namespace()
+    if not hasattr(bs_opts, "rbsl"):
+        bs_opts.rbsl = _argparse.Namespace()
+    if not hasattr(bs_opts, "metadata_loss"):
+        bs_opts.metadata_loss = _argparse.Namespace()
+
+    if hasattr(bs_cfg, "RBBF"):
+        _assign_if_valid(bs_opts.rbbf, "trigger_prob", bs_cfg.RBBF.TRIGGER_PROB)
+        _assign_if_valid(bs_opts.rbbf, "burst_lambda", bs_cfg.RBBF.BURST_LAMBDA)
+        _assign_if_valid(bs_opts.rbbf, "bit_error_rate", bs_cfg.RBBF.BIT_ERROR_RATE)
+        setattr(opts, "image_augmentation.byte_stream_corrupter.rbbf.trigger_prob", getattr(bs_opts.rbbf, "trigger_prob", None))
+        setattr(opts, "image_augmentation.byte_stream_corrupter.rbbf.burst_lambda", getattr(bs_opts.rbbf, "burst_lambda", None))
+        setattr(opts, "image_augmentation.byte_stream_corrupter.rbbf.bit_error_rate", getattr(bs_opts.rbbf, "bit_error_rate", None))
+    if hasattr(bs_cfg, "RBSL"):
+        _assign_if_valid(bs_opts.rbsl, "trigger_prob", bs_cfg.RBSL.TRIGGER_PROB)
+        _assign_if_valid(bs_opts.rbsl, "burst_lambda", bs_cfg.RBSL.BURST_LAMBDA)
+        _assign_if_valid(bs_opts.rbsl, "max_drop_ratio", bs_cfg.RBSL.MAX_DROP_RATIO)
+        setattr(opts, "image_augmentation.byte_stream_corrupter.rbsl.trigger_prob", getattr(bs_opts.rbsl, "trigger_prob", None))
+        setattr(opts, "image_augmentation.byte_stream_corrupter.rbsl.burst_lambda", getattr(bs_opts.rbsl, "burst_lambda", None))
+        setattr(opts, "image_augmentation.byte_stream_corrupter.rbsl.max_drop_ratio", getattr(bs_opts.rbsl, "max_drop_ratio", None))
+    if hasattr(bs_cfg, "METADATA"):
+        _assign_if_valid(bs_opts.metadata_loss, "strip_app_segments", bs_cfg.METADATA.STRIP_APP_SEGMENTS)
+        _assign_if_valid(bs_opts.metadata_loss, "zero_prefix_bytes", bs_cfg.METADATA.ZERO_PREFIX_BYTES)
+        _assign_if_valid(bs_opts.metadata_loss, "body_trim_ratio", bs_cfg.METADATA.BODY_TRIM_RATIO)
+        setattr(opts, "image_augmentation.byte_stream_corrupter.metadata_loss.strip_app_segments", getattr(bs_opts.metadata_loss, "strip_app_segments", None))
+        setattr(opts, "image_augmentation.byte_stream_corrupter.metadata_loss.zero_prefix_bytes", getattr(bs_opts.metadata_loss, "zero_prefix_bytes", None))
+        setattr(opts, "image_augmentation.byte_stream_corrupter.metadata_loss.body_trim_ratio", getattr(bs_opts.metadata_loss, "body_trim_ratio", None))
 
 def sample_collate(batch):
     indices, input_seq, target_seq, gv_feat, att_feats = zip(*batch)
@@ -220,6 +273,7 @@ def blip_collate_val(batch: Sequence[Tuple[Any, ...]]):
     # 1. 初始化 BLIP 的图像处理器和 ByteFormer 的损坏器
     blip_image_tensors = []
     corrupter = image_bytes.ByteStreamCorrupter(opts)
+    pipeline = corrupter.pipeline
 
     # 2. 对批次中的每个原始图像执行“编码 -> 损坏 -> 解码”流程
     for i, img_tensor in enumerate(att_feats):
@@ -233,35 +287,24 @@ def blip_collate_val(batch: Sequence[Tuple[Any, ...]]):
 
         except Exception as e:
             print(f"[ERROR] Failed to encode image to bytes: {e}")
-            num_corruptions = len(corrupter.corruption_types) if corrupter.corruption_types else 1
+            num_corruptions = len(corrupter.corruption_types) if pipeline.is_enabled() and corrupter.corruption_types else 1
             blip_image_tensors.extend([None] * num_corruptions)
             continue
 
-        corruption_types_to_apply = corrupter.corruption_types if corrupter.corruption_types else ["none"]
-        for corruption_type in corruption_types_to_apply:
-            corrupted_bytes = original_bytes
-            if corruption_type != "none":
-                if corruption_type == "bit_flip":
-                    corrupted_bytes = corrupter._random_bit_flip(original_bytes, corrupter.params["bit_flip"])
-                elif corruption_type == "segment_dropout":
-                    corrupted_bytes = corrupter._segment_dropout(original_bytes, corrupter.params["drop"])
-                elif corruption_type == "header_truncation":
-                    corrupted_bytes = corrupter._header_truncation(original_bytes, corrupter.params["head"])
-                elif corruption_type == "tail_truncation":
-                    corrupted_bytes = corrupter._tail_truncation(original_bytes, corrupter.params["tail"])
-            
+        corrupted_variants = pipeline.apply(original_bytes) if pipeline.is_enabled() else [(original_bytes, "none")]
+        for corrupted_bytes, marker in corrupted_variants:
             try:
                 reconstructed_img = Image.open(io.BytesIO(corrupted_bytes)).convert("RGB")
                 blip_image_tensors.append(reconstructed_img)
 
                 # --- START: 添加小样本保存逻辑 ---
-                if corruption_type != "none" and successful_corruption_samples_saved < 5:
+                if marker != "none" and successful_corruption_samples_saved < 5:
                     # 确保保存目录存在
                     os.makedirs(SAMPLE_SAVE_DIR, exist_ok=True)
                     
                     # 创建一个描述性的文件名
                     # 注意：这里我们无法直接获取原始 image_id，所以使用一个全局唯一的样本编号
-                    filename = f"decoded_corrupted_sample_{successful_corruption_samples_saved}_{corruption_type}_{corrupter.level}.jpg"
+                    filename = f"decoded_corrupted_sample_{successful_corruption_samples_saved}_{marker}.jpg"
                     filepath = os.path.join(SAMPLE_SAVE_DIR, filename)
                     
                     # 保存图像
@@ -269,7 +312,7 @@ def blip_collate_val(batch: Sequence[Tuple[Any, ...]]):
                     
                     print("\n" + "─" * 70)
                     print(f"[损坏图像保存成功]")
-                    print(f"  - 损坏类型: {corruption_type}_{corrupter.level}")
+                    print(f"  - 损坏类型: {marker}")
                     print(f"  - 图像已保存至: {filepath}")
                     print("─" * 70)
                     
@@ -310,6 +353,14 @@ def load_train(distributed: bool, epoch: int, coco_set: CocoDataset):
         epoch: 当前 epoch (用于分布式 sampler 设置 shuffle seed)
         coco_set: 已实例化的 CocoDataset
     """
+    _apply_corruption_cfg_overrides()
+    # Windows 多进程 DataLoader 支持有限，强制单进程以避免反复 spawn / 崩溃
+    num_workers = cfg.DATA_LOADER.NUM_WORKERS
+    if sys.platform.startswith("win"):
+        num_workers = 0
+    num_workers = max(0, int(num_workers))
+    persistent_workers = num_workers > 0 and not sys.platform.startswith("win")
+
     sampler = distributed_samplers.DistributedSampler(coco_set, epoch=epoch) if distributed else None
     shuffle = cfg.DATA_LOADER.SHUFFLE if sampler is None else False
     loader = torch.utils.data.DataLoader(
@@ -317,9 +368,9 @@ def load_train(distributed: bool, epoch: int, coco_set: CocoDataset):
         batch_size=cfg.TRAIN.BATCH_SIZE,
         shuffle=shuffle,
         sampler=sampler,
-        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+        num_workers=num_workers,
         pin_memory=True if torch.cuda.is_available() else False,
-        persistent_workers=True if cfg.DATA_LOADER.NUM_WORKERS > 0 else False,
+        persistent_workers=persistent_workers,
         collate_fn=byteformer_collate,
         worker_init_fn=_worker_init_fn,
         drop_last=False,
@@ -328,6 +379,7 @@ def load_train(distributed: bool, epoch: int, coco_set: CocoDataset):
 
 def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_samples: int = 200, eval_mode='byteformer'):  # noqa: D401
     """构建验证 DataLoader（进入数据集 validation 模式）。"""
+    _apply_corruption_cfg_overrides()
     coco_set = CocoDataset(
         image_ids_path=image_ids_path,
         input_seq=None,  # None 触发 validation mode
@@ -339,23 +391,36 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
     )
 
     # 加一个选择，先这样加，之后再说
-    if cfg.MODEL.TYPE == 'BLIP':
+    import os as _os
+    force_blip = _os.getenv("FORCE_BLIP", "").lower() in ("1", "true", "yes")
+    model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
+    is_hf = model_type.startswith("hf") or "blip" in model_type
+    # 调试：显示当前模型类型
+    print(f"[数据加载器] cfg.MODEL.TYPE = {cfg.MODEL.TYPE}")
+    if force_blip or is_hf:
+        if force_blip and "blip" not in model_type:
+            print("[数据加载器] FORCE_BLIP=1 -> overriding cfg.MODEL.TYPE to BLIP for collate/eval.")
+            cfg.MODEL.TYPE = "BLIP"
         active_collate_fn = blip_collate_val
-        print(f"[数据加载器] 已配置为 BLIP 评估模式。")
-    elif cfg.MODEL.TYPE == 'PureT_byteformer':
+        print(f"[数据加载器] 已配置为 HF/BLIP 评估模式。")
+    else:
         active_collate_fn = byteformer_collate_val
         print(f"[数据加载器] 已配置为 ByteFormer 评估模式。")
-    else:
-        raise ValueError(f"未知的模型类型 '{cfg.MODEL.TYPE}' 在配置文件中。")
 
+    # Windows 下强制单进程 DataLoader，避免反复 spawn
+    num_workers = cfg.DATA_LOADER.NUM_WORKERS
+    if sys.platform.startswith("win"):
+        num_workers = 0
+    num_workers = max(0, int(num_workers))
+    persistent_workers = num_workers > 0 and not sys.platform.startswith("win")
 
     loader = torch.utils.data.DataLoader(
         coco_set,
         batch_size=cfg.TEST.BATCH_SIZE,
         shuffle=False,
-        num_workers=cfg.DATA_LOADER.NUM_WORKERS,
+        num_workers=num_workers,
         pin_memory=True if torch.cuda.is_available() else False,
-        persistent_workers=True if cfg.DATA_LOADER.NUM_WORKERS > 0 else False,
+        persistent_workers=persistent_workers,
         collate_fn=active_collate_fn,
         worker_init_fn=_worker_init_fn,
         drop_last=False,
