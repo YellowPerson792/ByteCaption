@@ -8,6 +8,7 @@ Example:
     --models PureT/experiments/ByteCaption_XE PureT/experiments/ByteCaption_XE_blip \
     --corrupt-types rbbf rbsl \
     --corrupt-levels S0 S1 S2 S3 S4 S5 \
+    --save-captions 500 \
     --test-samples 0
 """
 
@@ -19,7 +20,7 @@ import sys
 from argparse import Namespace
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -95,6 +96,23 @@ def run_single_eval(
     return metrics
 
 
+def load_caption_samples(model_folder: Path, rname: str, max_samples: int) -> Optional[List[Dict]]:
+    """Load first N caption samples from per-run result file."""
+    if max_samples <= 0:
+        return None
+    result_path = model_folder / "result" / f"result_{rname}.json"
+    if not result_path.exists():
+        return None
+    try:
+        with open(result_path, "r", encoding="utf-8") as f:
+            results = json.load(f)
+    except Exception:
+        return None
+    if not isinstance(results, list):
+        return None
+    return results[:max_samples]
+
+
 def plot_curves(results: List[Dict], metric_keys: List[str], output_dir: Path):
     """Plot metric vs severity curves grouped by model and corruption type."""
     level_order = ["S0", "S1", "S2", "S3", "S4", "S5"]
@@ -148,6 +166,12 @@ def parse_args():
         help="Metrics to plot against corruption level",
     )
     parser.add_argument(
+        "--save-captions",
+        type=int,
+        default=500,
+        help="Save first N generated captions into per-run JSON (0 to disable)",
+    )
+    parser.add_argument(
         "--output-dir",
         type=str,
         default="batch_reports",
@@ -171,6 +195,7 @@ def main():
             model_name = model_folder.name
             for ctype in args.corrupt_types:
                 for level in args.corrupt_levels:
+                    normalized_level = jpeg_corruption.normalize_level(level)
                     print(f"\n[RUN] model={model_name}, type={ctype}, level={level}")
                     metrics = run_single_eval(
                         model_folder,
@@ -180,14 +205,23 @@ def main():
                         dataset=args.dataset,
                         resume=args.resume,
                     )
+                    rname = f"{ctype}_{normalized_level}"
+                    caption_samples = load_caption_samples(
+                        model_folder,
+                        rname,
+                        max_samples=args.save_captions,
+                    )
                     run_record = {
                         "model_folder": str(model_folder),
                         "model_name": model_name,
                         "model_type": str(getattr(cfg.MODEL, "TYPE", "")),
                         "corrupt_type": ctype,
-                        "corrupt_level": jpeg_corruption.normalize_level(level),
+                        "corrupt_level": normalized_level,
                         "metrics": metrics,
                     }
+                    if caption_samples is not None:
+                        run_record["caption_samples"] = caption_samples
+                        run_record["caption_samples_count"] = len(caption_samples)
                     all_results.append(run_record)
                     # save per-run metrics
                     per_run_path = output_dir / f"{model_name}_{ctype}_{level}.json"

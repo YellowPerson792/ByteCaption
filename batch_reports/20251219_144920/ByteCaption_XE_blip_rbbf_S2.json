@@ -1,0 +1,58 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+  "model_name": "ByteCaption_XE_blip",
+  "model_type": "BLIP",
+  "corrupt_type": "rbbf",
+  "corrupt_level": "S2",
+  "metrics": {
+    "Bleu_1": 0.44250168123738226,
+    "Bleu_2": 0.24790785700107454,
+    "Bleu_3": 0.13660635456686523,
+    "Bleu_4": 0.08190590509816416,
+    "ROUGE_L": 0.3137322671039931,
+    "CIDEr": 0.1646240683395929,
+    "METEOR": 0.1135009369319549,
+    "SPICE": 0.049935683702162594,
+    "XE_Loss": null,
+    "Undecodable_Count": 339,
+    "Undecodable_Ratio": 0.0678,
+    "Total_Samples": 5000,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "an image of a room with many windows",
+        "reference": "A woman stands in the dining area at the table.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a map showing the location of the area",
+        "reference": "A big burly grizzly bear is show with grass in the background.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "a man playing a game of golf in the grass",
+        "reference": "A young boy getting ready to catch a baseball in a grass field.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "a close up of a person ' s hand holding a piece of paper",
+        "reference": "A chicken sandwich in a wrapper near a cell phone.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "an image of a car driving down the road",
+        "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+        "augmentation_idx": 0
+      }
+    ],
+    "corruption_params": {
+      "trigger_prob": 0.00012,
+      "burst_lambda": 140.0,
+      "bit_error_rate": 0.18
+    }
+  }
+}
