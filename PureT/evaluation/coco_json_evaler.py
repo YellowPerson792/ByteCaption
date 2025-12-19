@@ -30,6 +30,7 @@ except Exception:
 class CocoJsonEvaler(object):
     """
     COCO evaluator that reads ground truth from a JSON annotation file.
+    Supports validation/test splits and direct path override.
     """
 
     def __init__(self, split='validation'):
@@ -37,17 +38,43 @@ class CocoJsonEvaler(object):
         Initialize evaluator with a JSON annotation file.
         
         Args:
-            split (str): Dataset split to use ('validation')
+            split (str | path): Dataset split to use ('validation'/'test') or a direct path to ann JSON.
         """
         super().__init__()
-        self.split = split
+        self.split = split or 'validation'
         
-        # Load annotations from JSON file
-        if split == 'validation':
-            ann_file = './PureT/data/coco_karpathy/captions_validation.json'
+        # Resolve annotation file path
+        ann_file = None
+        # Allow passing a concrete path directly
+        if isinstance(self.split, str) and os.path.exists(self.split):
+            ann_file = self.split
+            self.split = 'custom'
         else:
-            # Add paths for other splits if needed
-            raise ValueError(f"Split '{split}' not supported for JSON loading.")
+            split_norm = str(self.split).lower()
+            if split_norm in ('val', 'validation'):
+                ann_file = getattr(cfg.INFERENCE, 'VAL_ANNFILE', None)
+                self.split = 'validation'
+            elif split_norm in ('test', 'testing'):
+                ann_file = getattr(cfg.INFERENCE, 'TEST_ANNFILE', None)
+                self.split = 'test'
+            elif split_norm in ('train',):
+                ann_file = getattr(cfg.INFERENCE, 'TRAIN_ANNFILE', None)
+                self.split = 'train'
+            else:
+                raise ValueError(f"Unsupported split '{self.split}'. Use validation/test or provide a json path.")
+
+        # Fallback to hardcoded defaults if config missing
+        if ann_file is None:
+            base = './PureT/data/coco_karpathy'
+            if self.split == 'validation':
+                ann_file = os.path.join(base, 'captions_validation.json')
+            elif self.split == 'test':
+                ann_file = os.path.join(base, 'captions_test.json')
+            elif self.split == 'train':
+                ann_file = os.path.join(base, 'captions_train.json')
+
+        if not ann_file or not os.path.exists(ann_file):
+            raise FileNotFoundError(f"COCO annotation file not found for split '{self.split}': {ann_file}")
 
         print(f"Loading annotations from {ann_file}...")
         with open(ann_file, 'r') as f:

@@ -10,6 +10,7 @@ import os
 import sys
 import subprocess
 import threading
+import urllib.request
 
 # Assumes meteor-1.5.jar is in the same directory as meteor.py.  Change as needed.
 METEOR_JAR = 'meteor-1.5.jar'
@@ -20,7 +21,22 @@ class Meteor:
     def __init__(self):
         self.env = os.environ
         self.env['LC_ALL'] = 'en_US.UTF_8'
-        self.meteor_cmd = ['java', '-jar', '-Xmx2G', METEOR_JAR, \
+        data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+        para_path = os.path.join(data_dir, 'paraphrase-en.gz')
+        if not os.path.exists(para_path):
+            os.makedirs(data_dir, exist_ok=True)
+            try:
+                # Fetch the missing paraphrase dictionary required by METEOR
+                url = 'https://raw.githubusercontent.com/tylin/coco-caption/master/pycocoevalcap/meteor/data/paraphrase-en.gz'
+                urllib.request.urlretrieve(url, para_path)
+            except Exception as e:
+                raise RuntimeError(
+                    'METEOR requires paraphrase-en.gz under %s. Auto-download failed: %s' % (data_dir, e)
+                )
+        # JVM options (e.g., -Xmx) must precede the -jar flag; the previous
+        # order would cause Java to treat -Xmx as the jar name and exit
+        # immediately, leading to BrokenPipeError in compute_score.
+        self.meteor_cmd = ['java', '-Xmx2G', '-jar', METEOR_JAR,
                 '-', '-', '-stdio', '-l', 'en', '-norm']
         self.meteor_p = subprocess.Popen(self.meteor_cmd, \
                 cwd=os.path.dirname(os.path.abspath(__file__)), \

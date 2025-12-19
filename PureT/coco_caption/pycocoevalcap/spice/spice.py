@@ -25,7 +25,12 @@ class Spice:
     """
     def __init__(self):
         cwd = os.path.dirname(os.path.abspath(__file__))
-        cache_dir=os.path.join(cwd, CACHE_DIR, str(time.time()))
+        cache_dir_env = os.environ.get("SPICE_CACHE_DIR", "").strip()
+        if cache_dir_env:
+          cache_dir = cache_dir_env
+        else:
+          # Use a stable cache directory to reuse parsed references across runs
+          cache_dir = os.path.join(cwd, CACHE_DIR, "shared")
         self.cache_dir = cache_dir
         if not os.path.exists(cache_dir):
           os.makedirs(cache_dir)
@@ -72,9 +77,17 @@ class Spice:
         # Ensure that the required Stanford CoreNLP models jar is present next to spice-1.0.jar
         # This avoids the 'Unable to open edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz' exception
         exists_model = False
-        for fname in os.listdir(cwd):
-          if fname.endswith('-models.jar') and fname.startswith('stanford-corenlp'):
-            exists_model = True
+        # The models jar might be placed either in the current directory
+        # or under the bundled lib/ folder (as shipped in this repo).
+        search_roots = [cwd, os.path.join(cwd, 'lib')]
+        for root in search_roots:
+          if not os.path.isdir(root):
+            continue
+          for fname in os.listdir(root):
+            if fname.endswith('-models.jar') and fname.startswith('stanford-corenlp'):
+              exists_model = True
+              break
+          if exists_model:
             break
         if not exists_model:
           raise RuntimeError('\nSPICE evaluation requires the Stanford CoreNLP models jar (e.g. stanford-corenlp-3.6.0-models.jar) to be present under %s.\n' \
@@ -82,7 +95,8 @@ class Spice:
                      '    bash get_stanford_models.sh\n' \
                      'If you prefer to skip SPICE, remove SPICE from config SCORER.TYPES or run with a smaller scorer set.\n' % cwd)
 
-        spice_cmd = ['java', '-jar', '-Xmx8G', SPICE_JAR, in_file.name,
+        # JVM options must precede -jar, otherwise Java treats them as jar names
+        spice_cmd = ['java', '-Xmx8G', '-jar', SPICE_JAR, in_file.name,
           '-cache', self.cache_dir,
           '-out', out_file.name,
           '-subset',
@@ -103,17 +117,23 @@ class Spice:
         os.remove(in_file.name)
         os.remove(out_file.name)
 
-        imgId_to_scores = {}
         spice_scores = []
+        imgId_to_scores = {}
         for item in results:
           imgId_to_scores[item['image_id']] = item['scores']
           spice_scores.append(self.float_convert(item['scores']['All']['f']))
         average_score = np.mean(np.array(spice_scores))
+
+        # Allow skipping per-image details for speed/memory when only the average is needed
+        return_details = os.environ.get("SPICE_RETURN_DETAILS", "1").lower() not in ("0", "false", "no")
+        if not return_details:
+          return average_score, []
+
         scores = []
         for image_id in imgIds:
           # Convert none to NaN before saving scores over subcategories
           score_set = {}
-          for category,score_tuple in imgId_to_scores[image_id].items():
+          for category, score_tuple in imgId_to_scores[image_id].items():
             score_set[category] = {k: self.float_convert(v) for k, v in score_tuple.items()}
           scores.append(score_set)
         return average_score, scores
@@ -123,5 +143,3 @@ class Spice:
 
     def __del__(self):
         shutil.rmtree(self.cache_dir)
-
-

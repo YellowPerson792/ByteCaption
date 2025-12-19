@@ -108,25 +108,48 @@ class Optimizer(nn.Module):
         elif cfg.SOLVER.LR_POLICY.TYPE == 'CosineAnnealing':
             # 自动计算T_max（总迭代数）
             total_iters = self._calculate_total_iters()
+            warmup_steps = getattr(cfg.SOLVER.LR_POLICY, 'WARMUP_STEPS', 0)
+            if warmup_steps == 0:
+                warmup_ratio = getattr(cfg.SOLVER.LR_POLICY, 'WARMUP_RATIO', 0.0)
+                warmup_steps = int(total_iters * warmup_ratio) if warmup_ratio > 0 else 0
+            warmup_steps = min(max(0, warmup_steps), max(0, total_iters - 1))
+            warmup_init_lr = getattr(cfg.SOLVER.LR_POLICY, 'WARMUP_INIT_LR', None)
+            if warmup_steps > 0 and (warmup_init_lr is None or warmup_init_lr <= 0):
+                warmup_init_lr = cfg.SOLVER.BASE_LR * 0.1
             self.scheduler = lr_scheduler.create(
                 'CosineAnnealing',
                 self.optimizer,
                 T_max = total_iters,
                 eta_min = getattr(cfg.SOLVER.LR_POLICY, 'ETA_MIN', 0),
-                last_epoch = self.last_epoch
+                last_epoch = self.last_epoch,
+                warmup_steps = warmup_steps,
+                warmup_init_lr = warmup_init_lr if warmup_init_lr is not None else 0.0
             )
         elif cfg.SOLVER.LR_POLICY.TYPE == 'CosineWarmRestarts':
             # 自动计算T_0（重启周期）
             total_iters = self._calculate_total_iters()
-            # 如果配置中没有设置T_0，使用总迭代数的1/4作为默认值
-            t_0 = getattr(cfg.SOLVER.LR_POLICY, 'T_0', total_iters // 4)
+            warmup_steps = getattr(cfg.SOLVER.LR_POLICY, 'WARMUP_STEPS', 0)
+            if warmup_steps == 0:
+                warmup_ratio = getattr(cfg.SOLVER.LR_POLICY, 'WARMUP_RATIO', 0.0)
+                warmup_steps = int(total_iters * warmup_ratio) if warmup_ratio > 0 else 0
+            warmup_steps = min(max(0, warmup_steps), max(0, total_iters - 1))
+            non_warm_iters = max(1, total_iters - warmup_steps)
+            # 如果配置中没有设置T_0，使用（非 warmup 部分）的1/4作为默认值
+            t_0 = getattr(cfg.SOLVER.LR_POLICY, 'T_0', None)
+            if t_0 is None:
+                t_0 = max(1, non_warm_iters // 4)
+            warmup_init_lr = getattr(cfg.SOLVER.LR_POLICY, 'WARMUP_INIT_LR', None)
+            if warmup_steps > 0 and (warmup_init_lr is None or warmup_init_lr <= 0):
+                warmup_init_lr = cfg.SOLVER.BASE_LR * 0.1
             self.scheduler = lr_scheduler.create(
                 'CosineWarmRestarts',
                 self.optimizer,
                 T_0 = t_0,
                 T_mult = getattr(cfg.SOLVER.LR_POLICY, 'T_MULT', 1),
                 eta_min = getattr(cfg.SOLVER.LR_POLICY, 'ETA_MIN', 0),
-                last_epoch = self.last_epoch
+                last_epoch = self.last_epoch,
+                warmup_steps = warmup_steps,
+                warmup_init_lr = warmup_init_lr if warmup_init_lr is not None else 0.0
             )
         else:
             raise NotImplementedError
@@ -204,8 +227,16 @@ class Optimizer(nn.Module):
         if self.scheduler is None:
             return
 
-        if cfg.SOLVER.LR_POLICY.TYPE != 'Plateau':
+        policy = cfg.SOLVER.LR_POLICY.TYPE
+        # Non-Plateau schedulers ignore val
+        if policy != 'Plateau':
             val = None
+
+        # Cosine / Linear schedulers are intended to step every iteration
+        if policy in ['CosineAnnealing', 'CosineWarmRestarts', 'Linear']:
+            if lrs_type == 'Iter':
+                self.scheduler.step()
+            return
 
         if lrs_type == cfg.SOLVER.LR_POLICY.STEP_TYPE:
             self.scheduler.step(val)

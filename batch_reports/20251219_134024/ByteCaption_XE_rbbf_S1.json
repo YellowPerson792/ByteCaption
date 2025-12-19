@@ -1,0 +1,58 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE",
+  "model_name": "ByteCaption_XE",
+  "model_type": "PureT_byteformer",
+  "corrupt_type": "rbbf",
+  "corrupt_level": "S1",
+  "metrics": {
+    "Bleu_1": 0.6419742510282104,
+    "Bleu_2": 0.4670675730541681,
+    "Bleu_3": 0.3371189615979492,
+    "Bleu_4": 0.2455197719470106,
+    "ROUGE_L": 0.47673537285641615,
+    "CIDEr": 0.7066164092675695,
+    "METEOR": 0.20939358380588569,
+    "SPICE": 0.13881827654858164,
+    "XE_Loss": 2.2701034605503083,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 5000,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "a teddy bear sitting on top of a chair",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a black and white photo of a traffic light",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "a white toilet sitting next to a white toilet",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "a man sitting on a couch in a living room",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "a close up of a plate of food on a table",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ],
+    "corruption_params": {
+      "trigger_prob": 2e-05,
+      "burst_lambda": 30.0,
+      "bit_error_rate": 0.08
+    }
+  }
+}

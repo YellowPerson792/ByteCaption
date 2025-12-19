@@ -6,7 +6,7 @@ Example:
     --models PureT/experiments/ByteCaption_XE PureT/experiments/ByteCaption_XE_blip \
     --corrupt-types rbbf rbsl \
     --corrupt-levels S0 S1 S2 S3 S4 S5 \
-    --val-samples 80
+    --test-samples 0
 """
 
 import argparse
@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Dict, List
 
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 # Project paths
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +30,7 @@ if str(PROJECT_ROOT / "PureT") not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT / "PureT"))
 
 from lib.config import cfg, cfg_from_file  # noqa: E402
-from PureT.main_val import Tester  # noqa: E402
+from PureT.main_test import Tester  # noqa: E402
 from corenet.data.transforms import jpeg_corruption  # noqa: E402
 
 
@@ -58,7 +59,7 @@ def run_single_eval(
     model_folder: Path,
     corrupt_type: str,
     level: str,
-    val_samples: int,
+    test_samples: int,
     dataset: str,
     resume: int,
 ) -> Dict:
@@ -74,14 +75,15 @@ def run_single_eval(
     args = Namespace(
         folder=str(model_folder),
         resume=resume,
-        val_samples=val_samples,
+        test_samples=test_samples,
+        val_samples=test_samples,  # backward-compat with Tester signature
         corrupt_level=normalized_level,
         corrupt_types=[corrupt_type],
         disable_wandb=True,
         dataset=dataset,
     )
     tester = Tester(args)
-    metrics = tester.val_evaler(tester.model, f"{corrupt_type}_{normalized_level}")
+    metrics = tester.test_evaler(tester.model, f"{corrupt_type}_{normalized_level}")
     # Attach the corruption params for traceability
     preset_level = jpeg_corruption.normalize_level(normalized_level)
     corruption_params = jpeg_corruption.JPEG_CORRUPTION_PRESETS.get(
@@ -133,7 +135,8 @@ def parse_args():
     )
     parser.add_argument("--corrupt-types", nargs="+", default=["rbbf", "rbsl", "metadata_loss"])
     parser.add_argument("--corrupt-levels", nargs="+", default=["S0", "S1", "S2", "S3", "S4", "S5"])
-    parser.add_argument("--val-samples", type=int, default=80, help="Number of val samples (0 = all)")
+    parser.add_argument("--test-samples", type=int, default=80, help="Number of test samples (0 = all)")
+    parser.add_argument("--val-samples", type=int, default=None, help="(Alias) Number of test samples (0 = all)")
     parser.add_argument("--dataset", type=str, default="coco", choices=["coco", "flickr8k"])
     parser.add_argument("--resume", type=int, default=-1, help="Checkpoint to load (-1 = best)")
     parser.add_argument(
@@ -153,37 +156,42 @@ def parse_args():
 
 def main():
     args = parse_args()
+    if args.val_samples is not None:
+        args.test_samples = args.val_samples
     output_dir = Path(args.output_dir) / datetime.now().strftime("%Y%m%d_%H%M%S")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     all_results = []
-    for model_folder_str in args.models:
-        model_folder = Path(model_folder_str)
-        model_name = model_folder.name
-        for ctype in args.corrupt_types:
-            for level in args.corrupt_levels:
-                print(f"\n[RUN] model={model_name}, type={ctype}, level={level}")
-                metrics = run_single_eval(
-                    model_folder,
-                    ctype,
-                    level,
-                    val_samples=args.val_samples,
-                    dataset=args.dataset,
-                    resume=args.resume,
-                )
-                run_record = {
-                    "model_folder": str(model_folder),
-                    "model_name": model_name,
-                    "model_type": str(getattr(cfg.MODEL, "TYPE", "")),
-                    "corrupt_type": ctype,
-                    "corrupt_level": jpeg_corruption.normalize_level(level),
-                    "metrics": metrics,
-                }
-                all_results.append(run_record)
-                # save per-run metrics
-                per_run_path = output_dir / f"{model_name}_{ctype}_{level}.json"
-                with open(per_run_path, "w", encoding="utf-8") as f:
-                    json.dump(run_record, f, ensure_ascii=False, indent=2)
+    total_runs = len(args.models) * len(args.corrupt_types) * len(args.corrupt_levels)
+    with tqdm(total=total_runs, desc="Batch eval", unit="run") as pbar:
+        for model_folder_str in args.models:
+            model_folder = Path(model_folder_str)
+            model_name = model_folder.name
+            for ctype in args.corrupt_types:
+                for level in args.corrupt_levels:
+                    print(f"\n[RUN] model={model_name}, type={ctype}, level={level}")
+                    metrics = run_single_eval(
+                        model_folder,
+                        ctype,
+                        level,
+                        test_samples=args.test_samples,
+                        dataset=args.dataset,
+                        resume=args.resume,
+                    )
+                    run_record = {
+                        "model_folder": str(model_folder),
+                        "model_name": model_name,
+                        "model_type": str(getattr(cfg.MODEL, "TYPE", "")),
+                        "corrupt_type": ctype,
+                        "corrupt_level": jpeg_corruption.normalize_level(level),
+                        "metrics": metrics,
+                    }
+                    all_results.append(run_record)
+                    # save per-run metrics
+                    per_run_path = output_dir / f"{model_name}_{ctype}_{level}.json"
+                    with open(per_run_path, "w", encoding="utf-8") as f:
+                        json.dump(run_record, f, ensure_ascii=False, indent=2)
+                    pbar.update(1)
 
     # Aggregate summary
     summary_path = output_dir / "summary.json"

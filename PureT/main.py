@@ -43,7 +43,7 @@ from lib.config import cfg, cfg_from_file
 
 """
 cd /d/MLLMs/ByteCaption && python PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 100 --dataset coco --freeze_backbone --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main.py --folder PureT/experiments/ByteCaption_XE --dataset coco --eval_steps 500 --early_stop_patience 8 --val_samples 500 --load_weights --freeze_backbone  
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main.py --folder PureT/experiments/ByteCaption_XE --dataset coco --eval_steps 1600 --early_stop_patience 4 --val_samples 0 --load_weights --freeze_backbone  --disable_wandb
 cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption torchrun --nproc_per_node=2 --master_port=12355 PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 600 --val_samples 50 --dataset coco --load_weights --freeze_backbone
 """
 
@@ -74,6 +74,9 @@ class Trainer(object):
         # 显示数据集配置 (需要在is_master初始化后)
         self._print_config_summary(args)        # Choose device based on availability
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        # 训练脚本默认跳过 METEOR/SPICE 等耗时指标（评估脚本保持原样）
+        self._maybe_disable_slow_metrics()
 
         # SCST标记
         self.rl_stage = False
@@ -288,6 +291,21 @@ class Trainer(object):
         print(f"  Distributed Training : {'YES' if self.distributed else 'NO'}")
         print(f"  Early Stop Patience  : {early_stop_patience if early_stop_patience > 0 else 'DISABLED'} (measured in evaluations)")
         print()
+
+    def _maybe_disable_slow_metrics(self):
+        """Skip slow metrics (METEOR/SPICE) during training-only runs unless explicitly kept."""
+        if getattr(self.args, 'keep_full_metrics', False):
+            return
+        slow_metrics = {'METEOR', 'SPICE'}
+        paired = list(zip(list(cfg.SCORER.TYPES), list(cfg.SCORER.WEIGHTS)))
+        filtered = [(m, w) for m, w in paired if m not in slow_metrics]
+        removed = [m for m, _ in paired if m in slow_metrics]
+        # Avoid empty list; fallback to original if everything would be stripped
+        if filtered and len(filtered) != len(paired):
+            cfg.SCORER.TYPES = [m for m, _ in filtered]
+            cfg.SCORER.WEIGHTS = [w for _, w in filtered]
+            if self.is_master:
+                self._log(f"Disabled slow metrics for training: removed {removed}, keeping {cfg.SCORER.TYPES}", prefix="SCORER")
 
     def _clear_old_result_files(self):
         """清理旧的评估结果文件（仅在训练开始时执行）"""
@@ -1043,6 +1061,8 @@ def parse_args():
                         help='Freeze backbone parameters during training')
     parser.add_argument("--load_weights", action='store_true',
                         help='Path to pretrained weights file (.pth) to load')
+    parser.add_argument("--keep_full_metrics", action='store_true',
+                        help='Do not strip slow metrics (METEOR/SPICE) during training evaluations')
     parser.add_argument("--wandb_project", type=str, default="ByteCaption",
                         help='Wandb project name')
     parser.add_argument("--wandb_name", type=str, default=None,

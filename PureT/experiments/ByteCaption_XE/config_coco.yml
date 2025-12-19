@@ -24,7 +24,7 @@ DATA_LOADER:
   TEST_ATT_FEATS: ''                        # Not used for COCO
   TRAIN_ID: './PureT/data/coco_karpathy/train_ids.json'
   VAL_ID: './PureT/data/coco_karpathy/validation_ids.json'
-  TEST_ID: './PureT/data/coco_karpathy/validation_ids.json'
+  TEST_ID: './PureT/data/coco_karpathy/test_ids.json'
   TEST_4W_ID: './PureT/data/coco_karpathy/validation_ids.json'
   INPUT_SEQ_PATH: ''                        # Not used for COCO (auto-generated)
   TARGET_SEQ_PATH: ''                       # Not used for COCO (auto-generated)
@@ -127,15 +127,15 @@ SOLVER:
     # FACTOR: 1.0              # COCO数据集学习率因子
     # MODEL_SIZE: 512           # For Noam only
 
-    TYPE: 'Linear'
-    START_FACTOR: 1.0     # Start with full BASE_LR
-    END_FACTOR: 0.0       # End with 0 learning rate
-    STEP_TYPE: 'Iter'     # Update every iteration (fixed typo: SETP_TYPE -> STEP_TYPE)
+    # TYPE: 'Linear'
+    # START_FACTOR: 1.0     # Start with full BASE_LR
+    # END_FACTOR: 0.0       # End with 0 learning rate
+    # STEP_TYPE: 'Iter'     # Update every iteration (fixed typo: SETP_TYPE -> STEP_TYPE)
 
-    # TYPE: 'CosineAnnealing'
-    # # T_MAX: auto-calculated as (total_epochs × steps_per_epoch)
-    # ETA_MIN: 0.0      # Minimum learning rate
-    # STEP_TYPE: 'Step'    # Update every epoch
+    TYPE: 'CosineAnnealing'
+    # WARMUP_RATIO: 0.05
+    ETA_MIN: 0.0      # Minimum learning rate
+    STEP_TYPE: 'Iter'    # Update every iteration
 
 ############################ LOSSES ############################
 LOSSES:

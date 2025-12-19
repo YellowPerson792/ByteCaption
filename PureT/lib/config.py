@@ -309,6 +309,11 @@ __C.SOLVER.LR_POLICY.ETA_MIN = 0.0           # Minimum learning rate
 __C.SOLVER.LR_POLICY.T_0 = None            # [AUTO-CALCULATED] Iterations for first restart (set to number to override)
 __C.SOLVER.LR_POLICY.T_MULT = 2            # Factor increases T_i after a restart
 
+# Warmup settings for cosine schedulers
+__C.SOLVER.LR_POLICY.WARMUP_STEPS = 0      # Absolute warmup steps (linear ramp)
+__C.SOLVER.LR_POLICY.WARMUP_RATIO = 0.0    # Warmup steps as ratio of total iters (used if WARMUP_STEPS==0)
+__C.SOLVER.LR_POLICY.WARMUP_INIT_LR = 0.0  # Starting LR for warmup (defaults to 0)
+
 # ---------------------------------------------------------------------------- #
 # Losses options
 # ---------------------------------------------------------------------------- #
