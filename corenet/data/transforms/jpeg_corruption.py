@@ -107,8 +107,8 @@ class JPEGCorruptionPipeline:
         if all(ct == "none" for ct in self.corruption_types):
             return False
         if self.level in {"S0", "M0"}:
-            # No-op presets
-            return any(ct.startswith("metadata") and self.level == "M0" for ct in self.corruption_types) is False
+            # S0/M0 are meant to disable corruption entirely
+            return False
         return True
 
     def _resolve_params(self, corruption_type: str) -> Dict[str, float]:

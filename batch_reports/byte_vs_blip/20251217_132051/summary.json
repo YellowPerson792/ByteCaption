@@ -1,0 +1,1396 @@
+{
+  "runs": [
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S0",
+      "metrics": {
+        "Bleu_1": 0.6059760154038937,
+        "Bleu_2": 0.42120912963726687,
+        "Bleu_3": 0.2729908413808091,
+        "Bleu_4": 0.18077019088981466,
+        "ROUGE_L": 0.4419190951207369,
+        "CIDEr": 0.6595645042114634,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.3477586954832077,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a brown bear standing next to a brown bear",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of young men playing a game of frisbee",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a sandwich on a plate next to a drink",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with a sink and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0,
+          "burst_lambda": 0.0,
+          "bit_error_rate": 0.0
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S1",
+      "metrics": {
+        "Bleu_1": 0.6098226466567397,
+        "Bleu_2": 0.4234438190946059,
+        "Bleu_3": 0.2743639014121566,
+        "Bleu_4": 0.18166733051012937,
+        "ROUGE_L": 0.4426182672104469,
+        "CIDEr": 0.6639130917346373,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.349188342690468,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a brown bear standing next to a brown bear",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of young men playing a game of frisbee",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a sandwich on a plate next to a drink",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with a sink and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 2e-05,
+          "burst_lambda": 30.0,
+          "bit_error_rate": 0.08
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S2",
+      "metrics": {
+        "Bleu_1": 0.6166439290569805,
+        "Bleu_2": 0.432407516429608,
+        "Bleu_3": 0.2941544909541921,
+        "Bleu_4": 0.20160782168857552,
+        "ROUGE_L": 0.44624334519141023,
+        "CIDEr": 0.690683192841443,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.353854179382324,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a brown bear standing next to a brown bear",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of people playing a game of frisbee",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a hot dog sitting on top of a paper plate",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with a sink and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.00012,
+          "burst_lambda": 140.0,
+          "bit_error_rate": 0.18
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S3",
+      "metrics": {
+        "Bleu_1": 0.5986254777137163,
+        "Bleu_2": 0.39779256506015753,
+        "Bleu_3": 0.25337977910894677,
+        "Bleu_4": 0.16024843205531455,
+        "ROUGE_L": 0.40987150972607955,
+        "CIDEr": 0.600179578644368,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.393929734826088,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a polar bear standing in a field of grass",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of people playing a game of frisbee",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a hot dog on a bun next to a drink",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with a sink and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0006,
+          "burst_lambda": 220.0,
+          "bit_error_rate": 0.3
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S4",
+      "metrics": {
+        "Bleu_1": 0.5909694555105034,
+        "Bleu_2": 0.3953529524732194,
+        "Bleu_3": 0.25239555654805307,
+        "Bleu_4": 0.16730808931107347,
+        "ROUGE_L": 0.41666174934193423,
+        "CIDEr": 0.5818437472747229,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.4308220893144608,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a couple of polar bears standing next to each other",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of people playing a game of soccer",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a banana and a banana on a table",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with a sink and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.001,
+          "burst_lambda": 320.0,
+          "bit_error_rate": 0.38
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S5",
+      "metrics": {
+        "Bleu_1": 0.518609632276072,
+        "Bleu_2": 0.32526035115626556,
+        "Bleu_3": 0.1958862394984624,
+        "Bleu_4": 0.12189312908637764,
+        "ROUGE_L": 0.3843337782759906,
+        "CIDEr": 0.351012759578187,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.611631229519844,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with lots of furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a couple of sheep standing next to each other",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of people standing on top of a lush green field",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a pair of scissors sitting on top of a table",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a picture of a bathroom mirror and sink",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.002,
+          "burst_lambda": 420.0,
+          "bit_error_rate": 0.45
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S0",
+      "metrics": {
+        "Bleu_1": 0.6059760154038937,
+        "Bleu_2": 0.42120912963726687,
+        "Bleu_3": 0.2729908413808091,
+        "Bleu_4": 0.18077019088981466,
+        "ROUGE_L": 0.4419190951207369,
+        "CIDEr": 0.6595645042114634,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.3477586954832077,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a brown bear standing next to a brown bear",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of young men playing a game of frisbee",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a sandwich on a plate next to a drink",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with a sink and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0,
+          "burst_lambda": 0.0,
+          "max_drop_ratio": 0.0
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S1",
+      "metrics": {
+        "Bleu_1": 0.6114107778738838,
+        "Bleu_2": 0.4274782518856245,
+        "Bleu_3": 0.28115357563736515,
+        "Bleu_4": 0.19154042374002606,
+        "ROUGE_L": 0.4455035301642942,
+        "CIDEr": 0.6859220015793115,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.349685698747635,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a brown bear standing next to a brown bear",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of young men playing a game of frisbee",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a sandwich on a plate next to a drink",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with a sink and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 1e-05,
+          "burst_lambda": 24.0,
+          "max_drop_ratio": 0.08
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S2",
+      "metrics": {
+        "Bleu_1": 0.5933924685471853,
+        "Bleu_2": 0.40728939875412157,
+        "Bleu_3": 0.26416684886126074,
+        "Bleu_4": 0.177179893445128,
+        "ROUGE_L": 0.4310677700970694,
+        "CIDEr": 0.6202405297284497,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.3456897884607315,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a brown bear standing next to a brown bear",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of people playing a game of frisbee",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a hot dog on a bun next to a drink",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a sink and mirror in a bathroom",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0003,
+          "burst_lambda": 100.0,
+          "max_drop_ratio": 0.22
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S3",
+      "metrics": {
+        "Bleu_1": 0.6166294515508907,
+        "Bleu_2": 0.42597474086474596,
+        "Bleu_3": 0.2824218576746002,
+        "Bleu_4": 0.19570889738050498,
+        "ROUGE_L": 0.44562942691410984,
+        "CIDEr": 0.6796271437242714,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.388100117444992,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a polar bear standing in a field of grass",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of people playing a game of frisbee",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a hot dog sitting on a bun next to a drink",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a sink and mirror in a bathroom",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0008,
+          "burst_lambda": 220.0,
+          "max_drop_ratio": 0.45
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S4",
+      "metrics": {
+        "Bleu_1": 0.5466847090648264,
+        "Bleu_2": 0.35275354393823477,
+        "Bleu_3": 0.22916629572930233,
+        "Bleu_4": 0.15177267631317687,
+        "ROUGE_L": 0.4028533699983238,
+        "CIDEr": 0.46258042129569954,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.6756880432367325,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with lots of furniture",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a couple of bears standing next to each other",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a man flying a kite in a grassy field",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a hot dog sitting on top of a table",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with a sink and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0015,
+          "burst_lambda": 360.0,
+          "max_drop_ratio": 0.7
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE",
+      "model_name": "ByteCaption_XE",
+      "model_type": "PureT_byteformer",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S5",
+      "metrics": {
+        "Bleu_1": 0.4980694980688571,
+        "Bleu_2": 0.2903819301938894,
+        "Bleu_3": 0.1618099542430485,
+        "Bleu_4": 0.0891318358177028,
+        "ROUGE_L": 0.36273815835859813,
+        "CIDEr": 0.254311291972507,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": 2.6968518644571304,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a picture of a person laying on the ground",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a person sitting on a bench in the grass",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a group of people playing frisbee in a field",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a person holding a cell phone in their hand",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a close up of a train on a train track",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0025,
+          "burst_lambda": 520.0,
+          "max_drop_ratio": 0.85
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S0",
+      "metrics": {
+        "Bleu_1": 0.7292464878662461,
+        "Bleu_2": 0.5707216329758513,
+        "Bleu_3": 0.4202905794292956,
+        "Bleu_4": 0.3105199535455328,
+        "ROUGE_L": 0.5326737644698127,
+        "CIDEr": 1.1737010883336416,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and a fire place",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a brown bear sitting on top of a lush green field",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a young boy playing with a toy in the grass",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "white paper under the sandwich",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with two sinks and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0,
+          "burst_lambda": 0.0,
+          "bit_error_rate": 0.0
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S1",
+      "metrics": {
+        "Bleu_1": 0.6917304611762783,
+        "Bleu_2": 0.5310420573218635,
+        "Bleu_3": 0.38820858389423796,
+        "Bleu_4": 0.27779478248261136,
+        "ROUGE_L": 0.5150817430623823,
+        "CIDEr": 1.032285738504024,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 1,
+        "Undecodable_Ratio": 0.0125,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and a flat screen tv",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a brown bear sitting on top of a lush green field",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a little boy playing with a toy in the grass",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a hamburger on a table",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 2e-05,
+          "burst_lambda": 30.0,
+          "bit_error_rate": 0.08
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S2",
+      "metrics": {
+        "Bleu_1": 0.430769230768721,
+        "Bleu_2": 0.23729665688413448,
+        "Bleu_3": 0.1288117079425654,
+        "Bleu_4": 0.07709525696949769,
+        "ROUGE_L": 0.31312287602478933,
+        "CIDEr": 0.21006676987346617,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 8,
+        "Undecodable_Ratio": 0.1,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a room with a ceiling fan and a ceiling fan",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "an old photo of a man in a suit and tie",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a black and white photo of a man in a suit",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "an airplane that is flying in the sky",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.00012,
+          "burst_lambda": 140.0,
+          "bit_error_rate": 0.18
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S3",
+      "metrics": {
+        "Bleu_1": 0.3411764705878339,
+        "Bleu_2": 0.14583601619981312,
+        "Bleu_3": 0.045220349657859184,
+        "Bleu_4": 0.019731857860570395,
+        "ROUGE_L": 0.2430609724179122,
+        "CIDEr": 0.03368345001352344,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 36,
+        "Undecodable_Ratio": 0.45,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a black and white photo of a man in a suit",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a black and white photo of a man in a suit",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a man in a suit and tie standing in front of a building",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "an image of a computer screen with colorful squares on it",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0006,
+          "burst_lambda": 220.0,
+          "bit_error_rate": 0.3
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S4",
+      "metrics": {
+        "Bleu_1": 0.3211334120421238,
+        "Bleu_2": 0.15448363957873687,
+        "Bleu_3": 0.07470158754632507,
+        "Bleu_4": 0.040711321382560575,
+        "ROUGE_L": 0.2488478103268736,
+        "CIDEr": 0.04127489118753065,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 45,
+        "Undecodable_Ratio": 0.5625,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a black and white photo of a man in a suit",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.001,
+          "burst_lambda": 320.0,
+          "bit_error_rate": 0.38
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbbf",
+      "corrupt_level": "S5",
+      "metrics": {
+        "Bleu_1": 0.24931506849280916,
+        "Bleu_2": 0.06784349435291502,
+        "Bleu_3": 0.025276902451643747,
+        "Bleu_4": 2.39603892596356e-06,
+        "ROUGE_L": 0.1906110450010206,
+        "CIDEr": 0.01545329559191234,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 75,
+        "Undecodable_Ratio": 0.9375,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.002,
+          "burst_lambda": 420.0,
+          "bit_error_rate": 0.45
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S0",
+      "metrics": {
+        "Bleu_1": 0.7292464878662461,
+        "Bleu_2": 0.5707216329758513,
+        "Bleu_3": 0.4202905794292956,
+        "Bleu_4": 0.3105199535455328,
+        "ROUGE_L": 0.5326737644698127,
+        "CIDEr": 1.1737010883336416,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and a fire place",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a brown bear sitting on top of a lush green field",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a young boy playing with a toy in the grass",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "white paper under the sandwich",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with two sinks and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0,
+          "burst_lambda": 0.0,
+          "max_drop_ratio": 0.0
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S1",
+      "metrics": {
+        "Bleu_1": 0.7391559992911095,
+        "Bleu_2": 0.5810874621897206,
+        "Bleu_3": 0.43085132160556494,
+        "Bleu_4": 0.32228752503724245,
+        "ROUGE_L": 0.5352066188309982,
+        "CIDEr": 1.1604474190820357,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 0,
+        "Undecodable_Ratio": 0.0,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "a living room filled with furniture and a fire place",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "a brown bear sitting on top of a lush green field",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a young boy playing with a toy in the grass",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "white paper under the sandwich",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with two sinks and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 1e-05,
+          "burst_lambda": 24.0,
+          "max_drop_ratio": 0.08
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S2",
+      "metrics": {
+        "Bleu_1": 0.5554106910031872,
+        "Bleu_2": 0.38147405126825634,
+        "Bleu_3": 0.25479846126368505,
+        "Bleu_4": 0.17369785140885535,
+        "ROUGE_L": 0.4066076821688691,
+        "CIDEr": 0.5840796330107153,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 6,
+        "Undecodable_Ratio": 0.075,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "an image of a field with a red and green field in the background",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a little girl playing with a toy in the grass",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "a person sitting at a table with a plate of food in front of them",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "a bathroom with two sinks and a mirror",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0003,
+          "burst_lambda": 100.0,
+          "max_drop_ratio": 0.22
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S3",
+      "metrics": {
+        "Bleu_1": 0.3951093951083781,
+        "Bleu_2": 0.19633455645720915,
+        "Bleu_3": 0.0908440576937077,
+        "Bleu_4": 0.0486120369938889,
+        "ROUGE_L": 0.2736720283469264,
+        "CIDEr": 0.1472777433523512,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 25,
+        "Undecodable_Ratio": 0.3125,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "two dogs are in the grass and one is looking at the camera",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "a green screen with a picture of a dog and a green screen with a picture of a dog and a",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "an image of a man in a suit and tie",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0008,
+          "burst_lambda": 220.0,
+          "max_drop_ratio": 0.45
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S4",
+      "metrics": {
+        "Bleu_1": 0.31016731016691096,
+        "Bleu_2": 0.13992907430363694,
+        "Bleu_3": 0.06056330951244705,
+        "Bleu_4": 0.03015929095310666,
+        "ROUGE_L": 0.22828272358663818,
+        "CIDEr": 0.05703791206291101,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 47,
+        "Undecodable_Ratio": 0.5875,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "an image of a computer screen with a picture on it",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "two bears in the grass",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0015,
+          "burst_lambda": 360.0,
+          "max_drop_ratio": 0.7
+        }
+      }
+    },
+    {
+      "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+      "model_name": "ByteCaption_XE_blip",
+      "model_type": "BLIP",
+      "corrupt_type": "rbsl",
+      "corrupt_level": "S5",
+      "metrics": {
+        "Bleu_1": 0.28289473684173305,
+        "Bleu_2": 0.11171683022160979,
+        "Bleu_3": 0.03966453841409066,
+        "Bleu_4": 3.3097940247779366e-06,
+        "ROUGE_L": 0.20815725586769718,
+        "CIDEr": 0.02627800318617124,
+        "METEOR": 0.0,
+        "SPICE": 0.0,
+        "XE_Loss": null,
+        "Undecodable_Count": 61,
+        "Undecodable_Ratio": 0.7625,
+        "Total_Samples": 80,
+        "Sample_Preview": [
+          {
+            "image_id": 1,
+            "generated": "an image of a room with many different colors",
+            "reference": "A woman stands in the dining area at the table.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 2,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A big burly grizzly bear is show with grass in the background.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 3,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A young boy getting ready to catch a baseball in a grass field.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 4,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "A chicken sandwich in a wrapper near a cell phone.",
+            "augmentation_idx": 0
+          },
+          {
+            "image_id": 5,
+            "generated": "this is a dummy caption for an undecodable image",
+            "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+            "augmentation_idx": 0
+          }
+        ],
+        "corruption_params": {
+          "trigger_prob": 0.0025,
+          "burst_lambda": 520.0,
+          "max_drop_ratio": 0.85
+        }
+      }
+    }
+  ]
+}

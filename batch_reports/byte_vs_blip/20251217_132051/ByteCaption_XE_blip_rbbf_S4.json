@@ -1,0 +1,58 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+  "model_name": "ByteCaption_XE_blip",
+  "model_type": "BLIP",
+  "corrupt_type": "rbbf",
+  "corrupt_level": "S4",
+  "metrics": {
+    "Bleu_1": 0.3211334120421238,
+    "Bleu_2": 0.15448363957873687,
+    "Bleu_3": 0.07470158754632507,
+    "Bleu_4": 0.040711321382560575,
+    "ROUGE_L": 0.2488478103268736,
+    "CIDEr": 0.04127489118753065,
+    "METEOR": 0.0,
+    "SPICE": 0.0,
+    "XE_Loss": null,
+    "Undecodable_Count": 45,
+    "Undecodable_Ratio": 0.5625,
+    "Total_Samples": 80,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A woman stands in the dining area at the table.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a black and white photo of a man in a suit",
+        "reference": "A big burly grizzly bear is show with grass in the background.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A young boy getting ready to catch a baseball in a grass field.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A chicken sandwich in a wrapper near a cell phone.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+        "augmentation_idx": 0
+      }
+    ],
+    "corruption_params": {
+      "trigger_prob": 0.001,
+      "burst_lambda": 320.0,
+      "bit_error_rate": 0.38
+    }
+  }
+}

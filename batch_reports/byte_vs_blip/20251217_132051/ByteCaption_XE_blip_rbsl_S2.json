@@ -1,0 +1,58 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+  "model_name": "ByteCaption_XE_blip",
+  "model_type": "BLIP",
+  "corrupt_type": "rbsl",
+  "corrupt_level": "S2",
+  "metrics": {
+    "Bleu_1": 0.5554106910031872,
+    "Bleu_2": 0.38147405126825634,
+    "Bleu_3": 0.25479846126368505,
+    "Bleu_4": 0.17369785140885535,
+    "ROUGE_L": 0.4066076821688691,
+    "CIDEr": 0.5840796330107153,
+    "METEOR": 0.0,
+    "SPICE": 0.0,
+    "XE_Loss": null,
+    "Undecodable_Count": 6,
+    "Undecodable_Ratio": 0.075,
+    "Total_Samples": 80,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A woman stands in the dining area at the table.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "an image of a field with a red and green field in the background",
+        "reference": "A big burly grizzly bear is show with grass in the background.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "a little girl playing with a toy in the grass",
+        "reference": "A young boy getting ready to catch a baseball in a grass field.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "a person sitting at a table with a plate of food in front of them",
+        "reference": "A chicken sandwich in a wrapper near a cell phone.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "a bathroom with two sinks and a mirror",
+        "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+        "augmentation_idx": 0
+      }
+    ],
+    "corruption_params": {
+      "trigger_prob": 0.0003,
+      "burst_lambda": 100.0,
+      "max_drop_ratio": 0.22
+    }
+  }
+}

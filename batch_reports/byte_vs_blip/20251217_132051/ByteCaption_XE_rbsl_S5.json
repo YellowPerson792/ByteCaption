@@ -1,0 +1,58 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE",
+  "model_name": "ByteCaption_XE",
+  "model_type": "PureT_byteformer",
+  "corrupt_type": "rbsl",
+  "corrupt_level": "S5",
+  "metrics": {
+    "Bleu_1": 0.4980694980688571,
+    "Bleu_2": 0.2903819301938894,
+    "Bleu_3": 0.1618099542430485,
+    "Bleu_4": 0.0891318358177028,
+    "ROUGE_L": 0.36273815835859813,
+    "CIDEr": 0.254311291972507,
+    "METEOR": 0.0,
+    "SPICE": 0.0,
+    "XE_Loss": 2.6968518644571304,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 80,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "a picture of a person laying on the ground",
+        "reference": "A woman stands in the dining area at the table.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a person sitting on a bench in the grass",
+        "reference": "A big burly grizzly bear is show with grass in the background.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "a group of people playing frisbee in a field",
+        "reference": "A young boy getting ready to catch a baseball in a grass field.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "a person holding a cell phone in their hand",
+        "reference": "A chicken sandwich in a wrapper near a cell phone.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "a close up of a train on a train track",
+        "reference": "a bathroom wih a big mirror and a tv attached in the corner",
+        "augmentation_idx": 0
+      }
+    ],
+    "corruption_params": {
+      "trigger_prob": 0.0025,
+      "burst_lambda": 520.0,
+      "max_drop_ratio": 0.85
+    }
+  }
+}

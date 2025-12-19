@@ -10,7 +10,7 @@ TRAIN:
 
 ############################ TEST ############################  
 TEST:
-  BATCH_SIZE: 25
+  BATCH_SIZE: 50
 
 ############################ DATA_LOADER ############################
 DATA_LOADER:
@@ -98,7 +98,7 @@ MODEL:
 SOLVER:
   BASE_LR: 0.00005               # 0.00005
   TYPE: 'ADAM'                 # 'ADAM', 'SGD', 'RADAM'
-  MAX_EPOCH: 10
+  MAX_EPOCH: 2
   MAX_ITER: -1
   GRAD_CLIP: 0.1                # Norm:0.5 , Clamp:0.1
   GRAD_CLIP_TYPE: 'Clamp'       # 'Clamp'  , 'Norm'

@@ -124,115 +124,118 @@ class Flickr8kEvaler(object):
         loss_sum = 0.0
         loss_count = 0
         # output_indices = {0, 5, 10, 15, 20, 25}
+        pbar = None
         with torch.no_grad():
-            # Use tqdm without desc to avoid interference with sample output
+            # Ensure the progress bar is closed even if an exception happens.
             pbar = tqdm.tqdm(self.eval_loader, desc=f"Evaluating {rname}", leave=False)
-            for _, (indices, gv_feat, att_feats, att_mask) in enumerate(pbar):
-                ids = self.eval_ids[indices]
-                gv_feat = gv_feat.to(device)
-                att_feats = att_feats.to(device)
-                if att_mask is not None:
-                    att_mask = att_mask.to(device)
-                kwargs = self.make_kwargs(indices, ids, gv_feat, att_feats, att_mask)
-                # 尝试构建输入/目标序列以计算XE loss（仅当启用且数据集支持时）
-                batch_loss = None
-                if self.loss_computation_ready and xe_criterion is not None:
-                    try:
-                        dataset = self.eval_loader.dataset
-                        if not hasattr(dataset, '_build_seqs_from_captions'):
-                            raise AttributeError('Dataset lacks _build_seqs_from_captions; cannot compute eval XE loss')
-                        input_list = []
-                        target_list = []
-                        for idx in indices:
-                            sample = dataset.ds[int(idx)] if hasattr(dataset, 'ds') else None
-                            if sample is None:
-                                raise ValueError('Unable to retrieve sample for XE loss computation')
-                            in_arr, tgt_arr = dataset._build_seqs_from_captions(sample)
-                            # _build_seqs_from_captions 返回 (seq_per_img, seq_len)
-                            # 对于评估，我们需要所有5个序列来匹配模型的seq_per_img设置
-                            for seq_idx in range(cfg.DATA_LOADER.SEQ_PER_IMG):
-                                if seq_idx < in_arr.shape[0]:
-                                    input_list.append(in_arr[seq_idx])
-                                    target_list.append(tgt_arr[seq_idx])
+            try:
+                for _, (indices, gv_feat, att_feats, att_mask) in enumerate(pbar):
+                    ids = self.eval_ids[indices]
+                    gv_feat = gv_feat.to(device)
+                    att_feats = att_feats.to(device)
+                    if att_mask is not None:
+                        att_mask = att_mask.to(device)
+                    kwargs = self.make_kwargs(indices, ids, gv_feat, att_feats, att_mask)
+                    # 尝试构建输入/目标序列以计算XE loss（仅当启用且数据集支持时）
+                    batch_loss = None
+                    if self.loss_computation_ready and xe_criterion is not None:
+                        try:
+                            dataset = self.eval_loader.dataset
+                            if not hasattr(dataset, '_build_seqs_from_captions'):
+                                raise AttributeError('Dataset lacks _build_seqs_from_captions; cannot compute eval XE loss')
+                            input_list = []
+                            target_list = []
+                            for idx in indices:
+                                sample = dataset.ds[int(idx)] if hasattr(dataset, 'ds') else None
+                                if sample is None:
+                                    raise ValueError('Unable to retrieve sample for XE loss computation')
+                                in_arr, tgt_arr = dataset._build_seqs_from_captions(sample)
+                                # _build_seqs_from_captions 返回 (seq_per_img, seq_len)
+                                # 对于评估，我们需要所有5个序列来匹配模型的seq_per_img设置
+                                for seq_idx in range(cfg.DATA_LOADER.SEQ_PER_IMG):
+                                    if seq_idx < in_arr.shape[0]:
+                                        input_list.append(in_arr[seq_idx])
+                                        target_list.append(tgt_arr[seq_idx])
+                                    else:
+                                        # 如果序列不足5个，重复最后一个
+                                        input_list.append(in_arr[-1])
+                                        target_list.append(tgt_arr[-1])
+
+                            if len(input_list) > 0:
+                                input_seq = torch.from_numpy(np.stack(input_list, 0)).long().to(device)
+                                target_seq = torch.from_numpy(np.stack(target_list, 0)).long().to(device)
+
+                                # 构建损失计算所需的kwargs
+                                loss_kwargs = dict(kwargs)
+                                loss_kwargs[cfg.PARAM.INPUT_SENT] = input_seq
+                                loss_kwargs[cfg.PARAM.TARGET_SENT] = target_seq
+
+                                m = getattr(model, 'module', model)
+                                # 前向得到 log-probs
+                                logit = m(**loss_kwargs)
+
+                                # logit形状应该是 [batch_size*seq_per_img, seq_len, vocab_size]
+                                if logit.dim() == 3:  # [batch*seq_per_img, seq_len, vocab_size]
+                                    batch_loss, _batch_loss_info = xe_criterion(logit, target_seq)
                                 else:
-                                    # 如果序列不足5个，重复最后一个
-                                    input_list.append(in_arr[-1])
-                                    target_list.append(tgt_arr[-1])
-                        
-                        if len(input_list) > 0:
-                            input_seq = torch.from_numpy(np.stack(input_list, 0)).long().to(device)
-                            target_seq = torch.from_numpy(np.stack(target_list, 0)).long().to(device)
-                            
-                            # 现在input_seq和target_seq的形状应该是 [batch_size*seq_per_img, seq_len]
-                            # 这与模型期望的维度匹配
-                            
-                            # 构建损失计算所需的kwargs
-                            loss_kwargs = dict(kwargs)
-                            loss_kwargs[cfg.PARAM.INPUT_SENT] = input_seq
-                            loss_kwargs[cfg.PARAM.TARGET_SENT] = target_seq
-                            
-                            # 不需要修改seq_per_img，因为现在序列数量已经匹配了
-                            m = getattr(model, 'module', model)
-                            # 前向得到 log-probs
-                            logit = m(**loss_kwargs)
-                            
-                            # logit形状应该是 [batch_size*seq_per_img, seq_len, vocab_size]
-                            if logit.dim() == 3:  # [batch*seq_per_img, seq_len, vocab_size]
-                                batch_loss, batch_loss_info = xe_criterion(logit, target_seq)
-                            else:
-                                # 如果维度不对，跳过损失计算
-                                batch_loss = None
-                                
-                            # accumulate weighted by batch size (number of sequences)
+                                    # 如果维度不对，跳过损失计算
+                                    batch_loss = None
+
+                                # accumulate weighted by batch size (number of sequences)
+                                if batch_loss is not None:
+                                    try:
+                                        # 注意：现在序列数量是 batch_size * seq_per_img
+                                        bs = int(target_seq.size(0))
+                                        loss_sum += float(batch_loss.item()) * bs
+                                        loss_count += bs
+                                    except Exception:
+                                        pass
+                        except Exception as e:
+                            # 仅在第一个批次打印详细错误信息用于调试
+                            if len(results) == 0:  # 第一个批次
+                                print(f"[信息] XE Loss计算已禁用: {type(e).__name__} - {str(e)}")
+                            batch_loss = None
+                    m = getattr(model, 'module', model)
+                    if kwargs['BEAM_SIZE'] > 1:
+                        seq, _ = m.decode_beam(**kwargs)
+                    else:
+                        seq, _ = m.decode(**kwargs)
+
+                    sents = utils.decode_sequence(self.vocab, seq.data)
+                    for sid, sent in enumerate(sents):
+                        result = {cfg.INFERENCE.ID_KEY: int(ids[sid]), cfg.INFERENCE.CAP_KEY: sent}
+                        results.append(result)
+                        if global_idx < 5:  # Show first 5 samples only
+                            image_id = int(ids[sid])
+                            gt_captions = []
+                            if hasattr(self.evaler, 'id_to_captions') and image_id in self.evaler.id_to_captions:
+                                gt_captions = self.evaler.id_to_captions[image_id]
+                            elif hasattr(self.evaler, 'coco_data'):
+                                for ann in self.evaler.coco_data.get('annotations', []):
+                                    if ann['image_id'] == image_id:
+                                        gt_captions.append(ann['caption'])
+                            gt_str = gt_captions[0] if gt_captions else "N/A"
+
+                            # Clear progress bar line and print sample
+                            pbar.clear()
+                            print(f"\n[Eval Sample {global_idx}]")
+                            print(f"  Generated: {sent}")
+                            print(f"  Reference: {gt_str}")
                             if batch_loss is not None:
                                 try:
-                                    # 注意：现在序列数量是 batch_size * seq_per_img
-                                    bs = int(target_seq.size(0))
-                                    loss_sum += float(batch_loss.item()) * bs
-                                    loss_count += bs
+                                    print(f"  XE Loss  : {batch_loss.item():.4f}")
                                 except Exception:
-                                    pass
-                    except Exception as e:
-                        # 仅在第一个批次打印详细错误信息用于调试
-                        if len(results) == 0:  # 第一个批次
-                            print(f"[信息] XE Loss计算已禁用: {type(e).__name__} - {str(e)}")
-                        batch_loss = None
-                m = getattr(model, 'module', model)
-                if kwargs['BEAM_SIZE'] > 1:
-                    seq, _ = m.decode_beam(**kwargs)
-                else:
-                    seq, _ = m.decode(**kwargs)
+                                    print(f"  XE Loss  : {batch_loss}")
+                            else:
+                                print(f"  XE Loss  : N/A")
+                            print("  " + "─" * 50)
 
-                sents = utils.decode_sequence(self.vocab, seq.data)
-                for sid, sent in enumerate(sents):
-                    result = {cfg.INFERENCE.ID_KEY: int(ids[sid]), cfg.INFERENCE.CAP_KEY: sent}
-                    results.append(result)
-                    if global_idx < 5:  # Show first 5 samples only
-                        image_id = int(ids[sid])
-                        gt_captions = []
-                        if hasattr(self.evaler, 'id_to_captions') and image_id in self.evaler.id_to_captions:
-                            gt_captions = self.evaler.id_to_captions[image_id]
-                        elif hasattr(self.evaler, 'coco_data'):
-                            for ann in self.evaler.coco_data.get('annotations', []):
-                                if ann['image_id'] == image_id:
-                                    gt_captions.append(ann['caption'])
-                        gt_str = gt_captions[0] if gt_captions else "N/A"
-                        
-                        # Clear progress bar line and print sample
-                        pbar.clear()
-                        print(f"\n[Eval Sample {global_idx}]")
-                        print(f"  Generated: {sent}")
-                        print(f"  Reference: {gt_str}")
-                        if batch_loss is not None:
-                            try:
-                                print(f"  XE Loss  : {batch_loss.item():.4f}")
-                            except Exception:
-                                print(f"  XE Loss  : {batch_loss}")
-                        else:
-                            print(f"  XE Loss  : N/A")
-                        print("  " + "─" * 50)
-                        
-                    global_idx += 1
+                        global_idx += 1
+            finally:
+                try:
+                    pbar.close()
+                except Exception:
+                    pass
 
         # Evaluate (capture stdout to avoid duplicate printing)
         import sys

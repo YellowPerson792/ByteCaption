@@ -62,13 +62,30 @@ class Tester(object):
             if torch.cuda.is_available():
                 torch.cuda.manual_seed_all(int(cfg.SEED))
 
-        self.distributed = torch.cuda.device_count() > 1 and torch.distributed.is_available()
-        
+        # Evaluation runs are commonly launched as a single process even on multi-GPU hosts.
+        # Only enable distributed when torchrun-style environment variables are present.
+        self.distributed = (
+            torch.distributed.is_available()
+            and ("RANK" in os.environ and "WORLD_SIZE" in os.environ and "LOCAL_RANK" in os.environ)
+        )
+
         if self.distributed:
             self.local_rank = init_distributed_mode()
         else:
             self.local_rank = 0
-        self.is_master = (not self.distributed) or (dist.get_rank() == 0 if self.distributed else True)
+
+        self.is_master = (not self.distributed) or (dist.is_initialized() and dist.get_rank() == 0)
+
+        # Force safe DataLoader defaults for offline evaluation to avoid process hang on exit.
+        # (Common culprit: multi-worker DataLoader + persistent workers.)
+        if hasattr(args, "num_workers") and args.num_workers is not None:
+            cfg.DATA_LOADER.NUM_WORKERS = int(args.num_workers)
+        else:
+            cfg.DATA_LOADER.NUM_WORKERS = 0
+        if hasattr(args, "pin_memory") and args.pin_memory is not None:
+            cfg.DATA_LOADER.PIN_MEMORY = bool(args.pin_memory)
+        else:
+            cfg.DATA_LOADER.PIN_MEMORY = bool(torch.cuda.is_available())
 
         self._print_eval_summary(args)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -227,6 +244,35 @@ class Tester(object):
         snapshot_folder = os.path.join(cfg.ROOT_DIR, 'snapshot')
         return os.path.join(snapshot_folder, name + "_" + str(epoch) + ".pth")
 
+    def shutdown(self):
+        # Best-effort cleanup to prevent evaluation process hanging on exit.
+        try:
+            if self.is_master and self.use_wandb:
+                wandb.finish()
+        except Exception:
+            pass
+
+        try:
+            if dist.is_available() and dist.is_initialized():
+                dist.destroy_process_group()
+        except Exception:
+            pass
+
+        try:
+            if hasattr(self, "logger") and self.logger is not None:
+                for handler in list(self.logger.handlers):
+                    try:
+                        handler.flush()
+                        handler.close()
+                    except Exception:
+                        pass
+                    try:
+                        self.logger.removeHandler(handler)
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
     def _print_eval_summary(self, args):
         """打印评估相关的摘要（在 Tester 初始化后调用）"""
         if not self.is_master:
@@ -334,6 +380,26 @@ def parse_args():
     parser.add_argument("--wandb_name", type=str, default=None, help="A specific name for the wandb run.")
     parser.add_argument("--disable_wandb", action="store_true", help="Disable wandb logging.")
 
+    # DataLoader stability options (evaluation default: single-process).
+    parser.add_argument(
+        "--num_workers",
+        type=int,
+        default=0,
+        help="DataLoader workers for evaluation (default: 0 to avoid exit hangs).",
+    )
+    parser.add_argument(
+        "--pin_memory",
+        action="store_true",
+        help="Enable DataLoader pin_memory during evaluation.",
+    )
+    parser.add_argument(
+        "--no_pin_memory",
+        dest="pin_memory",
+        action="store_false",
+        help="Disable DataLoader pin_memory during evaluation.",
+    )
+    parser.set_defaults(pin_memory=None)
+
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -396,5 +462,11 @@ if __name__ == '__main__':
     # else:
     #     ...
     
-    if WANDB_AVAILABLE and not args.disable_wandb:
-        wandb.finish()
+    tester.shutdown()
+
+    # Extra safety: ensure buffered streams are flushed.
+    try:
+        sys.stdout.flush()
+        sys.stderr.flush()
+    except Exception:
+        pass

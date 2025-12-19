@@ -182,8 +182,8 @@ class CocoEvaler(object):
                     sents = utils.decode_sequence(self.vocab, decoded_output.data)
 
                 # 尝试构建输入/目标序列以计算XE loss（仅当启用且数据集支持时）
-                # batch_loss = None
-                if self.loss_computation_ready and xe_criterion is not None:
+                batch_loss = None
+                if self.loss_computation_ready and xe_criterion is not None and is_byteformer:
                     try:
                         # 评估模式下需要手动构建序列，因为数据集只返回 (indices, gv_feat, att_feats)
                         dataset = self.eval_loader.dataset
@@ -200,44 +200,37 @@ class CocoEvaler(object):
                                 raise ValueError('Unable to retrieve sample for XE loss computation')
                             in_arr, tgt_arr = dataset._build_seqs_from_captions(sample)
                             # _build_seqs_from_captions 返回 (seq_per_img, seq_len)
-                            # 对于评估，我们需要所有5个序列来匹配模型的seq_per_img设置
+                            # 对于评估，我们需要所有 seq_per_img 个序列来匹配模型的设置
                             for seq_idx in range(cfg.DATA_LOADER.SEQ_PER_IMG):
                                 if seq_idx < in_arr.shape[0]:
                                     input_list.append(in_arr[seq_idx])
                                     target_list.append(tgt_arr[seq_idx])
                                 else:
-                                    # 如果序列不足5个，重复最后一个
+                                    # 如果序列不足，重复最后一个
                                     input_list.append(in_arr[-1])
                                     target_list.append(tgt_arr[-1])
-                        
+
                         if len(input_list) > 0:
                             input_seq = torch.from_numpy(np.stack(input_list, 0)).long().to(device)
                             target_seq = torch.from_numpy(np.stack(target_list, 0)).long().to(device)
-                            
-                            # 现在input_seq和target_seq的形状应该是 [batch_size*seq_per_img, seq_len]
-                            # 这与模型期望的维度匹配
-                            
+
                             # 构建损失计算所需的kwargs
                             loss_kwargs = dict(kwargs)
                             loss_kwargs[cfg.PARAM.INPUT_SENT] = input_seq
                             loss_kwargs[cfg.PARAM.TARGET_SENT] = target_seq
-                            
-                            # 不需要修改seq_per_img，因为现在序列数量已经匹配了
-                            m = getattr(model, 'module', model)
+
                             # 前向得到 log-probs
                             logit = m(**loss_kwargs)
-                            
+
                             # logit形状应该是 [batch_size*seq_per_img, seq_len, vocab_size]
-                            if logit.dim() == 3:  # [batch*seq_per_img, seq_len, vocab_size]
-                                batch_loss, batch_loss_info = xe_criterion(logit, target_seq)
+                            if logit.dim() == 3:
+                                batch_loss, _batch_loss_info = xe_criterion(logit, target_seq)
                             else:
-                                # 如果维度不对，跳过损失计算
                                 batch_loss = None
-                                
+
                             # accumulate weighted by batch size (number of sequences)
                             if batch_loss is not None:
                                 try:
-                                    # 注意：现在序列数量是 batch_size * seq_per_img
                                     bs = int(target_seq.size(0))
                                     loss_sum += float(batch_loss.item()) * bs
                                     loss_count += bs
@@ -388,7 +381,7 @@ class CocoEvaler(object):
             lengths = np.array(data_loader._BYTE_STREAM_LENGTHS)
             count_total = len(lengths)
             count_below_20k = np.sum(lengths < 20000)
-            
+
             print(f"{'-'*30}")
             print("Byte Stream Length Statistics:")
             print(f"  - Total Images Processed: {count_total}")

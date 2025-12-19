@@ -9,6 +9,7 @@ import time
 import tqdm
 import logging
 import argparse
+from collections import deque
 import numpy as np
 
 import torch
@@ -42,7 +43,7 @@ from lib.config import cfg, cfg_from_file
 
 """
 cd /d/MLLMs/ByteCaption && python PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 100 --dataset coco --freeze_backbone --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main.py --folder PureT/experiments/ByteCaption_XE --dataset coco --eval_steps 100 --val_samples 0 --load_weights --freeze_backbone --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main.py --folder PureT/experiments/ByteCaption_XE --dataset coco --eval_steps 500 --early_stop_patience 8 --val_samples 500 --load_weights --freeze_backbone  
 cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption torchrun --nproc_per_node=2 --master_port=12355 PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 600 --val_samples 50 --dataset coco --load_weights --freeze_backbone
 """
 
@@ -96,9 +97,13 @@ class Trainer(object):
         else:
             self.scorer = Scorer()
 
-        # 初始化最佳分数变量
-        self.best_score = float('-inf')
+        # 初始化早停和最佳分数变量（基于 CIDEr）
+        self.best_cider = float('-inf')
         self.best_epoch = -1
+        self.best_step = None
+        self.evals_since_improvement = 0
+        self.early_stop_patience = getattr(args, 'early_stop_patience', 0)
+        self.latest_val_res = None
             
     def setup_evaler(self):
         # 使用命令行参数或默认值
@@ -251,6 +256,14 @@ class Trainer(object):
         print(f"{title}")
         print(f"{'-' * width}")
 
+    def _best_marker_label(self):
+        """返回当前最佳指标所在的位置描述"""
+        if self.best_step is not None:
+            return f"step {self.best_step}"
+        if self.best_epoch > 0:
+            return f"epoch {self.best_epoch}"
+        return "N/A"
+
     def _print_config_summary(self, args):
         """打印配置摘要"""
         if not self.is_master:
@@ -261,6 +274,7 @@ class Trainer(object):
         eval_steps = getattr(args, 'eval_steps', 0)
         log_steps = getattr(args, 'log_steps', 40)
         freeze_backbone = getattr(args, 'freeze_backbone', False)
+        early_stop_patience = getattr(args, 'early_stop_patience', 0)
         use_wandb = WANDB_AVAILABLE and not getattr(args, 'disable_wandb', False)
         
         self._log_section("TRAINING CONFIGURATION")
@@ -272,6 +286,7 @@ class Trainer(object):
         print(f"  Backbone Training    : {'FROZEN' if freeze_backbone else 'TRAINABLE'}")
         print(f"  Wandb Integration    : {'ENABLED' if use_wandb else 'DISABLED'}")
         print(f"  Distributed Training : {'YES' if self.distributed else 'NO'}")
+        print(f"  Early Stop Patience  : {early_stop_patience if early_stop_patience > 0 else 'DISABLED'} (measured in evaluations)")
         print()
 
     def _clear_old_result_files(self):
@@ -403,6 +418,8 @@ class Trainer(object):
 
     # 模型验证
     def eval(self, epoch):
+        # Reset latest validation metrics before a new evaluation run
+        self.latest_val_res = None
         if (epoch + 1) % cfg.SOLVER.TEST_INTERVAL != 0:
             return None
         if self.distributed and dist.get_rank() > 0:
@@ -414,6 +431,7 @@ class Trainer(object):
             val_res = self.val_evaler(self.model, 'val_' + str(epoch + 1))
             self.logger.info('######## Epoch (VAL)' + str(epoch + 1) + ' ########')
             self.logger.info(str(val_res))
+            self.latest_val_res = val_res
             
             # Wandb记录验证指标
             if self.use_wandb and val_res is not None:
@@ -457,6 +475,7 @@ class Trainer(object):
         val_res = None
         if self.val_evaler is not None:
             val_res = self.val_evaler(self.model, f'step_{iteration}')
+            self.latest_val_res = val_res
             
             # Wandb记录步数评估指标
             if self.use_wandb and val_res is not None:
@@ -487,7 +506,7 @@ class Trainer(object):
         return os.path.join(snapshot_folder, name + "_" + str(epoch) + ".pth")
 
     # 保存模型
-    def save_model(self, epoch, val_score=None):
+    def save_model(self, epoch=None, val_score=None, is_step_eval=False, iteration=None):
         # if (epoch + 1) % cfg.SOLVER.SNAPSHOT_ITERS != 0:
         #     return
         if self.distributed and dist.get_rank() > 0:
@@ -495,31 +514,38 @@ class Trainer(object):
         snapshot_folder = os.path.join(cfg.ROOT_DIR, 'snapshot')
         if not os.path.exists(snapshot_folder):
             os.mkdir(snapshot_folder)
+        improved = False
         
-        # 保存当前模型
-        # current_model_path = self.snapshot_path("caption_model", epoch+1)
-        # torch.save(self.model.state_dict(), current_model_path)
-        is_snapshot_iter = ((epoch + 1) % cfg.SOLVER.SNAPSHOT_ITERS == 0) if cfg.SOLVER.SNAPSHOT_ITERS > 0 else False
-        is_last_epoch = (epoch + 1) == cfg.SOLVER.MAX_EPOCH
-        save_snapshot = is_snapshot_iter or is_last_epoch
-        print(f"[SAVE_DBG] epoch={epoch+1}, save_snapshot={save_snapshot}, SNAPSHOT_ITERS={cfg.SOLVER.SNAPSHOT_ITERS}, MAX_EPOCH={cfg.SOLVER.MAX_EPOCH}")
-        if save_snapshot:
-            current_model_path = self.snapshot_path("caption_model", epoch+1)
-            torch.save(self.model.state_dict(), current_model_path)
-            print(f"[SAVE_DBG] Saving snapshot to: {current_model_path}")
+        # 保存当前模型（仅在epoch快照时）
+        save_snapshot = False
+        if (not is_step_eval) and (epoch is not None):
+            is_snapshot_iter = ((epoch + 1) % cfg.SOLVER.SNAPSHOT_ITERS == 0) if cfg.SOLVER.SNAPSHOT_ITERS > 0 else False
+            is_last_epoch = (epoch + 1) == cfg.SOLVER.MAX_EPOCH
+            save_snapshot = is_snapshot_iter or is_last_epoch
+            if save_snapshot:
+                current_model_path = self.snapshot_path("caption_model", epoch + 1)
+                torch.save(self.model.state_dict(), current_model_path)
+                self._log(f"Saving snapshot to: {current_model_path}", prefix="CHECKPOINT")
 
-        if val_score is not None and val_score > self.best_score:
-            self.best_score = val_score
-            self.best_epoch = epoch + 1
+        # 基于指标保存最佳模型（支持step或epoch评估）
+        if val_score is not None and val_score > self.best_cider:
+            self.best_cider = val_score
+            if epoch is not None:
+                self.best_epoch = epoch + 1
+            if iteration is not None:
+                self.best_step = iteration
             best_path = os.path.join(snapshot_folder, "best_model.pth")
-            print(f"[SAVE_DBG] New best {val_score:.4f}, saving best model to: {best_path}")
             torch.save(self.model.state_dict(), best_path)
+            improved = True
             if self.is_master:
-                print(f"[Best Model Updated] Epoch {epoch+1}: score={val_score:.4f}")
+                location = f"step {iteration}" if is_step_eval and iteration is not None else f"epoch {epoch + 1}" if epoch is not None else "unknown"
+                self._log(f"Best model updated at {location}: score={val_score:.4f}", prefix="CHECKPOINT")
         
         # 检查并清理旧的checkpoint文件
         if cfg.SOLVER.MAX_CHECKPOINTS > 0:
             self._cleanup_old_checkpoints(snapshot_folder)
+        
+        return improved
     
     def _cleanup_old_checkpoints(self, snapshot_folder):
         """清理旧的checkpoint文件，只保留最新的MAX_CHECKPOINTS个"""
@@ -541,6 +567,31 @@ class Trainer(object):
                 self._log(f"Removed old checkpoint: {oldest_file}", prefix="CHECKPOINT")
             except OSError as e:
                 self._log(f"Failed to remove {oldest_file}: {e}", level="ERROR", prefix="CHECKPOINT")
+
+    def _update_patience(self, improved, logger=None, context_label=""):
+        """基于评估结果更新早停计数，单位为评估触发次数"""
+        if self.early_stop_patience <= 0 or improved is None:
+            return False
+
+        if improved:
+            self.evals_since_improvement = 0
+            return False
+
+        self.evals_since_improvement += 1
+        if self.is_master and logger is not None:
+            logger(
+                f"No CIDEr improvement for {self.evals_since_improvement}/{self.early_stop_patience} evaluations "
+                f"(best {self.best_cider:.4f} at {self._best_marker_label()})."
+            )
+
+        if self.evals_since_improvement >= self.early_stop_patience:
+            if self.is_master and logger is not None:
+                logger(
+                    f"Early stopping after {self.early_stop_patience} evaluations (last check: {context_label})."
+                )
+            return True
+
+        return False
 
     def make_kwargs(self, indices, input_seq, target_seq, gv_feat, att_feats, att_mask):
         device = input_seq.device
@@ -772,8 +823,11 @@ class Trainer(object):
             disable=not self.is_master
         )
         with pbar_ctx as overall_pbar:
+            stop_training = False
             # Epoch迭代
             for epoch in range(self.load_epoch + 1, cfg.SOLVER.MAX_EPOCH):
+                if stop_training:
+                    break
                 if self.is_master:
                     overall_pbar.write(f"Current learning rate: {self.optim.get_lr()}")
                 if epoch >= cfg.TRAIN.REINFORCEMENT.START:
@@ -789,8 +843,12 @@ class Trainer(object):
                 
                 running_loss = .0
                 running_reward_baseline = .0
+                loss_window = deque(maxlen=log_steps if log_steps > 0 else None)
+                reward_baseline_window = deque(maxlen=log_steps if log_steps > 0 else None)
                 # 每一个Epoch内部Iteration迭代 - 不再使用epoch进度条，只更新总进度条
-                for _, (indices, input_seq, target_seq, gv_feat, att_feats, att_mask) in enumerate(self.training_loader):
+                for step_idx, (indices, input_seq, target_seq, gv_feat, att_feats, att_mask) in enumerate(self.training_loader):
+                    if stop_training:
+                        break
                     # data_time.update(time.time() - start)
                     input_seq = input_seq.to(self.device)
                     target_seq = target_seq.to(self.device)
@@ -818,25 +876,36 @@ class Trainer(object):
                     # losses.update(loss.item())
                     # self.display(iteration, data_time, batch_time, losses, loss_info)
                     # tqdm 迭代信息更新
-                    running_loss += loss.item()
+                    loss_value = loss.item()
+                    running_loss += loss_value
+                    loss_window.append(loss_value)
+                    recent_avg_loss = sum(loss_window) / len(loss_window)
+                    epoch_avg_loss = running_loss / (step_idx + 1)
+
+                    recent_reward_baseline = None
+                    if self.rl_stage and 'reward_baseline' in loss_info:
+                        reward_baseline_value = loss_info['reward_baseline']
+                        running_reward_baseline += reward_baseline_value
+                        reward_baseline_window.append(reward_baseline_value)
+                        recent_reward_baseline = sum(reward_baseline_window) / len(reward_baseline_window)
                     
                     # 添加训练调试信息和wandb记录
-                    if self.is_master and iteration % log_steps == 0:  # 根据设定的log_steps输出详细信息
+                    if self.is_master and log_steps > 0 and iteration % log_steps == 0:  # 根据设定的log_steps输出详细信息
                         current_lr_list = self.optim.get_lr()
                         current_lr = current_lr_list[0] if current_lr_list else 0
-                        avg_loss = running_loss / (_ + 1)
-                        
                         overall_pbar.write(
-                            f"Step {iteration}: loss={loss.item():.4f}, avg_loss={avg_loss:.4f}, lr={current_lr:.6f}"
+                            f"Step {iteration}: loss={loss_value:.4f}, avg_loss_last_{len(loss_window)}={recent_avg_loss:.4f}, "
+                            f"epoch_avg={epoch_avg_loss:.4f}, lr={current_lr:.6f}"
                         )
                         
                         # Wandb记录训练损失
                         if self.use_wandb:
                             # 计算epoch进度
-                            epoch_progress = (_ + 1) / len(self.training_loader)
+                            epoch_progress = (step_idx + 1) / len(self.training_loader)
                             log_dict = {
-                                'train/loss': loss.item(),
-                                'train/avg_loss': avg_loss,
+                                'train/loss': loss_value,
+                                'train/avg_loss_window': recent_avg_loss,
+                                'train/avg_loss_epoch': epoch_avg_loss,
                                 'train/learning_rate': current_lr,
                                 'train/epoch': epoch + epoch_progress,
                             }
@@ -844,6 +913,8 @@ class Trainer(object):
                             # 如果是SCST阶段，记录额外信息
                             if self.rl_stage and 'reward_baseline' in loss_info:
                                 log_dict['train/reward_baseline'] = loss_info['reward_baseline']
+                                if recent_reward_baseline is not None:
+                                    log_dict['train/reward_baseline_window'] = recent_reward_baseline
                                 
                             wandb.log(log_dict, step=iteration)
                         
@@ -853,15 +924,15 @@ class Trainer(object):
                             lr_list = self.optim.get_lr()
                             overall_pbar.set_postfix(
                                 epoch=epoch,
-                                loss='%.3f' % (running_loss / (_ + 1)),
+                                loss='%.3f' % recent_avg_loss,
                                 lr='%.2e' % (lr_list[0] if lr_list else 0)
                             )
                         else:
-                            running_reward_baseline += loss_info['reward_baseline']
                             lr_list = self.optim.get_lr()
+                            rb_display = recent_reward_baseline if recent_reward_baseline is not None else (running_reward_baseline / (step_idx + 1))
                             overall_pbar.set_postfix({
                                 'epoch': epoch,
-                                'loss/r_b': '%.3f/%.3f' % (running_loss / (_ + 1), running_reward_baseline / (_ + 1)),
+                                'loss/r_b': '%.3f/%.3f' % (recent_avg_loss, rb_display),
                                 'lr': '%.2e' % (lr_list[0] if lr_list else 0)
                             })
                         overall_pbar.update()
@@ -874,41 +945,76 @@ class Trainer(object):
                         if self.is_master:
                             overall_pbar.write(f"{'='*60}")
                             overall_pbar.write(f"Step-based Evaluation at iteration {iteration}")
-                            overall_pbar.write(f"Average training loss: {running_loss / _:.4f}")
+                            overall_pbar.write(f"Average training loss: {epoch_avg_loss:.4f}")
                             overall_pbar.write(f"{'='*60}")
-                        val = self.eval_by_steps(iteration, epoch, _ + 1)
+                        val = self.eval_by_steps(iteration, epoch, step_idx + 1)
                         # 可选：基于验证结果进行学习率调度
                         # self.optim.scheduler_step('Epoch', val)
+
+                        cider_score = None
+                        if self.latest_val_res is not None:
+                            cider_score = self.latest_val_res.get('CIDEr')
+
+                        improved = None
+                        if cider_score is not None:
+                            improved = self.save_model(epoch, cider_score, is_step_eval=True, iteration=iteration) or False
+
+                        stop_trigger = self._update_patience(improved, overall_pbar.write if self.is_master else None, context_label=f"step {iteration}")
+
+                        if self.distributed:
+                            stop_tensor = torch.tensor(1 if stop_trigger else 0, device=self.device)
+                            dist.broadcast(stop_tensor, src=0)
+                            stop_trigger = stop_tensor.item() == 1
+
+                        if stop_trigger:
+                            stop_training = True
+                            break
 
                     if self.distributed:
                         dist.barrier()
             
+                if stop_training:
+                    break
+
                 val = self.eval(epoch)
                 print("一轮结束后的val", val)
 
-                if val is not None:
-                    val_score = -val  # eval返回的是负加权值，取反表示分数越高越好
-                else:
-                    val_score = None
+                cider_score = None
+                if self.latest_val_res is not None:
+                    cider_score = self.latest_val_res.get('CIDEr')
 
-                # 每一个Epoch结束保存模型
-                self.save_model(epoch, val_score)
-            # 模型验证测试，返回的val仅用于SCST训练过程
-            # 如果使用基于步数的评估，可以跳过epoch评估或减少频率
-            # if eval_steps == 0:  # 只有在不使用步数评估时才进行epoch评估
-            #     val = self.eval(epoch)
-            # else:
-            #     val = None
-            #     if self.is_master:
-            #         overall_pbar.write(f"Epoch {epoch + 1} completed. Using step-based evaluation, skipping epoch evaluation.")
+                # 每一个Epoch结束保存模型（基于 CIDEr 最佳）
+                improved = None
+                if cider_score is not None:
+                    improved = self.save_model(epoch, cider_score) or False
+                # 模型验证测试，返回的val仅用于SCST训练过程
+                # 如果使用基于步数的评估，可以跳过epoch评估或减少频率
+                # if eval_steps == 0:  # 只有在不使用步数评估时才进行epoch评估
+                #     val = self.eval(epoch)
+                # else:
+                #     val = None
+                #     if self.is_master:
+                #         overall_pbar.write(f"Epoch {epoch + 1} completed. Using step-based evaluation, skipping epoch evaluation.")
+                    
+                # 4（SCST）、优化器lr更新（用于SCST训练），在XE训练时不起作用
+                # 4 (XE)、优化器lr更新，当使用Step学习率策略时作用
+                self.optim.scheduler_step('Epoch', val)
+                self.scheduled_sampling(epoch)
                 
-            # 4（SCST）、优化器lr更新（用于SCST训练），在XE训练时不起作用
-            # 4 (XE)、优化器lr更新，当使用Step学习率策略时作用
-            self.optim.scheduler_step('Epoch', val)
-            self.scheduled_sampling(epoch)
-            
-            if self.distributed:
-                dist.barrier()
+                # 早停检查（基于验证集 CIDEr）
+                stop_trigger = self._update_patience(improved, overall_pbar.write if self.is_master else None, context_label=f"epoch {epoch + 1}")
+
+                if self.distributed:
+                    stop_tensor = torch.tensor(1 if stop_trigger else 0, device=self.device)
+                    dist.broadcast(stop_tensor, src=0)
+                    stop_trigger = stop_tensor.item() == 1
+
+                if stop_trigger:
+                    stop_training = True
+                    break
+                
+                if self.distributed:
+                    dist.barrier()
         
         # 训练完成后关闭wandb
         if self.use_wandb and self.is_master:
@@ -931,6 +1037,8 @@ def parse_args():
                         help='Evaluate every N steps (0 for every epoch)')
     parser.add_argument("--log_steps", type=int, default=40,
                         help='Print detailed training log every N steps')
+    parser.add_argument("--early_stop_patience", type=int, default=0,
+                        help='Early stop training if CIDEr does not improve for this many evaluations (0 disables)')
     parser.add_argument("--freeze_backbone", action='store_true',
                         help='Freeze backbone parameters during training')
     parser.add_argument("--load_weights", action='store_true',

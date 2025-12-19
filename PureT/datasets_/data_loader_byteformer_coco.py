@@ -174,10 +174,11 @@ def byteformer_collate(batch: Sequence[Tuple[Any, ...]]):
     """
     indices, input_seq, target_seq, gv_feat, att_feats = zip(*batch)
     
-    indices = np.stack(indices, axis=0).reshape(-1)
-    input_seq = torch.cat([torch.from_numpy(b) for b in input_seq], 0)
-    target_seq = torch.cat([torch.from_numpy(b) for b in target_seq], 0)
-    gv_feat = torch.cat([torch.from_numpy(b) for b in gv_feat], 0)
+    original_bs = len(att_feats)
+    indices_np = np.stack(indices, axis=0).reshape(-1)
+    input_seq_tensor = torch.cat([torch.from_numpy(b) for b in input_seq], 0)
+    target_seq_tensor = torch.cat([torch.from_numpy(b) for b in target_seq], 0)
+    gv_feat_tensor = torch.cat([torch.from_numpy(b) for b in gv_feat], 0)
 
     """
     # 读取图像的预训练特征时，大小为[L, D]，其中L的长度可能不一（如目标特征）
@@ -210,7 +211,23 @@ def byteformer_collate(batch: Sequence[Tuple[Any, ...]]):
     collated = byteformer_image_collate_fn(corenet_batch, opts)
     att_feats = collated["samples"]
     att_mask = None
-    
+
+    # Duplicate caption-side metadata when corruption augments images
+    augmentation_factor = att_feats.size(0) // original_bs if original_bs > 0 else 1
+    if augmentation_factor > 1:
+        indices = np.repeat(indices_np, augmentation_factor, axis=0)
+        gv_feat = gv_feat_tensor.repeat_interleave(augmentation_factor, dim=0)
+        seq_per_img = max(int(getattr(cfg.DATA_LOADER, "SEQ_PER_IMG", 1)), 1)
+        input_seq = input_seq_tensor.view(original_bs, seq_per_img, -1)
+        target_seq = target_seq_tensor.view(original_bs, seq_per_img, -1)
+        input_seq = input_seq.repeat_interleave(augmentation_factor, dim=0).view(-1, input_seq_tensor.size(-1))
+        target_seq = target_seq.repeat_interleave(augmentation_factor, dim=0).view(-1, target_seq_tensor.size(-1))
+    else:
+        indices = indices_np
+        gv_feat = gv_feat_tensor
+        input_seq = input_seq_tensor
+        target_seq = target_seq_tensor
+
     return indices, input_seq, target_seq, gv_feat, att_feats, att_mask
 
 def byteformer_collate_val(batch: Sequence[Tuple[Any, ...]]):
