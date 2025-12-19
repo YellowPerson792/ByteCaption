@@ -1,3 +1,9 @@
 [INFO: 2025-12-19 13:40:25,430] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth
 [INFO: 2025-12-19 13:48:02,952] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth
 [INFO: 2025-12-19 13:49:33,812] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth
+[INFO: 2025-12-19 14:22:21,757] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth
+[INFO: 2025-12-19 14:27:20,474] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth
+[INFO: 2025-12-19 14:34:53,632] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth
+[INFO: 2025-12-19 14:36:20,480] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth
+[INFO: 2025-12-19 14:46:49,479] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth
+[INFO: 2025-12-19 14:49:20,783] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth

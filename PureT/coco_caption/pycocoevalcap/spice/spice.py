@@ -10,6 +10,7 @@ import json
 import numpy as np
 import ast
 import tempfile
+import atexit
 
 import time
 import shutil
@@ -18,6 +19,159 @@ import shutil
 SPICE_JAR = 'spice-1.0.jar'
 TEMP_DIR = 'tmp'
 CACHE_DIR = 'cache'
+SERVER_CLASSES_DIR = 'server_classes'
+SERVER_SRC = os.path.join('server', 'edu', 'anu', 'spice', 'SpiceServer.java')
+SERVER_CLASS = os.path.join('edu', 'anu', 'spice', 'SpiceServer.class')
+
+_SPICE_SERVER = None
+_SPICE_SERVER_LOCK = threading.Lock()
+
+
+def _env_flag(name):
+    value = os.environ.get(name, "").strip().lower()
+    if value in ("1", "true", "yes", "on"):
+        return True
+    if value in ("0", "false", "no", "off"):
+        return False
+    return None
+
+
+def _server_classpath(cwd):
+    server_classes = os.path.join(cwd, SERVER_CLASSES_DIR)
+    server_class = os.path.join(server_classes, SERVER_CLASS)
+    if not os.path.exists(server_class):
+        return None
+    spice_jar = os.path.join(cwd, SPICE_JAR)
+    lib_glob = os.path.join(cwd, 'lib', '*')
+    return os.pathsep.join([server_classes, spice_jar, lib_glob])
+
+
+def _ensure_server_compiled(cwd):
+    server_classes = os.path.join(cwd, SERVER_CLASSES_DIR)
+    server_class = os.path.join(server_classes, SERVER_CLASS)
+    if os.path.exists(server_class):
+        return True
+    src_path = os.path.join(cwd, SERVER_SRC)
+    if not os.path.exists(src_path):
+        return False
+    javac = shutil.which("javac")
+    if not javac:
+        return False
+    os.makedirs(server_classes, exist_ok=True)
+    classpath = os.pathsep.join([
+        os.path.join(cwd, SPICE_JAR),
+        os.path.join(cwd, 'lib', '*'),
+    ])
+    try:
+        subprocess.check_call(
+            [javac, '-cp', classpath, '-d', server_classes, src_path],
+            cwd=cwd
+        )
+    except Exception:
+        return False
+    return os.path.exists(server_class)
+
+
+class _SpiceServerProcess:
+    def __init__(self, cwd, cache_dir, threads=None, use_synsets=True):
+        self._lock = threading.Lock()
+        self._next_id = 0
+        self.cache_dir = cache_dir
+        classpath = _server_classpath(cwd)
+        if not classpath:
+            raise RuntimeError("SPICE server classes not available")
+        cmd = ['java', '-Xmx8G', '-cp', classpath, 'edu.anu.spice.SpiceServer']
+        cmd += ['-cache', cache_dir, '-subset', '-silent']
+        if threads:
+            cmd += ['-threads', str(threads)]
+        if not use_synsets:
+            cmd += ['-noSynsets']
+        self.proc = subprocess.Popen(
+            cmd,
+            cwd=cwd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            bufsize=1
+        )
+        self._stderr_thread = threading.Thread(target=self._drain_stderr, daemon=True)
+        self._stderr_thread.start()
+
+    def _drain_stderr(self):
+        if not self.proc or not self.proc.stderr:
+            return
+        for line in self.proc.stderr:
+            sys.stderr.write(line)
+
+    def score(self, input_path, output_path):
+        if self.proc.poll() is not None:
+            raise RuntimeError("SPICE server is not running")
+        with self._lock:
+            self._next_id += 1
+            payload = {"id": self._next_id, "input": input_path, "output": output_path}
+            self.proc.stdin.write(json.dumps(payload) + "\n")
+            self.proc.stdin.flush()
+            line = self.proc.stdout.readline()
+            if not line:
+                raise RuntimeError("SPICE server returned no response")
+            try:
+                resp = json.loads(line)
+            except Exception as exc:
+                raise RuntimeError("SPICE server response parse failed: %s" % exc)
+            if not resp.get("ok", False):
+                raise RuntimeError(resp.get("error", "SPICE server error"))
+
+    def close(self):
+        if not self.proc:
+            return
+        try:
+            if self.proc.poll() is None and self.proc.stdin:
+                self.proc.stdin.write("exit\n")
+                self.proc.stdin.flush()
+        except Exception:
+            pass
+        try:
+            self.proc.terminate()
+        except Exception:
+            pass
+        self.proc = None
+
+
+def _close_spice_server():
+    global _SPICE_SERVER
+    if _SPICE_SERVER:
+        _SPICE_SERVER.close()
+        _SPICE_SERVER = None
+
+
+atexit.register(_close_spice_server)
+
+
+def _get_spice_server(cwd, cache_dir):
+    global _SPICE_SERVER
+    use_server = _env_flag("SPICE_SERVER")
+    if use_server is False:
+        return None
+    if _server_classpath(cwd) is None and use_server is True:
+        _ensure_server_compiled(cwd)
+    if _server_classpath(cwd) is None:
+        return None
+    threads_env = os.environ.get("SPICE_THREADS", "").strip()
+    threads = int(threads_env) if threads_env.isdigit() else None
+    use_synsets = _env_flag("SPICE_NO_SYNSETS") is not True
+    with _SPICE_SERVER_LOCK:
+        if _SPICE_SERVER and _SPICE_SERVER.cache_dir != cache_dir:
+            _SPICE_SERVER.close()
+            _SPICE_SERVER = None
+        if _SPICE_SERVER is None:
+            _SPICE_SERVER = _SpiceServerProcess(
+                cwd,
+                cache_dir,
+                threads=threads,
+                use_synsets=use_synsets
+            )
+        return _SPICE_SERVER
 
 class Spice:
     """
@@ -32,8 +186,19 @@ class Spice:
           # Use a stable cache directory to reuse parsed references across runs
           cache_dir = os.path.join(cwd, CACHE_DIR, "shared")
         self.cache_dir = cache_dir
-        if not os.path.exists(cache_dir):
-          os.makedirs(cache_dir)
+        self._cleanup_cache = os.environ.get("SPICE_CLEANUP_CACHE", "").strip().lower() in ("1", "true", "yes")
+        self._ensure_cache_dir()
+
+    def _ensure_cache_dir(self):
+        """Ensure cache directory exists and is not pruned as empty."""
+        if not os.path.exists(self.cache_dir):
+          os.makedirs(self.cache_dir, exist_ok=True)
+        keep_path = os.path.join(self.cache_dir, ".keep")
+        try:
+          with open(keep_path, "a"):
+            pass
+        except Exception:
+          pass
 
     def float_convert(self, obj):
         try:
@@ -95,27 +260,45 @@ class Spice:
                      '    bash get_stanford_models.sh\n' \
                      'If you prefer to skip SPICE, remove SPICE from config SCORER.TYPES or run with a smaller scorer set.\n' % cwd)
 
-        # JVM options must precede -jar, otherwise Java treats them as jar names
-        spice_cmd = ['java', '-Xmx8G', '-jar', SPICE_JAR, in_file.name,
-          '-cache', self.cache_dir,
-          '-out', out_file.name,
-          '-subset',
-          '-silent'
-        ]
-        try:
-          subprocess.check_call(spice_cmd, 
-           cwd=os.path.dirname(os.path.abspath(__file__)))
-        except subprocess.CalledProcessError as e:
-          # Provide a clearer error message for the user
-          raise RuntimeError('SPICE scoring failed, please ensure Java is installed and the CoreNLP models jar is present in %s. Error: %s' % (cwd, e))
-        except FileNotFoundError as e:
-          raise RuntimeError('SPICE scoring failed because Java is not found in PATH. Please install Java (JRE/JDK) and ensure `java` is available in your PATH. Error: %s' % e)
+        server_used = False
+        server = _get_spice_server(cwd, self.cache_dir)
+        if server:
+          try:
+            server.score(in_file.name, out_file.name)
+            server_used = True
+          except Exception as e:
+            sys.stderr.write("SPICE server failed, falling back to jar: %s\n" % e)
+            _close_spice_server()
+
+        if not server_used:
+          # JVM options must precede -jar, otherwise Java treats them as jar names
+          spice_cmd = ['java', '-Xmx8G', '-jar', SPICE_JAR, in_file.name,
+            '-cache', self.cache_dir,
+            '-out', out_file.name,
+            '-subset',
+            '-silent'
+          ]
+          threads_env = os.environ.get("SPICE_THREADS", "").strip()
+          if threads_env.isdigit():
+            spice_cmd += ['-threads', threads_env]
+          if _env_flag("SPICE_NO_SYNSETS") is True:
+            spice_cmd += ['-noSynsets']
+          try:
+            subprocess.check_call(spice_cmd,
+             cwd=os.path.dirname(os.path.abspath(__file__)))
+          except subprocess.CalledProcessError as e:
+            # Provide a clearer error message for the user
+            raise RuntimeError('SPICE scoring failed, please ensure Java is installed and the CoreNLP models jar is present in %s. Error: %s' % (cwd, e))
+          except FileNotFoundError as e:
+            raise RuntimeError('SPICE scoring failed because Java is not found in PATH. Please install Java (JRE/JDK) and ensure `java` is available in your PATH. Error: %s' % e)
 
         # Read and process results
         with open(out_file.name) as data_file:    
           results = json.load(data_file)
         os.remove(in_file.name)
         os.remove(out_file.name)
+        # Some environments prune empty cache directories; keep it persistent.
+        self._ensure_cache_dir()
 
         spice_scores = []
         imgId_to_scores = {}
@@ -142,4 +325,5 @@ class Spice:
         return "SPICE"
 
     def __del__(self):
-        shutil.rmtree(self.cache_dir)
+        if self._cleanup_cache and os.path.isdir(self.cache_dir):
+          shutil.rmtree(self.cache_dir, ignore_errors=True)

@@ -3,56 +3,56 @@
   "model_name": "ByteCaption_XE",
   "model_type": "PureT_byteformer",
   "corrupt_type": "rbbf",
-  "corrupt_level": "S0",
+  "corrupt_level": "S5",
   "metrics": {
-    "Bleu_1": 0.6202568096718664,
-    "Bleu_2": 0.43135135980434536,
-    "Bleu_3": 0.29138458451171856,
-    "Bleu_4": 0.1956363030356026,
-    "ROUGE_L": 0.43645773401229065,
-    "CIDEr": 0.5903042443385493,
-    "METEOR": 0.19487151342687278,
-    "SPICE": 0.11758853870024985,
-    "XE_Loss": 2.3681508004665375,
+    "Bleu_1": 0.48505914566568714,
+    "Bleu_2": 0.29044446668121915,
+    "Bleu_3": 0.18015168514624083,
+    "Bleu_4": 0.12065599448034395,
+    "ROUGE_L": 0.3669207436033633,
+    "CIDEr": 0.2234909611451373,
+    "METEOR": 0.12802021559118992,
+    "SPICE": 0.053910252775851986,
+    "XE_Loss": 2.6086896324157713,
     "Undecodable_Count": 0,
     "Undecodable_Ratio": 0.0,
-    "Total_Samples": 80,
+    "Total_Samples": 5000,
     "Sample_Preview": [
       {
         "image_id": 1,
-        "generated": "a teddy bear sitting on top of a chair",
+        "generated": "a close up of a person holding a teddy bear",
         "reference": "This wire metal rack holds several pairs of shoes and sandals",
         "augmentation_idx": 0
       },
       {
         "image_id": 2,
-        "generated": "a black and white photo of a traffic light",
+        "generated": "a black and white photo of a black and white photo",
         "reference": "A traffic light over a street surrounded by tall buildings.",
         "augmentation_idx": 0
       },
       {
         "image_id": 3,
-        "generated": "a white toilet sitting next to a white toilet",
+        "generated": "a white toilet sitting on top of a table",
         "reference": "A toilet seat sits on top of a hole in the ground.",
         "augmentation_idx": 0
       },
       {
         "image_id": 4,
-        "generated": "a man sitting on a couch in a living room",
+        "generated": "a group of people standing around a table",
         "reference": "A coffee table sits in the middle of a living room.",
         "augmentation_idx": 0
       },
       {
         "image_id": 5,
-        "generated": "a close up of a plate of food on a table",
+        "generated": "a pair of scissors sitting on top of a table",
         "reference": "a sandwich in a plastic food basket on a table",
         "augmentation_idx": 0
       }
     ],
     "corruption_params": {
-      "trigger_prob": 0.0,
-      "burst_lambda": 0.0,
-      "bit_error_rate": 0.0
+      "trigger_prob": 0.002,
+      "burst_lambda": 420.0,
+      "bit_error_rate": 0.45
     }
   }
 }

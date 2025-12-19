@@ -3,20 +3,20 @@
   "model_name": "ByteCaption_XE",
   "model_type": "PureT_byteformer",
   "corrupt_type": "rbbf",
-  "corrupt_level": "S1",
+  "corrupt_level": "S2",
   "metrics": {
-    "Bleu_1": 0.6202369852141824,
-    "Bleu_2": 0.4302733294360031,
-    "Bleu_3": 0.2909344633503514,
-    "Bleu_4": 0.19544214390608244,
-    "ROUGE_L": 0.4367612017489645,
-    "CIDEr": 0.5898538847776047,
-    "METEOR": 0.1947616522221771,
-    "SPICE": 0.11675520536691653,
-    "XE_Loss": 2.3681810796260834,
+    "Bleu_1": 0.6427300260897038,
+    "Bleu_2": 0.46682495664007034,
+    "Bleu_3": 0.336429613993769,
+    "Bleu_4": 0.24401102848633419,
+    "ROUGE_L": 0.4771726631547295,
+    "CIDEr": 0.7023552142931778,
+    "METEOR": 0.20944079941307603,
+    "SPICE": 0.13863770355976282,
+    "XE_Loss": 2.272143105268478,
     "Undecodable_Count": 0,
     "Undecodable_Ratio": 0.0,
-    "Total_Samples": 80,
+    "Total_Samples": 5000,
     "Sample_Preview": [
       {
         "image_id": 1,
@@ -26,7 +26,7 @@
       },
       {
         "image_id": 2,
-        "generated": "a black and white photo of a traffic light",
+        "generated": "a black and white photo of a street sign",
         "reference": "A traffic light over a street surrounded by tall buildings.",
         "augmentation_idx": 0
       },
@@ -38,21 +38,21 @@
       },
       {
         "image_id": 4,
-        "generated": "a man sitting on a couch in a living room",
+        "generated": "a living room filled with furniture and a television",
         "reference": "A coffee table sits in the middle of a living room.",
         "augmentation_idx": 0
       },
       {
         "image_id": 5,
-        "generated": "a close up of a plate of food on a table",
+        "generated": "a person holding a piece of cake on a plate",
         "reference": "a sandwich in a plastic food basket on a table",
         "augmentation_idx": 0
       }
     ],
     "corruption_params": {
-      "trigger_prob": 2e-05,
-      "burst_lambda": 30.0,
-      "bit_error_rate": 0.08
+      "trigger_prob": 0.00012,
+      "burst_lambda": 140.0,
+      "bit_error_rate": 0.18
     }
   }
 }

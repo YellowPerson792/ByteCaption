@@ -1,0 +1,2 @@
+[INFO: 2025-12-19 14:21:06,257] BLIP model uses HF weights. Skipping local checkpoint loading.
+[INFO: 2025-12-19 15:02:08,512] BLIP model uses HF weights. Skipping local checkpoint loading.

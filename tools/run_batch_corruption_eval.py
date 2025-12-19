@@ -1,6 +1,8 @@
 """
 Batch corruption evaluation helper.
 
+PureT/experiments/ByteCaption_XE 
+
 Example:
   python tools/run_batch_corruption_eval.py \
     --models PureT/experiments/ByteCaption_XE PureT/experiments/ByteCaption_XE_blip \
