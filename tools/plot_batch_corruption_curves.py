@@ -3,7 +3,7 @@ Plot corruption severity curves from batch evaluation JSONs.
 
 Example:
   python tools/plot_batch_corruption_curves.py \
-    --input-dir batch_reports/20251219_144920 \
+    --input-dir batch_reports/20251219_222531 \
     --models ByteCaption_XE ByteCaption_XE_blip \
     --corrupt-types rbbf rbsl \
     --plot-metrics CIDEr Bleu_4 SPICE
@@ -17,7 +17,7 @@ from typing import Dict, List
 import matplotlib.pyplot as plt
 
 
-LEVEL_ORDER = ["S0", "S1", "S2", "S3", "S4", "S5", "M0", "M1"]
+LEVEL_ORDER = ["S0", "S1", "S2", "S3", "S4", "S5"]
 LEVEL_TO_IDX = {lvl: i for i, lvl in enumerate(LEVEL_ORDER)}
 
 

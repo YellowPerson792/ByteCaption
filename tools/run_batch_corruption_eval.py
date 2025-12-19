@@ -5,11 +5,11 @@ PureT/experiments/ByteCaption_XE
 
 Example:
   python tools/run_batch_corruption_eval.py \
-    --models PureT/experiments/ByteCaption_XE PureT/experiments/ByteCaption_XE_blip \
+    --models PureT/experiments/ByteCaption_XE_blip \
     --corrupt-types rbbf rbsl \
     --corrupt-levels S0 S1 S2 S3 S4 S5 \
     --save-captions 500 \
-    --test-samples 0
+    --test-samples 250
 """
 
 import argparse
@@ -36,6 +36,8 @@ from lib.config import cfg, cfg_from_file  # noqa: E402
 from PureT.main_test import Tester  # noqa: E402
 from corenet.data.transforms import jpeg_corruption  # noqa: E402
 
+_REFERENCE_CACHE: Dict[str, Dict[int, List[str]]] = {}
+
 
 def reset_logger_handlers():
     """Detach existing handlers to avoid duplicated logs across runs."""
@@ -56,6 +58,50 @@ def load_config(model_folder: Path):
     cfg_from_file(str(config_path))
     cfg.ROOT_DIR = str(model_folder)
     return config_path
+
+
+def resolve_reference_annfile(dataset: str) -> Optional[Path]:
+    dataset = (dataset or "").lower()
+    if dataset == "coco":
+        annfile = getattr(cfg.INFERENCE, "TEST_ANNFILE", None)
+    elif dataset == "flickr8k":
+        annfile = getattr(cfg.INFERENCE, "VAL_ANNFILE", None)
+    else:
+        return None
+    if not annfile:
+        return None
+    ann_path = Path(annfile)
+    if not ann_path.is_absolute():
+        ann_path = (PROJECT_ROOT / ann_path).resolve()
+    return ann_path
+
+
+def build_reference_map(dataset: str) -> Optional[Dict[int, List[str]]]:
+    ann_path = resolve_reference_annfile(dataset)
+    if ann_path is None:
+        return None
+    cache_key = str(ann_path)
+    if cache_key in _REFERENCE_CACHE:
+        return _REFERENCE_CACHE[cache_key]
+    try:
+        with open(ann_path, "r", encoding="utf-8") as f:
+            ann_data = json.load(f)
+    except Exception as exc:
+        print(f"[WARN] Failed to load reference annotations from {ann_path}: {exc}")
+        return None
+    ref_map: Dict[int, List[str]] = {}
+    for ann in ann_data.get("annotations", []):
+        image_id = ann.get("image_id")
+        caption = ann.get("caption")
+        if image_id is None or caption is None:
+            continue
+        try:
+            image_id = int(image_id)
+        except Exception:
+            pass
+        ref_map.setdefault(image_id, []).append(caption)
+    _REFERENCE_CACHE[cache_key] = ref_map
+    return ref_map
 
 
 def run_single_eval(
@@ -96,8 +142,14 @@ def run_single_eval(
     return metrics
 
 
-def load_caption_samples(model_folder: Path, rname: str, max_samples: int) -> Optional[List[Dict]]:
-    """Load first N caption samples from per-run result file."""
+def load_caption_samples(
+    model_folder: Path,
+    rname: str,
+    max_samples: int,
+    reference_map: Optional[Dict[int, List[str]]] = None,
+    id_key: str = "image_id",
+) -> Optional[List[Dict]]:
+    """Load first N caption samples from per-run result file, with references."""
     if max_samples <= 0:
         return None
     result_path = model_folder / "result" / f"result_{rname}.json"
@@ -110,7 +162,24 @@ def load_caption_samples(model_folder: Path, rname: str, max_samples: int) -> Op
         return None
     if not isinstance(results, list):
         return None
-    return results[:max_samples]
+    samples = results[:max_samples]
+    if not reference_map:
+        return samples
+    enriched = []
+    for item in samples:
+        sample = dict(item)
+        image_id = sample.get(id_key)
+        lookup_id = image_id
+        try:
+            lookup_id = int(image_id)
+        except Exception:
+            pass
+        references = reference_map.get(lookup_id)
+        if references is None and lookup_id != image_id:
+            references = reference_map.get(image_id)
+        sample["references"] = references or []
+        enriched.append(sample)
+    return enriched
 
 
 def plot_curves(results: List[Dict], metric_keys: List[str], output_dir: Path):
@@ -193,6 +262,15 @@ def main():
         for model_folder_str in args.models:
             model_folder = Path(model_folder_str)
             model_name = model_folder.name
+            reference_map = None
+            id_key = "image_id"
+            if args.save_captions > 0:
+                try:
+                    load_config(model_folder)
+                    id_key = getattr(cfg.INFERENCE, "ID_KEY", "image_id")
+                    reference_map = build_reference_map(args.dataset)
+                except Exception as exc:
+                    print(f"[WARN] Failed to prepare references for {model_name}: {exc}")
             for ctype in args.corrupt_types:
                 for level in args.corrupt_levels:
                     normalized_level = jpeg_corruption.normalize_level(level)
@@ -210,6 +288,8 @@ def main():
                         model_folder,
                         rname,
                         max_samples=args.save_captions,
+                        reference_map=reference_map,
+                        id_key=id_key,
                     )
                     run_record = {
                         "model_folder": str(model_folder),

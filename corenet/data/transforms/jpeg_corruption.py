@@ -26,20 +26,20 @@ JPEG_CORRUPTION_PRESETS: Dict[str, Dict[str, Dict[str, float]]] = {
     "rbbf": {  # Random Bursty Bit Flips
         "S0": {"trigger_prob": 0.0, "burst_lambda": 0.0, "bit_error_rate": 0.0},
         # Slightly lighter S1 to let baseline BLIP stay competitive
-        "S1": {"trigger_prob": 2e-5, "burst_lambda": 30.0, "bit_error_rate": 0.08},
+        "S1": {"trigger_prob": 5e-5, "burst_lambda": 80.0, "bit_error_rate": 0.12},
         # Keep higher severities strong but a bit gentler than before to retain caption quality
-        "S2": {"trigger_prob": 1.2e-4, "burst_lambda": 140.0, "bit_error_rate": 0.18},
-        "S3": {"trigger_prob": 6e-4, "burst_lambda": 220.0, "bit_error_rate": 0.30},
-        "S4": {"trigger_prob": 1e-3, "burst_lambda": 320.0, "bit_error_rate": 0.38},
-        "S5": {"trigger_prob": 2e-3, "burst_lambda": 420.0, "bit_error_rate": 0.45},
+        "S2": {"trigger_prob": 2e-4, "burst_lambda": 160.0, "bit_error_rate": 0.24},
+        "S3": {"trigger_prob": 5e-4, "burst_lambda": 200.0, "bit_error_rate": 0.36},
+        "S4": {"trigger_prob": 1e-3, "burst_lambda": 260.0, "bit_error_rate": 0.42},
+        "S5": {"trigger_prob": 5e-3, "burst_lambda": 360.0, "bit_error_rate": 0.5},
     },
     "rbsl": {  # Random Bursty Segment Loss
-        "S0": {"trigger_prob": 0.0, "burst_lambda": 0.0, "max_drop_ratio": 0.0},
-        "S1": {"trigger_prob": 1e-5, "burst_lambda": 24.0, "max_drop_ratio": 0.08},
-        "S2": {"trigger_prob": 3e-4, "burst_lambda": 100.0, "max_drop_ratio": 0.22},
-        "S3": {"trigger_prob": 8e-4, "burst_lambda": 220.0, "max_drop_ratio": 0.45},
-        "S4": {"trigger_prob": 1.5e-3, "burst_lambda": 360.0, "max_drop_ratio": 0.70},
-        "S5": {"trigger_prob": 2.5e-3, "burst_lambda": 520.0, "max_drop_ratio": 0.85},
+        "S0": {"trigger_prob": 0.0, "burst_lambda": 0.0, "max_drop_ratio": 1.0},
+        "S1": {"trigger_prob": 5e-4, "burst_lambda": 100.0, "max_drop_ratio": 1.0},
+        "S2": {"trigger_prob": 8e-4, "burst_lambda": 220.0, "max_drop_ratio": 1.0},
+        "S3": {"trigger_prob": 2e-3, "burst_lambda": 360.0, "max_drop_ratio": 1.0},
+        "S4": {"trigger_prob": 5e-3, "burst_lambda": 520.0, "max_drop_ratio": 1.0},
+        "S5": {"trigger_prob": 7e-3, "burst_lambda": 640.0, "max_drop_ratio": 1.0},
     },
     "metadata_loss": {
         "M0": {

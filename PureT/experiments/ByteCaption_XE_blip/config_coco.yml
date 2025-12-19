@@ -24,8 +24,8 @@ DATA_LOADER:
   TEST_ATT_FEATS: ''                        # Not used for COCO
   TRAIN_ID: './PureT/data/coco_karpathy/train_ids.json'
   VAL_ID: './PureT/data/coco_karpathy/validation_ids.json'
-  TEST_ID: './PureT/data/coco_karpathy/validation_ids.json'
-  TEST_4W_ID: './PureT/data/coco_karpathy/validation_ids.json'
+  TEST_ID: './PureT/data/coco_karpathy/test_ids.json'
+  TEST_4W_ID: './PureT/data/coco_karpathy/test_ids.json'
   INPUT_SEQ_PATH: ''                        # Not used for COCO (auto-generated)
   TARGET_SEQ_PATH: ''                       # Not used for COCO (auto-generated)
   SEQ_PER_IMG: 5

@@ -1,12 +1,12 @@
 """
-Sample COCO val images, corrupt their JPEG bitstreams, and save category-wise
+Sample COCO test images, corrupt their JPEG bitstreams, and save category-wise
 examples for visual inspection. Dataset loading now mirrors training/eval
 (`PureT/datasets_/coco_dataset_hf.py` + cfg).
 
 Quick run examples (from repo root, with venv python):
   python tools/corrupt_coco_bitstreams.py \
       --config PureT/experiments/ByteCaption_XE/config_coco.yml \
-      --images-per-cat 5 --max-images 200 \
+      --images-per-cat 10 --max-images 200 \
       --severity-levels S1 S2 S3 S4 S5 \
       --corrupt-types rbbf rbsl metadata_loss \
       --mode sequential \
@@ -22,7 +22,7 @@ import random
 import sys
 import shutil
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 from PIL import Image, ImageFile
@@ -76,20 +76,20 @@ def _build_pipelines(corrupt_types: List[str], levels: List[str]) -> Dict[str, D
     return pipelines
 
 
-def _load_coco_dataset(val_ids_path: Optional[str], max_samples: Optional[int]) -> CocoDataset:
-    """Create CocoDataset in the same way as eval loaders."""
+def _load_coco_dataset(image_ids_path: Optional[str], gv_feat_path: str, max_samples: Optional[int]) -> CocoDataset:
+    """Create CocoDataset in the same way as eval/test loaders."""
     return CocoDataset(
-        image_ids_path=val_ids_path,
+        image_ids_path=image_ids_path,
         input_seq=None,
         target_seq=None,
-        gv_feat_path=cfg.DATA_LOADER.VAL_GV_FEAT or "",
+        gv_feat_path=gv_feat_path or "",
         seq_per_img=1,
         max_feat_num=cfg.DATA_LOADER.MAX_FEAT,
         max_samples=max_samples,
     )
 
 
-def _attach_categories(instances_ann: Optional[str]) -> Tuple[Optional[COCO], Dict[str, str]]:
+def _attach_categories(instances_ann: Optional[str]) -> Tuple[Optional[Any], Dict[str, str]]:
     """Return COCO API handle and image_id -> category name mapping if available."""
     if not instances_ann or not Path(instances_ann).exists() or COCO is None:
         return None, {}
@@ -110,7 +110,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Corrupt COCO JPEG bitstreams and save samples.")
     parser.add_argument("--config", type=str, default="PureT/experiments/ByteCaption_XE/config_coco.yml",
                         help="Config file to load (same as train/eval).")
-    parser.add_argument("--val-ids", type=str, default=None, help="Optional override for validation id list (JSON).")
+    parser.add_argument("--test-ids", type=str, default=None, help="Optional override for test id list (JSON).")
+    parser.add_argument(
+        "--val-ids",
+        type=str,
+        default=None,
+        help="[DEPRECATED] Alias for --test-ids (kept for backward compatibility).",
+    )
     parser.add_argument("--instances-ann", type=str, default=None,
                         help="Optional instances annotation (instances_val2017.json) for category grouping.")
     parser.add_argument("--images-per-cat", type=int, default=3, help="How many images to sample per category.")
@@ -140,8 +146,9 @@ def main() -> None:
     output_root.mkdir(parents=True, exist_ok=True)
 
     max_samples = args.max_images if args.max_images > 0 else None
-    val_ids_path = args.val_ids if args.val_ids else cfg.DATA_LOADER.VAL_ID
-    dataset = _load_coco_dataset(val_ids_path, max_samples=max_samples)
+    test_ids_path = args.test_ids or args.val_ids or cfg.DATA_LOADER.TEST_ID
+    test_gv_feat = getattr(cfg.DATA_LOADER, "TEST_GV_FEAT", cfg.DATA_LOADER.VAL_GV_FEAT)
+    dataset = _load_coco_dataset(test_ids_path, test_gv_feat, max_samples=max_samples)
 
     coco_api, img_to_cat = _attach_categories(args.instances_ann)
     category_names = list(set(img_to_cat.values())) if img_to_cat else ["all"]

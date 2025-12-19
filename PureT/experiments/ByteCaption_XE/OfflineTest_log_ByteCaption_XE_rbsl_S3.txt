@@ -1,1 +1,2 @@
 [INFO: 2025-12-19 14:13:48,084] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth
+[INFO: 2025-12-19 22:13:37,449] Loaded best model: PureT/experiments/ByteCaption_XE/snapshot/best_model.pth
