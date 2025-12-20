@@ -3,6 +3,7 @@ from models.pure_transformer import PureT_Base
 from models.pure_transformer import PureT_Base_22K
 from models.pure_byteformer import PureT_byteformer
 from .hf_caption_model import HFCaptionModel
+from .openrouter_caption_model import OpenRouterCaptionModel
 
 __factory = {
     'PureT': PureT,
@@ -15,6 +16,7 @@ __factory = {
     'HF': HFCaptionModel,
     'GIT': HFCaptionModel,
     'HF_GIT': HFCaptionModel,
+    'OPENROUTER': OpenRouterCaptionModel,
 }
 
 def names():

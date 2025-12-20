@@ -238,6 +238,29 @@ __C.MODEL.HF.ALLOW_UNSAFE_TORCH_LOAD = False  # Allow .bin loading with torch<2.
 __C.MODEL.HF.GENERATION = edict()
 __C.MODEL.HF.GENERATION.MAX_LENGTH = 50
 __C.MODEL.HF.GENERATION.NUM_BEAMS = 3
+
+# OpenRouter vision captioning options (API-based models)
+__C.MODEL.OPENROUTER = edict()
+__C.MODEL.OPENROUTER.MODEL_ID = 'openai/gpt-5.1'
+__C.MODEL.OPENROUTER.API_BASE = 'https://openrouter.ai/api/v1/chat/completions'
+__C.MODEL.OPENROUTER.API_KEY = ''
+__C.MODEL.OPENROUTER.API_KEY_PATH = 'openrouter_api'
+__C.MODEL.OPENROUTER.HTTP_REFERER = ''
+__C.MODEL.OPENROUTER.APP_TITLE = 'ByteCaption'
+__C.MODEL.OPENROUTER.TIMEOUT = 60
+__C.MODEL.OPENROUTER.MAX_TOKENS = 64
+__C.MODEL.OPENROUTER.TEMPERATURE = 0.0
+__C.MODEL.OPENROUTER.TOP_P = 1.0
+__C.MODEL.OPENROUTER.MAX_WORKERS = 6
+__C.MODEL.OPENROUTER.BATCH_SIZE = 1
+__C.MODEL.OPENROUTER.PROXY = ''
+__C.MODEL.OPENROUTER.SYSTEM_PROMPT = ''
+__C.MODEL.OPENROUTER.USER_PROMPT = ''
+__C.MODEL.OPENROUTER.PLACEHOLDER = 'this is a dummy caption for an undecodable image'
+__C.MODEL.OPENROUTER.RETRY = edict()
+__C.MODEL.OPENROUTER.RETRY.MAX_ATTEMPTS = 3
+__C.MODEL.OPENROUTER.RETRY.BACKOFF_BASE = 1.5
+__C.MODEL.OPENROUTER.RETRY.BACKOFF_MAX = 20.0
 # ---------------------------------------------------------------------------- #
 # Solver options
 # ---------------------------------------------------------------------------- #

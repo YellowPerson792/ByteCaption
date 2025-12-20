@@ -35,7 +35,8 @@ except ImportError:
 
 """
 Example:
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE --test_samples 0 --resume -1 --disable_wandb
+python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 30 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE --test_samples 5 --resume -1 --disable_wandb
 """
 
 class Tester(object):
@@ -199,7 +200,14 @@ class Tester(object):
 
         # 仅在模型不是 HF/BLIP/GIT 时才加载本地检查点。
         model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
-        is_hf = model_type.startswith("hf") or "blip" in model_type or "git" in model_type
+        is_hf = (
+            model_type.startswith("hf")
+            or "blip" in model_type
+            or "git" in model_type
+            or "openrouter" in model_type
+            or model_type.startswith("gpt")
+            or "gpt" in model_type
+        )
         if is_hf:
             self.logger.info(f"{cfg.MODEL.TYPE} model uses HF weights. Skipping local checkpoint loading.")
             return

@@ -1,0 +1,428 @@
+import base64
+import json
+import logging
+import os
+import random
+import time
+import urllib.error
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from io import BytesIO
+from pathlib import Path
+from typing import List, Optional, Tuple
+
+import torch
+import torch.nn as nn
+from PIL import Image
+
+from lib.config import cfg
+
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _coerce_image_bytes(item) -> Optional[bytes]:
+    if item is None:
+        return None
+    if isinstance(item, (bytes, bytearray, memoryview)):
+        return bytes(item)
+    if isinstance(item, Image.Image):
+        buf = BytesIO()
+        item.save(buf, format="JPEG", quality=60)
+        return buf.getvalue()
+    return None
+
+
+def _normalize_caption(text: str, placeholder: str) -> str:
+    raw = (text or "").strip()
+    if not raw:
+        return placeholder
+    if raw[0] in "{[":
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, dict):
+                for key in ("caption", "text", "output"):
+                    if isinstance(parsed.get(key), str):
+                        raw = parsed[key]
+                        break
+            elif isinstance(parsed, list) and parsed:
+                first = parsed[0]
+                if isinstance(first, str):
+                    raw = first
+                elif isinstance(first, dict):
+                    for key in ("caption", "text", "output"):
+                        if isinstance(first.get(key), str):
+                            raw = first[key]
+                            break
+        except Exception:
+            pass
+    cleaned = " ".join(str(raw).strip().strip('"').strip("'").split())
+    if not cleaned:
+        return placeholder
+    if cleaned == placeholder:
+        return placeholder
+    if cleaned.endswith(".") and cleaned[:-1].strip() == placeholder:
+        return placeholder
+    return cleaned
+
+
+class OpenRouterCaptionModel(nn.Module):
+    """
+    OpenRouter API captioning wrapper.
+    Accepts a list of corrupted JPEG byte streams via cfg.PARAM.ATT_FEATS.
+    """
+
+    def __init__(
+        self,
+        model_id: Optional[str] = None,
+        api_base: Optional[str] = None,
+        api_key: Optional[str] = None,
+        api_key_path: Optional[str] = None,
+        max_workers: Optional[int] = None,
+    ):
+        super().__init__()
+        or_cfg = getattr(cfg.MODEL, "OPENROUTER", None)
+        self.model_id = model_id or (or_cfg.MODEL_ID if or_cfg else "openai/gpt-5.1")
+        self.api_base = api_base or (or_cfg.API_BASE if or_cfg else "https://openrouter.ai/api/v1/chat/completions")
+        self.api_key = api_key or (or_cfg.API_KEY if or_cfg else "")
+        self.api_key_path = api_key_path or (or_cfg.API_KEY_PATH if or_cfg else "openrouter_api")
+        self.http_referer = (or_cfg.HTTP_REFERER if or_cfg else "") or ""
+        self.app_title = (or_cfg.APP_TITLE if or_cfg else "") or ""
+        self.proxy = (or_cfg.PROXY if or_cfg else "") or ""
+        self.timeout = float(or_cfg.TIMEOUT if or_cfg else 60)
+        self.max_tokens = int(or_cfg.MAX_TOKENS if or_cfg else 64)
+        self.temperature = float(or_cfg.TEMPERATURE if or_cfg else 0.0)
+        self.top_p = float(or_cfg.TOP_P if or_cfg else 1.0)
+        self.max_workers = int(max_workers if max_workers is not None else (or_cfg.MAX_WORKERS if or_cfg else 6))
+        self.request_batch_size = int(or_cfg.BATCH_SIZE if or_cfg else 1)
+        self.placeholder = (or_cfg.PLACEHOLDER if or_cfg else "this is a dummy caption for an undecodable image").strip()
+        self.system_prompt = (or_cfg.SYSTEM_PROMPT if or_cfg else "").strip()
+        self.user_prompt = (or_cfg.USER_PROMPT if or_cfg else "").strip()
+        retry_cfg = getattr(or_cfg, "RETRY", None) if or_cfg else None
+        self.retry_attempts = int(retry_cfg.MAX_ATTEMPTS) if retry_cfg else 3
+        self.retry_backoff_base = float(retry_cfg.BACKOFF_BASE) if retry_cfg else 1.5
+        self.retry_backoff_max = float(retry_cfg.BACKOFF_MAX) if retry_cfg else 20.0
+        self.logger = logging.getLogger(cfg.LOGGER_NAME)
+        self._seen_errors = set()
+        self._opener = self._build_opener(self.proxy)
+
+        if not self.placeholder:
+            self.placeholder = "this is a dummy caption for an undecodable image"
+
+        if not self.user_prompt:
+            self.user_prompt = (
+                "You are given a possibly corrupted JPEG image. "
+                "If you can decode it, output a short COCO-style caption. "
+                f"If you cannot decode it, output exactly: {self.placeholder} "
+                "Output only the caption with no extra text."
+            )
+
+        self.api_key = self.api_key or self._resolve_api_key()
+        if not self.api_key:
+            raise RuntimeError(
+                "OpenRouter API key not found. Set OPENROUTER_API_KEY or provide MODEL.OPENROUTER.API_KEY/_PATH."
+            )
+
+    def forward(self, *args, **kwargs):
+        raise NotImplementedError("OpenRouterCaptionModel is inference-only in this pipeline.")
+
+    def decode_beam(self, **kwargs) -> Tuple[List[str], None]:
+        images = kwargs[cfg.PARAM.ATT_FEATS]
+        outputs = [self.placeholder for _ in range(len(images))]
+        if not images:
+            return outputs, None
+
+        indexed_urls = []
+        for idx, item in enumerate(images):
+            if item is None:
+                continue
+            data_url = self._to_data_url(item)
+            if not data_url:
+                continue
+            indexed_urls.append((idx, data_url))
+
+        if not indexed_urls:
+            return outputs, None
+
+        batch_size = self.request_batch_size if self.request_batch_size is not None else 1
+        if batch_size <= 0:
+            batch_size = len(indexed_urls)
+        else:
+            batch_size = max(1, batch_size)
+        if self.max_workers <= 1 or len(indexed_urls) == 1:
+            for idx, url in indexed_urls:
+                caption = self._request_caption(url)
+                outputs[idx] = _normalize_caption(caption, self.placeholder)
+            return outputs, None
+
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            for start in range(0, len(indexed_urls), batch_size):
+                chunk = indexed_urls[start : start + batch_size]
+                future_map = {executor.submit(self._request_caption, url): idx for idx, url in chunk}
+                for fut in as_completed(future_map):
+                    idx = future_map[fut]
+                    caption = fut.result()
+                    outputs[idx] = _normalize_caption(caption, self.placeholder)
+
+        return outputs, None
+
+    def decode(self, **kwargs):
+        kwargs["BEAM_SIZE"] = 1
+        return self.decode_beam(**kwargs)
+
+    def _resolve_api_key(self) -> str:
+        env_key = os.getenv("OPENROUTER_API_KEY", "").strip()
+        if env_key:
+            return env_key
+        key_path = os.getenv("OPENROUTER_API_KEY_PATH", "").strip() or self.api_key_path
+        if not key_path:
+            return ""
+        path = Path(key_path)
+        candidates = [path]
+        if not path.is_absolute():
+            candidates.append(Path.cwd() / path)
+            candidates.append(_PROJECT_ROOT / path)
+        for candidate in candidates:
+            if candidate.exists():
+                try:
+                    return candidate.read_text(encoding="utf-8").strip()
+                except Exception:
+                    continue
+        return ""
+
+    def _to_data_url(self, item) -> Optional[str]:
+        if isinstance(item, str):
+            if item.startswith("data:image"):
+                return item
+            return f"data:image/jpeg;base64,{item}"
+        raw = _coerce_image_bytes(item)
+        if not raw:
+            return None
+        b64 = base64.b64encode(raw).decode("ascii")
+        return f"data:image/jpeg;base64,{b64}"
+
+    def _build_payload(self, image_url: str) -> dict:
+        messages = []
+        if self.system_prompt:
+            messages.append({"role": "system", "content": self.system_prompt})
+        messages.append(
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": self.user_prompt},
+                    {"type": "image_url", "image_url": {"url": image_url}},
+                ],
+            }
+        )
+        return {
+            "model": self.model_id,
+            "messages": messages,
+            "max_tokens": self.max_tokens,
+            "temperature": self.temperature,
+            "top_p": self.top_p,
+            "stream": False,
+        }
+
+    def _request_caption(self, image_url: str) -> str:
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        if self.http_referer:
+            headers["HTTP-Referer"] = self.http_referer
+        if self.app_title:
+            headers["X-Title"] = self.app_title
+
+        payload = self._build_payload(image_url)
+        payload_bytes = json.dumps(payload).encode("utf-8")
+
+        attempt = 0
+        last_error = ""
+        while attempt < self.retry_attempts:
+            attempt += 1
+            try:
+                req = urllib.request.Request(self.api_base, data=payload_bytes, headers=headers, method="POST")
+                opener = self._opener or urllib.request
+                with opener.open(req, timeout=self.timeout) as resp:
+                    body = resp.read()
+                    resp_headers = resp.headers
+                raw_text = body.decode("utf-8", errors="replace")
+                try:
+                    data = json.loads(raw_text)
+                except Exception:
+                    last_error = "invalid_json"
+                    self._log_api_error("invalid_json", raw_text)
+                    self._sleep_backoff(attempt, None)
+                    continue
+                if isinstance(data, dict) and data.get("error"):
+                    retry_after = None
+                    if resp_headers is not None:
+                        retry_after = resp_headers.get("Retry-After")
+                    last_error = self._format_error(data)
+                    self._log_api_error("api_error", data)
+                    if self._is_retryable_error(data):
+                        self._sleep_backoff(attempt, retry_after)
+                        continue
+                    return ""
+                choice_error = self._extract_choice_error(data)
+                if choice_error is not None:
+                    retry_after = None
+                    if resp_headers is not None:
+                        retry_after = resp_headers.get("Retry-After")
+                    last_error = self._format_error(choice_error)
+                    self._log_api_error("choice_error", choice_error)
+                    if self._is_retryable_error(choice_error):
+                        self._sleep_backoff(attempt, retry_after)
+                        continue
+                    return ""
+                caption = self._extract_caption(data)
+                if caption:
+                    return caption
+                if raw_text:
+                    self._log_api_error("missing_choices", raw_text)
+                last_error = "empty_response"
+                self._sleep_backoff(attempt, None)
+            except urllib.error.HTTPError as err:
+                try:
+                    err_body = err.read().decode("utf-8", errors="replace")
+                    err_data = json.loads(err_body) if err_body else None
+                except Exception:
+                    err_body = ""
+                    err_data = None
+                last_error = f"HTTP {err.code}"
+                if err_data:
+                    self._log_api_error(err.code, err_data)
+                else:
+                    self._log_api_error(err.code, err_body)
+                if err.code in (429, 500, 502, 503, 504):
+                    self._sleep_backoff(attempt, err.headers.get("Retry-After"))
+                    continue
+                return ""
+            except urllib.error.URLError as err:
+                last_error = str(err.reason)
+                self._sleep_backoff(attempt, None)
+            except Exception as err:
+                last_error = str(err)
+                self._sleep_backoff(attempt, None)
+
+        if last_error:
+            try:
+                self.logger.warning("OpenRouter request failed after retries: %s", last_error)
+            except Exception:
+                pass
+        return ""
+
+    def _build_opener(self, proxy: str):
+        if not proxy:
+            return None
+        proxy_url = proxy.strip()
+        if not proxy_url:
+            return None
+        proxies = {"http": proxy_url, "https": proxy_url}
+        try:
+            handler = urllib.request.ProxyHandler(proxies)
+            return urllib.request.build_opener(handler)
+        except Exception:
+            return None
+
+    def _log_api_error(self, status, body) -> None:
+        if not body:
+            return
+        preview = body
+        if isinstance(body, dict):
+            preview = json.dumps(body, ensure_ascii=True)[:200]
+        key = (str(status), preview)
+        if key in self._seen_errors:
+            return
+        self._seen_errors.add(key)
+        try:
+            self.logger.error("OpenRouter API error %s: %s", status, preview)
+        except Exception:
+            pass
+
+    def _format_error(self, data: dict) -> str:
+        err = data.get("error") if isinstance(data, dict) else None
+        if not isinstance(err, dict):
+            return "api_error"
+        code = err.get("code") or "unknown"
+        message = err.get("message") or ""
+        return f"{code}:{message}".strip(":")
+
+    def _is_retryable_error(self, data: dict) -> bool:
+        err = data.get("error") if isinstance(data, dict) else None
+        if not isinstance(err, dict):
+            return False
+        code = str(err.get("code") or "").lower()
+        message = str(err.get("message") or "").lower()
+        raw = ""
+        meta = err.get("metadata") if isinstance(err.get("metadata"), dict) else None
+        if meta and isinstance(meta.get("raw"), str):
+            raw = meta["raw"].lower()
+        combined = " ".join([code, message, raw])
+        if any(
+            token in combined
+            for token in (
+                "rate",
+                "limit",
+                "overload",
+                "timeout",
+                "temporarily",
+                "busy",
+                "server_error",
+                "gateway",
+                "bad_gateway",
+                "unavailable",
+                "502",
+                "503",
+            )
+        ):
+            return True
+        return False
+
+    def _extract_choice_error(self, data: dict):
+        if not isinstance(data, dict):
+            return None
+        choices = data.get("choices")
+        if not isinstance(choices, list) or not choices:
+            return None
+        choice = choices[0]
+        if not isinstance(choice, dict):
+            return None
+        if "error" in choice and isinstance(choice["error"], dict):
+            return {"error": choice["error"]}
+        return None
+
+    def _extract_caption(self, data: dict) -> str:
+        if isinstance(data, dict) and data.get("error"):
+            return ""
+        choices = data.get("choices") if isinstance(data, dict) else None
+        if not choices:
+            return ""
+        choice = choices[0]
+        if isinstance(choice, dict):
+            message = choice.get("message")
+            if isinstance(message, dict) and message.get("content") is not None:
+                content = message["content"]
+                if isinstance(content, list):
+                    parts = []
+                    for part in content:
+                        if isinstance(part, dict) and isinstance(part.get("text"), str):
+                            parts.append(part["text"])
+                    return "".join(parts)
+                return str(content)
+            if isinstance(choice.get("text"), str):
+                return choice["text"]
+        return ""
+
+    def _sleep_backoff(self, attempt: int, retry_after: Optional[str]) -> None:
+        if retry_after:
+            try:
+                delay = float(retry_after)
+                time.sleep(delay)
+                return
+            except Exception:
+                pass
+        base = self.retry_backoff_base ** max(attempt - 1, 0)
+        delay = min(self.retry_backoff_max, base + random.random())
+        time.sleep(delay)

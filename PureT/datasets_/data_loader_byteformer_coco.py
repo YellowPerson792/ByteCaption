@@ -354,6 +354,46 @@ def blip_collate_val(batch: Sequence[Tuple[Any, ...]]):
     return expanded_indices, expanded_gv_feat, blip_image_tensors, None
 
 
+def openrouter_collate_val(batch: Sequence[Tuple[Any, ...]]):
+    """
+    Validation collate for OpenRouter API models.
+    Returns raw (possibly corrupted) JPEG bytes instead of PIL images.
+    """
+    indices, gv_feat, att_feats = zip(*batch)
+
+    api_image_bytes = []
+    corrupter = image_bytes.ByteStreamCorrupter(opts)
+    pipeline = corrupter.pipeline
+    if pipeline.is_enabled() and corrupter.corruption_types:
+        num_variants = len(corrupter.corruption_types)
+    else:
+        num_variants = 1
+
+    for img_tensor in att_feats:
+        try:
+            byte_stream = image_bytes._image_to_bytes(img_tensor, format="jpeg", quality=95)
+            original_bytes = byte_stream.getvalue()
+            _BYTE_STREAM_LENGTHS.append(len(original_bytes))
+        except Exception:
+            api_image_bytes.extend([None] * num_variants)
+            continue
+
+        corrupted_variants = pipeline.apply(original_bytes) if pipeline.is_enabled() else [(original_bytes, "none")]
+        for corrupted_bytes, _marker in corrupted_variants:
+            api_image_bytes.append(corrupted_bytes)
+
+    original_bs = len(att_feats)
+    augmentation_factor = len(api_image_bytes) // original_bs if original_bs > 0 else 1
+
+    indices_np = np.stack(indices, axis=0).reshape(-1)
+    expanded_indices = np.repeat(indices_np, augmentation_factor, axis=0)
+
+    gv_feat_tensor = torch.cat([torch.from_numpy(b) for b in gv_feat], 0)
+    expanded_gv_feat = gv_feat_tensor.repeat_interleave(augmentation_factor, dim=0)
+
+    return expanded_indices, expanded_gv_feat, api_image_bytes, None
+
+
 def _worker_init_fn(worker_id: int) -> None:
     """为每个 DataLoader worker 设置独立但可复现的随机种子。"""
     base_seed = torch.initial_seed() % 2**31
@@ -410,11 +450,19 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
     # 加一个选择，先这样加，之后再说
     import os as _os
     force_blip = _os.getenv("FORCE_BLIP", "").lower() in ("1", "true", "yes")
+    force_openrouter = _os.getenv("FORCE_OPENROUTER", "").lower() in ("1", "true", "yes")
     model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
+    is_openrouter = "openrouter" in model_type or model_type.startswith("gpt") or "gpt" in model_type
     is_hf = model_type.startswith("hf") or "blip" in model_type or "git" in model_type
     # 调试：显示当前模型类型
     print(f"[数据加载器] cfg.MODEL.TYPE = {cfg.MODEL.TYPE}")
-    if force_blip or is_hf:
+    if force_openrouter or is_openrouter:
+        if force_openrouter and not is_openrouter:
+            cfg.MODEL.TYPE = "OPENROUTER"
+            print("[data_loader] FORCE_OPENROUTER=1 -> overriding cfg.MODEL.TYPE to OPENROUTER.")
+        active_collate_fn = openrouter_collate_val
+        print("[data_loader] OpenRouter API evaluation mode enabled.")
+    elif force_blip or is_hf:
         if force_blip and "blip" not in model_type:
             print("[数据加载器] FORCE_BLIP=1 -> overriding cfg.MODEL.TYPE to BLIP for collate/eval.")
             cfg.MODEL.TYPE = "BLIP"
