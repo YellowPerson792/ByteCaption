@@ -256,11 +256,34 @@ __C.MODEL.OPENROUTER.BATCH_SIZE = 1
 __C.MODEL.OPENROUTER.PROXY = ''
 __C.MODEL.OPENROUTER.SYSTEM_PROMPT = ''
 __C.MODEL.OPENROUTER.USER_PROMPT = ''
+__C.MODEL.OPENROUTER.IMAGE_DETAIL = ''  # e.g. "low" to reduce image tokens
+__C.MODEL.OPENROUTER.FREQUENCY_PENALTY = None
+__C.MODEL.OPENROUTER.PRESENCE_PENALTY = None
+__C.MODEL.OPENROUTER.REPETITION_PENALTY = None
+__C.MODEL.OPENROUTER.MIN_P = None
+__C.MODEL.OPENROUTER.TOP_K = None
+__C.MODEL.OPENROUTER.SEED = None
+__C.MODEL.OPENROUTER.STOP = None
+__C.MODEL.OPENROUTER.LOGPROBS = None
+__C.MODEL.OPENROUTER.TOP_LOGPROBS = None
+__C.MODEL.OPENROUTER.RESPONSE_FORMAT = None
+__C.MODEL.OPENROUTER.EXTRA_HEADERS = None
+__C.MODEL.OPENROUTER.EXTRA_PAYLOAD = None
+# Reasoning control for OpenRouter models.
+# Keep it as a dict-like structure so YAML can set e.g.:
+#   REASONING: { enabled: false }
+# or:
+#   REASONING: { enabled: true, effort: "low" }
+__C.MODEL.OPENROUTER.REASONING = edict()
+__C.MODEL.OPENROUTER.REASONING.enabled = False
+__C.MODEL.OPENROUTER.REASONING.effort = ''
 __C.MODEL.OPENROUTER.PLACEHOLDER = 'this is a dummy caption for an undecodable image'
 __C.MODEL.OPENROUTER.RETRY = edict()
 __C.MODEL.OPENROUTER.RETRY.MAX_ATTEMPTS = 3
 __C.MODEL.OPENROUTER.RETRY.BACKOFF_BASE = 1.5
 __C.MODEL.OPENROUTER.RETRY.BACKOFF_MAX = 20.0
+__C.MODEL.OPENROUTER.RETRY.ON_EMPTY_RESPONSE = True
+__C.MODEL.OPENROUTER.RETRY.ON_TRUNCATED = True
 # ---------------------------------------------------------------------------- #
 # Solver options
 # ---------------------------------------------------------------------------- #

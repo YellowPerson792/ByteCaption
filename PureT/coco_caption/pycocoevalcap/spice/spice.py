@@ -26,6 +26,78 @@ SERVER_CLASS = os.path.join('edu', 'anu', 'spice', 'SpiceServer.class')
 _SPICE_SERVER = None
 _SPICE_SERVER_LOCK = threading.Lock()
 
+_JAVA_MAJOR_VERSION = None
+
+
+def _java_major_version():
+  """Best-effort detection of Java major version.
+
+  Returns an int (e.g. 8, 11, 17, 21) or None if undetectable.
+  """
+  global _JAVA_MAJOR_VERSION
+  if _JAVA_MAJOR_VERSION is not None:
+    return _JAVA_MAJOR_VERSION
+  try:
+    # java -version prints to stderr
+    proc = subprocess.run(
+      ["java", "-version"],
+      stdout=subprocess.PIPE,
+      stderr=subprocess.PIPE,
+      universal_newlines=True,
+      check=False,
+    )
+    text = (proc.stderr or "") + "\n" + (proc.stdout or "")
+    first_line = (text.strip().splitlines() or [""])[0]
+    # Examples:
+    # - openjdk version "17.0.10" 2024-01-16
+    # - java version "1.8.0_392"
+    import re
+
+    m = re.search(r'version\s+"([0-9]+)(?:\.([0-9]+))?', first_line)
+    if not m:
+      _JAVA_MAJOR_VERSION = None
+      return _JAVA_MAJOR_VERSION
+    major = int(m.group(1))
+    minor = m.group(2)
+    # Java 8 reports as 1.8
+    if major == 1 and minor is not None:
+      major = int(minor)
+    _JAVA_MAJOR_VERSION = major
+    return _JAVA_MAJOR_VERSION
+  except Exception:
+    _JAVA_MAJOR_VERSION = None
+    return _JAVA_MAJOR_VERSION
+
+
+def _spice_jvm_args():
+  """Return JVM args needed for SPICE on newer Java runtimes.
+
+  Java 16+ tightens reflection access; SPICE's dependencies may require
+  opening java.base internals (commonly fails on Windows where newer JDKs are installed).
+  We only add these flags when Java >= 16 to remain compatible with Java 8.
+  """
+  # Allow user override/extension
+  extra = os.environ.get("SPICE_JAVA_OPTS", "").strip()
+  extra_args = extra.split() if extra else []
+
+  major = _java_major_version()
+  if major is None or major < 16:
+    return extra_args
+
+  add_opens = [
+    "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+    "--add-opens", "java.base/java.util=ALL-UNNAMED",
+    "--add-opens", "java.base/java.util.concurrent=ALL-UNNAMED",
+    "--add-opens", "java.base/java.io=ALL-UNNAMED",
+    "--add-opens", "java.base/java.math=ALL-UNNAMED",
+    "--add-opens", "java.base/java.nio=ALL-UNNAMED",
+    "--add-opens", "java.base/java.net=ALL-UNNAMED",
+    "--add-opens", "java.base/java.text=ALL-UNNAMED",
+    "--add-opens", "java.base/java.time=ALL-UNNAMED",
+    "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED",
+  ]
+  return add_opens + extra_args
+
 
 def _env_flag(name):
     value = os.environ.get(name, "").strip().lower()
@@ -80,7 +152,7 @@ class _SpiceServerProcess:
         classpath = _server_classpath(cwd)
         if not classpath:
             raise RuntimeError("SPICE server classes not available")
-        cmd = ['java', '-Xmx8G', '-cp', classpath, 'edu.anu.spice.SpiceServer']
+        cmd = ['java'] + _spice_jvm_args() + ['-Xmx8G', '-cp', classpath, 'edu.anu.spice.SpiceServer']
         cmd += ['-cache', cache_dir, '-subset', '-silent']
         if threads:
             cmd += ['-threads', str(threads)]
@@ -272,7 +344,7 @@ class Spice:
 
         if not server_used:
           # JVM options must precede -jar, otherwise Java treats them as jar names
-          spice_cmd = ['java', '-Xmx8G', '-jar', SPICE_JAR, in_file.name,
+          spice_cmd = ['java'] + _spice_jvm_args() + ['-Xmx8G', '-jar', SPICE_JAR, in_file.name,
             '-cache', self.cache_dir,
             '-out', out_file.name,
             '-subset',

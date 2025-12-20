@@ -51,15 +51,19 @@ MODEL:
     MAX_TOKENS: 64
     TEMPERATURE: 0.0
     TOP_P: 1.0
-    MAX_WORKERS: 4
-    BATCH_SIZE: 10
+    MAX_WORKERS: 5
+    BATCH_SIZE: 0
     SYSTEM_PROMPT: 'You are a vision captioning model.'
     USER_PROMPT: 'You are given a possibly corrupted JPEG image. If you can decode it, output a short COCO-style caption. If you cannot decode it, output exactly: this is a dummy caption for an undecodable image Output only the caption with no extra text.'
+    IMAGE_DETAIL: 'low'
+    REASONING: { enabled: false }
     PLACEHOLDER: 'this is a dummy caption for an undecodable image'
     RETRY:
-      MAX_ATTEMPTS: 4
-      BACKOFF_BASE: 1.6
-      BACKOFF_MAX: 20.0
+      MAX_ATTEMPTS: 2
+      BACKOFF_BASE: 1.2
+      BACKOFF_MAX: 6.0
+      ON_EMPTY_RESPONSE: false
+      ON_TRUNCATED: false
 
   SEQ_LEN: 17
   VOCAB_SIZE: 9487

@@ -888,3 +888,338 @@
 [INFO: 2025-12-20 17:48:29,028] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
 [INFO: 2025-12-20 17:49:24,148] ######## Offline TEST best ########
 [INFO: 2025-12-20 17:49:24,149] {'Bleu_1': 0.7266313932967784, 'Bleu_2': 0.5484268307752083, 'Bleu_3': 0.3940470108279558, 'Bleu_4': 0.27325801766119556, 'ROUGE_L': 0.5393432748914209, 'CIDEr': 1.1490559163628373, 'METEOR': 0.28827026157595026, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 0, 'Undecodable_Ratio': 0.0, 'Total_Samples': 50, 'Sample_Preview': [{'image_id': 1, 'generated': 'a small curly dog sleeping on a shoe rack among various sandals', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'black and white view of a city street with a traffic light and tall tower in the distance', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'An open toilet seat in a rustic bathroom.', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'a cozy living room with sofas and a wooden coffee table', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'a sandwich in a red basket on an outdoor cafe table', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 18:02:46,140] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[INFO: 2025-12-20 18:03:28,711] ######## Offline TEST best ########
+[INFO: 2025-12-20 18:03:28,711] {'Bleu_1': 0.7376543209853776, 'Bleu_2': 0.5819955505495558, 'Bleu_3': 0.4499503392069627, 'Bleu_4': 0.3366649916269006, 'ROUGE_L': 0.5586961566697667, 'CIDEr': 1.3083728320049386, 'METEOR': 0.30159877439765437, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 0, 'Undecodable_Ratio': 0.0, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'a small dog sleeping on a shoe rack filled with sandals', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'black and white photo of a city street with a traffic light and distant tower', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'An open toilet seat in a rustic bathroom setting.', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'a cozy living room with couches and a wooden coffee table', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'a sandwich in a basket on an outdoor cafe table', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 18:05:21,242] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 18:05:22,153] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[ERROR: 2025-12-20 18:05:27,732] OpenRouter API error missing_choices: 
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1766225122-A2eyGteV0XLnmOWerykC","provider":"OpenAI","model":"openai/gpt-5.1","object":"chat.completion","created":1766225122,"choices":[{"logprobs":null,"finish_reason":"length","native_finish_reason":"max_output_tokens","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":"**Decoding image issues**\n\nThe user mentioned a corrupted JPEG and is asking for a caption if the image is decodable. I see that the image seems mainly corrupted with some fragmentation, making it hard for me to identify anything. If decoding fails, I need to output the exact phrase, \"this is a dummy caption for an undecodable image.\" Since the image is mostly green with no clear objects, I should be cautious in my approach.**Interpreting corrupted image**\n\nThe user asked about a corrupted JPEG, and it looks like the image is mostly green with some fragmentation. I can't really identify any clear objects. If I can't decode it, I¡¯ll need to output the exact phrase: \"this is a dummy caption for an undecodable image.\" I want to ensure I provide the right response based on what's visible. It's crucial to follow the user's instructions carefully!","reasoning_details":[{"format":"openai-responses-v1","index":0,"type":"reasoning.summary","summary":"**Decoding image issues**\n\nThe user mentioned a corrupted JPEG and is asking for a caption if the image is decodable. I see that the image seems mainly corrupted with some fragmentation, making it hard for me to identify anything. If decoding fails, I need to output the exact phrase, \"this is a dummy caption for an undecodable image.\" Since the image is mostly green with no clear objects, I should be cautious in my approach.**Interpreting corrupted image**\n\nThe user asked about a corrupted JPEG, and it looks like the image is mostly green with some fragmentation. I can't really identify any clear objects. If I can't decode it, I¡¯ll need to output the exact phrase: \"this is a dummy caption for an undecodable image.\" I want to ensure I provide the right response based on what's visible. It's crucial to follow the user's instructions carefully!"},{"id":"rs_0fcbdebfe1fcbfca01694674e33d84819788ac457eb1a331cc","format":"openai-responses-v1","index":0,"type":"reasoning.encrypted","data":"gAAAAABpRnTo4kPZTbcfAhuFbOP4AQkDAZUZTqg9awvejpTd0JUw-s5lhvoAMpfHGvFlgh7ybKPp7GmfEYGR58zGCFBtvzOqV8NFG-MsFGjLliCxVeTMaO042EGgIFGeXqVy9IA-MCelgqNdJNFF0DJWIlAgtjkMMKRa0N10PVxcZ2BAu_9A9_FX_l4meOpgIQTxn4FDfpUSvAPbspTBugTJBdTPvDaGPvCB3X1KrVra2rPkCp0CvyDiISxokFoYGM0CyYiN6cG7j1DDt0eX-t-M8Ec1cRFAZl6OE6Cr13HUQDHN5Wg0PYWWN_npHp938grGqCjzzpf9OV2jUq1420Q09Qh-V4GYetHIWag72WwMQ9vxTq0xQ3zH355zoRy4Jcb6cfIj8I5GudYpXuff5jcShqBJ1we-HNnyu40WvbOms5Hi25M28Y96xkonZYAazVNNYabD589kzvzTsYsv3_d09tNxAfj0smsAi0ueWooXQ0H4CTtQ-PsaPwhrbpTgeidGRrdEx1BjJMoei_XcwYuf9hfcXAf4Rf9hfP3tHr88xfpUL300a_ozEkE0U2e0a57rLYs-76aJa5pwn3c31VkA1i76wjJ-GdbDblVa7_ZiZ7Q1cFuqZcuTtJuX-qigY4mlzcOaaEBnELxyFGmwj688wLEavCuxAWkz8HMa2_-43fkHQsxdMFISKkdFtFmjnar3GeGkzSohFVGz9QnyHZ3XDI4hrm-a0uLk9xKZBYQaW2sbBdi7DPPm-XkQ6QbNxGWKlNuN5MfMgP7W-7w__QrMGuZt-y0UjheqhR024t3dw1ejhE_Nx5R9aguK_wM_FuDcasENLGOp0zcY9NhN2qsvlxKtSOZPxMsZoqgsA9uNta_4kL0UPVKq3_f68gMENxOrv_cVT0jNlkLoh70lI_jPxTxXl-zndnGpkSI_UX1NO0K2evF1Zbjrwla27MuR8re-ydzJtOfS0bfans5V0orkKEKBrUkrmReWMLm53mzX5H-zXBBc72W-6ThKgm47w-H8sjfSJSxLf2htqcaqPyJyATEZNaTG-S3mLPT8nnfYG-fC4F__z2wmAdXWBEse_mu57wajuJ7wRUGAE0XocAM_edXiDgUJGqIVqsR1Q1UkcsoLP9cgkcuKn6N1tJy6OkRdc0nXRRta_pRGtrBT0ci5S33PTq-Sn79LVHcKM9iWBV0cbTSOE1lmY4HnQO9gtQ4mk3L4S76GFsbjOX3FRWsfjO9ur-Y8SrLxhmx9-Uuq9WWWbHGtcYw="}]}}],"usage":{"prompt_tokens":279,"completion_tokens":64,"total_tokens":343,"cost":0.00098875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00034875,"upstream_inference_completions_cost":0.00064},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0}}}
+[ERROR: 2025-12-20 18:05:29,328] OpenRouter API error missing_choices: 
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1766225124-FHP8Dxi0GCSjrS5UJR70","provider":"OpenAI","model":"openai/gpt-5.1","object":"chat.completion","created":1766225124,"choices":[{"logprobs":null,"finish_reason":"length","native_finish_reason":"max_output_tokens","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":"**Assessing image decodability**\n\nI need to figure out if this image is decodable. It looks pretty corrupted, and it¡¯s a small 224x224 pixel glitchy image. I can kinda see something¡ªmaybe kids at a table? But the requirement is about whether the model can actually interpret it. So, I¡¯ll mentally inspect it further to see if there's enough clarity to decode any meaningful information. It¡¯s tricky when images are so heavily distorted!**Evaluating image decodability**\n\nI need to determine if this image is decodable. It looks heavily corrupted, but I can still make out some details. I¡¯m mentally inspecting it¡ªit¡¯s a small 224x224 size and seems glitchy. Maybe I see a few kids at a table? However, the requirement is clear: I need to check if the model can interpret it. This might be a bit tricky given the state of the image!","reasoning_details":[{"format":"openai-responses-v1","index":0,"type":"reasoning.summary","summary":"**Assessing image decodability**\n\nI need to figure out if this image is decodable. It looks pretty corrupted, and it¡¯s a small 224x224 pixel glitchy image. I can kinda see something¡ªmaybe kids at a table? But the requirement is about whether the model can actually interpret it. So, I¡¯ll mentally inspect it further to see if there's enough clarity to decode any meaningful information. It¡¯s tricky when images are so heavily distorted!**Evaluating image decodability**\n\nI need to determine if this image is decodable. It looks heavily corrupted, but I can still make out some details. I¡¯m mentally inspecting it¡ªit¡¯s a small 224x224 size and seems glitchy. Maybe I see a few kids at a table? However, the requirement is clear: I need to check if the model can interpret it. This might be a bit tricky given the state of the image!"},{"id":"rs_045c7e29a1ba791301694674e4b14c819792b33629496b45fe","format":"openai-responses-v1","index":0,"type":"reasoning.encrypted","data":"gAAAAABpRnTq7lbmNFEV6Te_JcaOtXYzDQzksxYln9ZUDnsCr8iO_tIMTTX5PngtR06N5IoRRNAmspoa8YECVdFeSR4NyqdVxn6FrHvk1pr8yw4Xnn7UFCjabBiDythfrUWZBBRpTjoHrWFBNP9ArDhvw_qIpqFC06gwDnI2SeXnPukT6Uz4aa-H9tDHAb40i3Fb4PCc-BO9wUoUXIXlldP_Ndbi31BFIlibPg8Z3QHPduvQNOZ_2hCZyoGSXGmZ3voN5rFyiGyTr-dHRbkLkK5Z6_eWov-iqsA7y-ZJEv0CFGWyNxw-c4tab7KFEU61nd661TY059mRtpWaHdp5ATjG1Ig06rTL1lA3JGlj80quVybSxM6PLF7dJ_XDbXRKCphftWQBVjfYgr9x6B2gt8LfQU3IwT9AWCKssA5hJ5Sx9eL9Eh9bMHtX00ten4ogDLAnc7pVdJREf0SFob7Vhm4eB6GKZZV9SyZaek6mqlZxKbhKsP655cAQ0VOMkJt-1AbqRyR-m6ex1VuNvrE9bjAMNYZLSLFiFwx-mNXIKiPizD873h31K0RUjIMKqw8IDtGe-450vVZywlQBw3TwjZzsJexmPVGzA_oRf5WVC1ohgpaXn3i-vWAdny4SRRqOC1To-AiXAwt14tG6Ya9zUZeCPGAt-vzMR4c7Lg5O-p2I5H4D_YwmNl4gFzu9GpEhR9xMlzsntG9ECGK8bW85mSxjJ4pjc28_0szbIzkDsqzEfuTtX0wP0YuLDcduUq6AkO5bVl4csErmzBOYaipTrhDuEwtdOzjQJyCeKJNj54J1-Vrll8p8qGzbxQu5aKjtJ6KNfrcg6tP6PjQWG48IyO4mWi85lvjoaVZiK4v2Ri_tw2JvrCEQQZgq1R22b0OpnT9pJI-e89KY5n4oaTzNVEeyzBH8yFQ-A14TUsYNTVJ-W3v6VpNGaYVcE72m4TBRsMDB6awDAAe3wmDb8GpnCajNshNWzm0OU0gkE1tVU4au6S3Q2gTWb2INT2E02DgNAlShx1_EST_b3GlF23omiyBRDcGlmO36-kTX4c_uXOwGWD9egyKpe57mz-3O7mund8riQOyU7z4kBWAG3MPHWC2p2ObBQDDvwSxh87Ce057neeCACP4teFeQc5gDPBwTWhmhRniQrqbnPE3UYMUyx_wQgtOtG9AYn4wwlVIItKIVX0tYAo8AnxU="}]}}],"usage":{"prompt_tokens":279,"completion_tokens":64,"total_tokens":343,"cost":0.00098875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00034875,"upstream_inference_completions_cost":0.00064},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0}}}
+[ERROR: 2025-12-20 18:05:31,669] OpenRouter API error missing_choices: 
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1766225125-QFb8W4IqYNfWOal7nM6f","provider":"OpenAI","model":"openai/gpt-5.1","object":"chat.completion","created":1766225125,"choices":[{"logprobs":null,"finish_reason":"length","native_finish_reason":"max_output_tokens","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":"**Deciding on image caption**\n\nI see that the user has a corrupted image and needs a caption if it's possible to decode it. The image is small and glitched, but I can mentally visualize it. It seems like there might be people playing soccer or frisbee, but the corruption is severe. I need to decide whether to say \"cannot decode\" or take a shot at describing it based on what I think I can see.**Deciding on image caption**\n\nThe user's image is corrupted, and I need to determine if I can provide a caption based on what I can decipher. Although the corruption is severe, I'm thinking I might catch a glimpse of people playing soccer or frisbee. But if it's too distorted to decode, I should mention that specifically. I want to make sure I give an accurate response based on what¡¯s visible, even if it¡¯s limited.","reasoning_details":[{"format":"openai-responses-v1","index":0,"type":"reasoning.summary","summary":"**Deciding on image caption**\n\nI see that the user has a corrupted image and needs a caption if it's possible to decode it. The image is small and glitched, but I can mentally visualize it. It seems like there might be people playing soccer or frisbee, but the corruption is severe. I need to decide whether to say \"cannot decode\" or take a shot at describing it based on what I think I can see.**Deciding on image caption**\n\nThe user's image is corrupted, and I need to determine if I can provide a caption based on what I can decipher. Although the corruption is severe, I'm thinking I might catch a glimpse of people playing soccer or frisbee. But if it's too distorted to decode, I should mention that specifically. I want to make sure I give an accurate response based on what¡¯s visible, even if it¡¯s limited."},{"id":"rs_06c3ca727cdbf2a701694674e5c30c8195a35fac959d7cfe62","format":"openai-responses-v1","index":0,"type":"reasoning.encrypted","data":"gAAAAABpRnTsLNt6YvRS0F1PTGSqINKcQtHX6iYPpSB0eR5DZicVydxjV2IJ9ZFaLndsAtuooYTKuqqVeViwoGW54SkN0Tp4SphuUeHJjFoDuRhm6--Gho3_v8JkhJKqu6QzzzbZ3CCWeMMvhqZv2TOvRxrqJT-0fzxgHN6dKBb5lCUFaGKnBsXQm4PNJde_ptzktOQNHKWiOO5Qfg6JfkdTfrUzrcNqFeQkoPLjq0JhgaO1iCkT4pEoNSpHJ9b60e28ARgJFbriOsf6gOxtfYdKgjQanTKTVC20b1SgxubC02xH8L29ocWV9KW95tOVe8zROYOT62G0XogBierYijbp2C5YOHuLy9hevezw7iNvacYM2_9XGD27ZvPLU43MtfNmnYHsM1ozcRbBg7veqIzuU0T2-t3JZwHHvpxx92Xqy7-pxVuxUBiG8rYqKqOsLc71U9mvsTdHsrn_x7i_LudmKJ9LrZYI4tqGf5BPXU0zC4R6VFoGSrGLU_2aKTd2bTPnWlRGs9ZdnLtz1s7euNZ_Uv0eq7OL8E4VfKN7Dd9MZH0FwmOWxQEsSgHd8Qd8o2zAg_CyAFlhlVFNEnrqlkzNAOJFH2kbmrvdDMTXJnYvwpWM36eMcM2hu36-68yIRjFh-3RDkCKY4foe5ZzDHXA8enGsYluosBhRg1a1lVa-2GkZjSD593Q_QNrjKyVNz5amgvryVddgDEtGniGQeMwgw783EksOiWYZ7-yo1Dvrwc1l4_aKdHLDWaQWqL3md0mnMw9oh-xbQDC69jhu2H5NLYe8_gDgY5jfGtY39JS-zPzO4QjC3zOW5KcKIFBcEghIS1ldyitFAiNQL4-ly9-cZlKXWgfUWq5Kcc_3n99UqnE8RxBUsROrCr66zHOInJhLrcKojqzo05SARB8f7g3vzV2fXGjIqrFzrmkV5TVhnyi9D9JTpZouR2cgQmxEhTWs7u7pqwyCPu4uwwZ98cO_bbLTIVWMdlNg0evzlXBjqvDkkFGdsDPnfSLXWFFjIKvCnLvrx7g7DUGVGeOVweJ2f2KvvFZMHV7yBwh1Wf9tsKS7Gtg5tFlqi1YUKHnD7eKc9wesZnXw9Hg9EzB2wxcuKyixfY3-W_lCBIACYagZzqAu4weh9JZHvvawp1y-I5szZChetsrR0K4-3vce-1hzP5JmcCs8epyWXOii0CTwKWjPBWTNkRFycE8CjZKsxnEJLuOwYBpQhPTU-gOoshftcq6xkyb2Cg=="}]}}],"usage":{"prompt_tokens":279,"completion_tokens":64,"total_tokens":343,"cost":0.00098875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00034875,"upstream_inference_completions_cost":0.00064},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0}}}
+[ERROR: 2025-12-20 18:05:35,493] OpenRouter API error missing_choices: 
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1766225130-uIuOdo0zo2h96oDPEBsF","provider":"OpenAI","model":"openai/gpt-5.1","object":"chat.completion","created":1766225130,"choices":[{"logprobs":null,"finish_reason":"length","native_finish_reason":"max_output_tokens","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":"**Decoding visual data**\n\nI'm trying to decide if I can decode this image. The bottom 80% is just solid teal, which seems corrupted, but there¡¯s a small strip at the top that might be recognizable. I can see some hints of green and blue, along with shapes that could be flowers, but it's too little to be sure. The instructions say to output a caption if I can decode it.**Deciding on decoding**\n\nI need to figure out if I can decode this image. The bottom 80% is just a solid teal color, which seems corrupted. The top has a small strip that looks a little recognizable ¡ª I see hints of green and blue, possibly shapes that could be flowers? But honestly, there's not enough detail here to be sure. The instructions say to output a caption if I can decode it, but it¡¯s looking unlikely.","reasoning_details":[{"format":"openai-responses-v1","index":0,"type":"reasoning.summary","summary":"**Decoding visual data**\n\nI'm trying to decide if I can decode this image. The bottom 80% is just solid teal, which seems corrupted, but there¡¯s a small strip at the top that might be recognizable. I can see some hints of green and blue, along with shapes that could be flowers, but it's too little to be sure. The instructions say to output a caption if I can decode it.**Deciding on decoding**\n\nI need to figure out if I can decode this image. The bottom 80% is just a solid teal color, which seems corrupted. The top has a small strip that looks a little recognizable ¡ª I see hints of green and blue, possibly shapes that could be flowers? But honestly, there's not enough detail here to be sure. The instructions say to output a caption if I can decode it, but it¡¯s looking unlikely."},{"id":"rs_0a0773b23bae14c901694674eb76048194a51404642659b0b3","format":"openai-responses-v1","index":0,"type":"reasoning.encrypted","data":"gAAAAABpRnTweRMszedzKvazEXplNM62qBrZrmzLfM6Gl2oq_-8T98R8FkMRzLn7I4WuFBB11h8I45jd989SeqpKM_i0tqC7tkFgTg-CqLo5ewr_gPCrsxu17m5de1DV9RAWK1EwQHlll9LosDGnBnoj0vTFvmDNmoTAnMnM-7iNQ776O5tXXtwyUSV-XLr8QIrRSrQRpzFZyT7_7APhwebxz9pnEzI1hkYOlHkzcZu9Hui5jIvMboS4h6A8aYiAbBonQgdNkzZF2ZDfLZy3GueSN8W8mmf1CxASYvJJBuGsAPkkI4Z1G1h5fV4LWH03Gq4Azt3fAEEZBMb0NDf889zzBWJF_AHbWGup_RfXoRlvyyrrfVAxz5xoKo76UtSA_RB3-xw-ehq7AE6YH7GjyjVsKcRmCwsLQqcxd_rkNrKoSRHm5kE8ot1nsSHTx7dNxB0jm9D9KujWEcnWdWu9qr5g6dzwTxct3nvL6_fYeunw-FQ6xKxlvX58GFmCZKboBN6T75_xJjuu5e4ATnTzHFcKeHYHl2ndoL-mvEAFlz9lZXCWD1LCsCcI5DBaVZup8sIZJine_F6r0UyIa9nuGmLJI1_7DVuJiR_0tkue-LSFuFvTNHhJxs04r2zRFKgpcycGoOJm3Vciqc6wq3RQqBikaLtERFWjLMHkHjNSN8UA7J2k1asnDqtxXc9ROhQfnXXlnEqR4zt6l0tXVGeYHP0qXHi9qXU-5MB3e2s6Z3c4vVY1Cz9wsxFOuhRjHDp9On0Ps9SIJgra7dLzRQrzKemFRL_Y94RXTB634VwyJ4Y6e473gHVzbwKnn6ae285ZuN03lQ9d0SSoy7dvN3Xj60Qe3fGKqVoFnqP_nFz4MEai1HR664zAo5a1e127bKmi-C_9rJB5hTAEjhDE8KJR5V0APP3Vxiq0XWf6D2uPm2QlJ2aBH8_6GKOSpAPq_hlVCJnxEornVb5teAjxvmnPkTjBhMMztGXceWdOtPh1aU2E3DdcGSL410Rs_uV-gtd8Gg5RJ1Qv2v2s3YGXe8pRmGSK-ULxLeDezWCKV4dCY66Dyp3BouaDf2T67zYfDFli061POXRr71J52Ox21IZA6jnzX9910UFwdUadS0jaq8YsccySnkYNnw_E5LwLl_W6QQM4i4LidmK0k1IAMAFx_WjSTk4bRr40oBAsld5fjYks6nZ2p5gHwj4jg8wEJaETX7q7tJjx7V2x"}]}}],"usage":{"prompt_tokens":279,"completion_tokens":64,"total_tokens":343,"cost":0.00098875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00034875,"upstream_inference_completions_cost":0.00064},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0}}}
+[ERROR: 2025-12-20 18:05:36,338] OpenRouter API error missing_choices: 
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1766225131-e50YSP1ZwidvYnZbEcJG","provider":"OpenAI","model":"openai/gpt-5.1","object":"chat.completion","created":1766225131,"choices":[{"logprobs":null,"finish_reason":"length","native_finish_reason":"max_output_tokens","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":"**Deciding on image decodability**\n\nI need to determine if the image is decodable, and it looks pretty corrupted with color bands. But, I think I can still see maybe two people sitting at a table. Following the user instructions, if I can decode it, I should provide a short COCO-style caption; if not, I need to output a specific dummy string. It seems heavily glitched, but there's still some recognizable content.**Evaluating image decodability**\n\nI need to determine if the image is decodable. It looks corrupted, showing color bands, but I think I can still make out maybe two people sitting at a table. According to the user instructions, if I can decode it, I should output a short COCO-style caption; otherwise, I need to provide a specific dummy string. So, my judgment is that it's heavily glitched, but there seems to be some content present.","reasoning_details":[{"format":"openai-responses-v1","index":0,"type":"reasoning.summary","summary":"**Deciding on image decodability**\n\nI need to determine if the image is decodable, and it looks pretty corrupted with color bands. But, I think I can still see maybe two people sitting at a table. Following the user instructions, if I can decode it, I should provide a short COCO-style caption; if not, I need to output a specific dummy string. It seems heavily glitched, but there's still some recognizable content.**Evaluating image decodability**\n\nI need to determine if the image is decodable. It looks corrupted, showing color bands, but I think I can still make out maybe two people sitting at a table. According to the user instructions, if I can decode it, I should output a short COCO-style caption; otherwise, I need to provide a specific dummy string. So, my judgment is that it's heavily glitched, but there seems to be some content present."},{"id":"rs_06dfd64ab37c063601694674ebe6988193a8813bba2762ffc1","format":"openai-responses-v1","index":0,"type":"reasoning.encrypted","data":"gAAAAABpRnTxPWMG1o2ibBWhZlrlI29FSbkeROgQ9hWTefgcdy9VNJmFK5BQZ3hGbuSxkf7sG8Cs1cWYPZx29BFGnyA4xMpEQj7dL4-kD3JsBq6vxVJho13ugsAn2MtLVjKPZ7PUo5BrnXd8v55x5Kq6Gu0KfCvc7PaPPhhuu6ndcfFCLnAq4zI6filiSfMIc4HsTw_T2-kewmzG2ONybWGFlwoB6siSwImGL0JtXMipJc9kOlDD6DQ9VC1M6yrrwFatWvpcPHVgdkez3JNR9a9jHqHS8ARtS8RoCH97SprAgijwkhv6piTDcvONN9wz2YNSCqi8oACMAMsFBBfGRQzNKbJG10tp6qC6j76tC0fHoIZjm73fsXs2ModJfyDeHTiTEUmS4_MszFR3kbzpdbKJZkPGoeGL6g6WqdZPeKuMaz6Pi2J_iB6NV-a9QKVay2yBOUuzC32N0nQotZN0o4mcNjHslAfmg6MxjsZGQsVtfurNhhRneh8_8KeGoJr-tGfC72H8OM1VgspSckGgFUSQQOCYnDbdL6ruFVd3I29HmSk_b9-mDRfUnYmdW3Dl0oXGGskFBpcMCIL77a_7S79fj3e-vuxWYYXCGvus-_owoq85EcKlMggMObSRW_k_AYcxbxIaYaEDxXLvZs_mFqHTmUfpJJE0wTjCwx1mCNwt11BM3Yl6r24kWjcFwtqNLaZklOO4bCr4HpBR7ppT1-E6a_W9jFqHYu__beRGC-8x5eB0FoA_IH0YCikPTDOSe_SkPnmYAMKi2u1HoaOtMeAtIxchVHIrTKcJ2a_RmSrEqOuHB5ECX-VrNCxklpA7c5poNms9605mrQo5IWJ22yrGXXEzRUzBeDh8HkH6J1A3UXDJLqvGnZQ0T6zjgh3YYXN1yxajONn510U4r7YXILWjLyWpHtETs5EPS9q1v3CPV5ECgotmEr1JvFYz78Jsi8NijY8EkzrDycVe_6zofGsB8t97Ml4mYYpHQl6mj0VzC-WmRc0NfiFTcvsOsLARNDu5HGrnEo64aBXo5uplpyT6yvakoYqzlZ-g0zSRoHb3EQ3Kyu30AZDgm-XqfjsTqK_rzU4yrG4zXrQVy3WHnEdFxrhqolAMDPY46fD4ZWqncE3EksRQqFzpBWLCCvXHBej1x66uqMU_DaFizkdAAtRE5kIcuCUXdEgLCOtnjLxtopgDYuv8cCqUabjpqllKQlS2V6koljvimh1KCy3VmQzS0SF-XQCdcQ=="}]}}],"usage":{"prompt_tokens":279,"completion_tokens":64,"total_tokens":343,"cost":0.00098875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00034875,"upstream_inference_completions_cost":0.00064},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0}}}
+[ERROR: 2025-12-20 18:05:37,430] OpenRouter API error missing_choices: 
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1766225135-eIhvNLDtDvLNCO7KZZh4","provider":"OpenAI","model":"openai/gpt-5.1","object":"chat.completion","created":1766225135,"choices":[{"logprobs":null,"finish_reason":"length","native_finish_reason":"max_output_tokens","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":"**Decoding an image**\n\nI need to decode this image. It seems heavily corrupted, but I think I see a small dog lying on grass? The resolution is low, and at the top, there might be some greenery. The center shape resembles a dog. So, I¡¯ll go with a generic caption: \"a dog lying on grass.\" That might not be perfect, but it feels like the best bet considering the state of the image!","reasoning_details":[{"format":"openai-responses-v1","index":0,"type":"reasoning.summary","summary":"**Decoding an image**\n\nI need to decode this image. It seems heavily corrupted, but I think I see a small dog lying on grass? The resolution is low, and at the top, there might be some greenery. The center shape resembles a dog. So, I¡¯ll go with a generic caption: \"a dog lying on grass.\" That might not be perfect, but it feels like the best bet considering the state of the image!"},{"id":"rs_003875dae7c8286401694674efe6188193ae27122f1956ae16","format":"openai-responses-v1","index":0,"type":"reasoning.encrypted","data":"gAAAAABpRnTypRHQ39IOHqNocBV0f_nXn5pPhWFqCfg_tP9wJeclqvkczG6qoOVY9xbjAqPFXeXRK_Q9T-zN4Rnjs2UiLW2mKYSIU-l-lAdBlihmv3r4-bTVpY4BJUqSH85DkEWmvkCUfwLGwOl7x6Syk6uWJrgQRH4nt6yBucAO5lSKx3P99wF5_MOgrWOwnuLA_IRlPL4-fmipbp06BCy6Fk7kjlTHI55b1Gew5lKlebCLotZDzlGfGD5KIy1VyRa9pU8GQBhWhrTQNY-TlNTyxIw_EzUZP0j14LigPLCRMqkOp__Jx0IHzVmH7l5-8VLQ1VeU60MbVkp_0nxsFSI_O-wZTV42AX-oUNYK7w_6vikEgdSDgp6UWwLIaIqYOkv6fm9gi7YvrrlSg5bT7wIb7p8n11MXj_9l1fU4G1joUrGJaBdaDiLfy1gJYGKXyII0HU8h4-cKm5P2nKbZX5JIZYvYaNexvfG5diChdmBUDvXeL3YEbDIHhjiw-Zua4sGHTjPtafYIY53vvdX-tdOnWqAim60SO1fVEoe61FG0-vGNnvMlAgnjoWlP7ggho4E8hIzYg1p9wcsK6pjIPtMDahYsZ6q4uDtWAfc5xPab6Sa--iSMz2kiTb2szhXrf2HpJq4S-mcLIRS0UfxgDH8gr_3QLplR1xr7FoeZRVF3wvfMnZoVuvJtRfQ89XJq3n7yOBp2pcEKt8gYeZIdncB8PsCyG7mWJH-uD4Kc1gxia2hxNKvGTequEpMCm_GquGTgUu5Y3FAGrcWZQGWj4wYuieGSPPBAFUdz-RebcTbcsaTu_xwiG9jPqV__8UgSaU_BaGBo9SNdRVAxsppLh6LtPYMEVauEK-ixymdeJBbFnlOHtqvDCUa-BELC9SNh5EHtgD9jDYlCBMGYV9gPTgMzGbMeFd0uNFoc8aqPjYaX0Mv_suehIVRHKFVgkCglg6h_VGdF06Q1XJC18Sbkl4tB_bKxwfgiIYAJQcP1A7_615yd6Axw8c4T3GLlS_JqCLDcDMPJr_MsA4zRHt4lJLbAKP_7sKD8MwH9qFn3AvJJ4389oKti5Nru_TQU9EqMDxqUmkifl9PqkLkfVSS4BuiUt8udQGri-3kAUqN3hW7kV8ySiRVCbGbiMmYI-mct0hEhSs5EMkhKNXnn7v3bkS9InJ0CuLo7hX8RDo0tDFk77hi-eiYvpGQ="}]}}],"usage":{"prompt_tokens":279,"completion_tokens":64,"total_tokens":343,"cost":0.00098875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00034875,"upstream_inference_completions_cost":0.00064},"completion_tokens_details":{"reasoning_tokens":59,"image_tokens":0}}}
+[ERROR: 2025-12-20 18:05:44,096] OpenRouter API error missing_choices: 
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1766225139-gHEVlGAPPxotKxvoATVb","provider":"OpenAI","model":"openai/gpt-5.1","object":"chat.completion","created":1766225139,"choices":[{"logprobs":null,"finish_reason":"length","native_finish_reason":"max_output_tokens","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":"**Decoding a corrupted image**\n\nI need to mentally decode an image that's small and possibly corrupted. As an AI, I can see that it has glitches, but I'm wondering if it's still decodable. When I zoom in, it seems like I can make out two people at a dining table. However, the instructions are clear: if I can't decode it fully, I should just output the exact phrase instead. So, I¡¯ll follow those instructions carefully!**Decoding an image**\n\nI need to mentally decode this image, but it¡¯s corrupted and small. As an AI, I¡¯m seeing a glitch, yet I wonder if it¡¯s still possible to decode it. When I zoom in, it seems like there are two people at a dining table. But if I can¡¯t decode it, I¡¯ll have to follow the instructions and output the exact phrase instead. Let's see how this goes!","reasoning_details":[{"format":"openai-responses-v1","index":0,"type":"reasoning.summary","summary":"**Decoding a corrupted image**\n\nI need to mentally decode an image that's small and possibly corrupted. As an AI, I can see that it has glitches, but I'm wondering if it's still decodable. When I zoom in, it seems like I can make out two people at a dining table. However, the instructions are clear: if I can't decode it fully, I should just output the exact phrase instead. So, I¡¯ll follow those instructions carefully!**Decoding an image**\n\nI need to mentally decode this image, but it¡¯s corrupted and small. As an AI, I¡¯m seeing a glitch, yet I wonder if it¡¯s still possible to decode it. When I zoom in, it seems like there are two people at a dining table. But if I can¡¯t decode it, I¡¯ll have to follow the instructions and output the exact phrase instead. Let's see how this goes!"},{"id":"rs_0bec9ec87d83e11001694674f4232c81959bf2431a385bd2cc","format":"openai-responses-v1","index":0,"type":"reasoning.encrypted","data":"gAAAAABpRnT4nY4TZgUZOXMkW82jKeh3MdLBFqkS8LOxdDDjbl8GmD09w93D3M-dvDx6zKGHTp6oKqzGV6mzBSKOxZmmXiGBYCkg9zVqhzqzSJwZjTtu6-qqG9McoqXJcd73O-CL0-ry_-1oTN_t438fr5y312udBdSNS4kiOIqJU5RE4pAbY-YUtITrbSpVJencEyZXxVISz7Ck5Mi60Wbv0uFQoOr5LDD4dDQLYVOwhv5jLVDVuiJ4TNJ6DXZkhIMlpS1K1xKEsQwZYcZeS3sydNaj_zUci8vQmoN6XQN2pF7R7iWSJ6LdJaTp3YUU54tPYvWY8NGDTf6AT46KJoHHOMfzTPOvjazw2oMXHsuDBZhDdWTPgO7ZrDWk2I1P-txJ6I2J8zD4RDHxO-9GLHfkmVfU6-LQ-iGC35NbXtCAkpPWmdbqTphsl3DN7nGVJg03ew4dAPpAABSwdVstBdB3oXidG2sK92Sz2fr16ZJijrV4oTFoV-X4kIAh13Jt2dvW_h1ODNn_eDQ9PW1ZbtKhiDbmF8onFiDwTdxDXN33cKwLTJjrzYBIa2G3XXwBy-r_Sp8XtaYjqeE9hpvROJGgWh8rmOIninv9rcyuH5EeXabwuQMASN19h1zdNUpfVhy80g_shm5H4l0N4pSYy_bIGTeC9oWg36XB607WqXOdQr2JSjj5wwro8lAjunP1RoVsCxjPMFaDg7R5vbJ3OSHFVqJpQ3asX95OKj3eYKXnJlXKTCFTS5O4SJBUdFjWdaDYTup2uZ5hueqz5USAQCT-MLAYzSJyPdMwLLI1EJhDqTOH7fwBq3WIe1zQI5MOrnf7oGDow_PVrbVPBbeOvTPeeCCxtdJou9ZBIh_jIfsq7LuFqVY5biC0oZa6lb0INhO7yXEIbLfDJxeyMGki7TYu_jAtpj7nm6QNj1zT_9Qzt8c53t_ytoATYnXOS7pughF-ZmGFjGKUr3vIs-09eMpcZm8VTHReJwg1wNsPwz40wkSPxCE06a-cP2B_OAmPoQmKtjUJH39XQ8hmBiXYYqHWL9sqI7z10c7NOChGQ__gYlXkAYtPb2H8c87Dfs5aH9OB9rhpyfmPABSTUm7FBvUlsKLDE7X3Wo8gaXYAeqCCqAGWwVpc9b39F66FgYRQyP6Z0DG4KIqS-ObRMXpCyVRRTGNvSNIt1W90BsdLEZM1rLYEKLSn9QGhGGvsEK_34PDHyxbqz1S7Yo8E3P2t3bN2DygSY95Cdw=="}]}}],"usage":{"prompt_tokens":279,"completion_tokens":64,"total_tokens":343,"cost":0.00098875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00034875,"upstream_inference_completions_cost":0.00064},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0}}}
+[ERROR: 2025-12-20 18:05:46,835] OpenRouter API error missing_choices: 
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1766225141-IFL7pbi3kM8mOkIE3bAr","provider":"OpenAI","model":"openai/gpt-5.1","object":"chat.completion","created":1766225141,"choices":[{"logprobs":null,"finish_reason":"length","native_finish_reason":"max_output_tokens","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":"**Evaluating image decodability**\n\nI need to check if the image is decodable. It looks heavily corrupted, but it¡¯s small, so maybe I can still make something out of it. I think I might see soccer players, but the corruption is too severe for a clear identification. If I can¡¯t decode it effectively, I should just output a dummy string instead. This decision feels necessary considering how glitched the image is.**Evaluating image decoding**\n\nI need to check if this image is decodable. It looks heavily corrupted, but since it's small, I might still see something, like soccer players? However, the corruption is severe. If I can't decode it meaningfully, I should just output an exact dummy string. I really have to make a decision here because the image appears to be glitched ¡ª I can't reliably identify anything from it.","reasoning_details":[{"format":"openai-responses-v1","index":0,"type":"reasoning.summary","summary":"**Evaluating image decodability**\n\nI need to check if the image is decodable. It looks heavily corrupted, but it¡¯s small, so maybe I can still make something out of it. I think I might see soccer players, but the corruption is too severe for a clear identification. If I can¡¯t decode it effectively, I should just output a dummy string instead. This decision feels necessary considering how glitched the image is.**Evaluating image decoding**\n\nI need to check if this image is decodable. It looks heavily corrupted, but since it's small, I might still see something, like soccer players? However, the corruption is severe. If I can't decode it meaningfully, I should just output an exact dummy string. I really have to make a decision here because the image appears to be glitched ¡ª I can't reliably identify anything from it."},{"id":"rs_04d9aaeed87edbd701694674f62f308196af88594ad3d16961","format":"openai-responses-v1","index":0,"type":"reasoning.encrypted","data":"gAAAAABpRnT77y5ZfEON3mGwOtpBdjj3EzcGIJrfH3nNpnTAkhmnwbT79JAgJ9CYoY30B1pA--Hgn1hE49LbhDZKghnRFyrRLOHb6CDejZSkDmEY_hYLGKRZF6-XNEusnZ26hNRtDRmzKIUemkxAqTAjnoF0JSxLzFVsSxrtCqySOMQN_TiqIFZYs1abz93xxybCrF19FkoM0yUVu8bt1CKKZc658pFbxPQkg3KZDfgID2QSVt64ufhmIkn-dYVIQXd_10NYsMtMpbtpY6Ci-SckQzulitItxvB-LVdbx9NTSJR6QSTb3Ih78pWMcR_VWvUgMt2e3ZRFGYlVWamVprZVbkdlMxdwfb2SXzKgTo3ZZX8NC9go8-ZQb23NMIDqOcvat0_BiouSmVp4n_IGNnxRl6g9kvSg0AYCAiqikcQfAbOhslCSyDqfQ6WCiZpSTA7cF5ILRC_5fAf0VzhoWm_ddoSWi4iIiST8wG78wTxYinn-72ivOrIbvnWdLUFG7X9gU_irBLrt2Tv4TPg7k9P4MmGiUSLl6HpAR1GJ6VpuvaBZ8LxGz1ku3Dx9YoCdgrTC85KPNxN6KT4M-D_gyUpuiXsQZ1pGfSIobzykvUmvr8XfRHhio4hzQEyht3YBhVj2_v5dMvbRBLEgBrn2EAk9ZkZkm8TOMZAI2RJKJvFImL2qlpAT_PgBzVIpQNU1NX89AL9-mJl4Mx8DjTA0tbdnvUIxN2TLOOFVERaJzWPcgsV-wbqrvm6xGwfTrNJLZ-XXq16q0NlTpZKwIpzFfrOj046TxyXj42pC_gs8TrGh6Jr6MdhLdoEEOf52JT6MkOIVbd4S1UnG6sQPvhaOdPfVZYGJHElVtXNcrnyqdGLCLJec5nNIE0xJrfgzDXkZFDk1KxzcuovUDuf4KaI_LhnH8dGqgdYQnCABmv4QL0AfG3GygRk6yO3XaSUKTLylyQFPZs7op0yq_gC4390hSZvrUQGUYfOiTg9q46wUFg9TRYRyfkOb2hTDAr3tEGto6bYh5ONKg4GcuDv_tTN5udMRkRk9CyGVzNvhL4EkKY7rWK4o_8qg6HOC90FdZUKGoEU6ahgZeikjCFMkcnUIl2dTE2VcO2MtAL8iOqtzskyFBF39QzCTdU_JZEZqKms9j-kp7JqZifgWnzZIBVAmnw-FQciHvjd-lso41OagWoXUchrhAPQxFsLSddJjVarJqbUYwshZ9c6QKbhi7Qsv3mTuSZCN7fbYSw=="}]}}],"usage":{"prompt_tokens":279,"completion_tokens":64,"total_tokens":343,"cost":0.00098875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00034875,"upstream_inference_completions_cost":0.00064},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0}}}
+[WARNING: 2025-12-20 18:05:51,699] OpenRouter request failed after retries: empty_response
+[ERROR: 2025-12-20 18:05:53,995] OpenRouter API error missing_choices: 
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1766225147-JGLXGQGdG5ZpNm3BVS16","provider":"OpenAI","model":"openai/gpt-5.1","object":"chat.completion","created":1766225148,"choices":[{"logprobs":null,"finish_reason":"length","native_finish_reason":"max_output_tokens","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":"**Deciding on image caption**\n\nThe user wants a caption for an image, but it seems heavily corrupted. I can only see a visible glitch and think there may be kids in it, but it's a small image at 224x224. I need to figure out if the model can still decode it. Ultimately, I have to decide whether to provide the caption or a dummy string if it¡¯s undecodable.**Deciding on image captioning**\n\nThe user wants a caption, but the image is heavily corrupted. I'm unsure if my model's backend can still decode it. I can see a heavy glitch, but maybe I can vaguely identify some kids. The image is quite small at 224x224 pixels, which adds to the difficulty. I need to output either a caption if I can decode it, or a dummy string if I can't. Let's decide on the best approach!","reasoning_details":[{"format":"openai-responses-v1","index":0,"type":"reasoning.summary","summary":"**Deciding on image caption**\n\nThe user wants a caption for an image, but it seems heavily corrupted. I can only see a visible glitch and think there may be kids in it, but it's a small image at 224x224. I need to figure out if the model can still decode it. Ultimately, I have to decide whether to provide the caption or a dummy string if it¡¯s undecodable.**Deciding on image captioning**\n\nThe user wants a caption, but the image is heavily corrupted. I'm unsure if my model's backend can still decode it. I can see a heavy glitch, but maybe I can vaguely identify some kids. The image is quite small at 224x224 pixels, which adds to the difficulty. I need to output either a caption if I can decode it, or a dummy string if I can't. Let's decide on the best approach!"},{"id":"rs_06bbdbda055546e401694674fc9acc8195a2e31b259492f1fd","format":"openai-responses-v1","index":0,"type":"reasoning.encrypted","data":"gAAAAABpRnUCSAQ5M5Cz53mTn1ToRKfAZMv4y3M9zR9BChNWZIYcAc0zfgKexynTEJsd8zE9yhOr8Ue4Tj5b1uD5CqPDEcv1Ma3OTy5A3Yr4TGGxLc-H87OUbO8cj-mT1OTSn2utGc_PoMqtLUyUauitwDJXXQlx_0CTjyd-fSNv_a3gM4rSSX5ivauIJ_1iwYD22gyQnj6VuNUqyT2x4X4KRoVzqUz15h0F0xewZlYFtPqZupp162pQ5JqhMZFWButpDAvst2QZVhx-GEUvnEjr7QU6k5brVw1hhXNl_Z8WbquU4pt904Eb9US_98mkIk_sGiwIzHkncUoYGNB0jNi8ZJow-LFc3G7ClrFFydDCDthurDDMJAOHcnL1GY75dj7RD2Vah3kHnaQY7DHkDQEzhH1342ai8sab7vhicVZ_zNKP-5CPTUbuXewBZHJWAQP5Em6n9RLi9Qyn8hBSWI3fM9GUrdt7bk6IzwCVV8VhwXDqESTAq8qUPCjRK2JoNodJ08bmkvSJrDyF3eJ4PitXCEeQ_V7qru_51fF-qR58XSvkJDzZXfi-eSsXimbU4Qv2igcaauRIHzdxgyp2N8E-GuaVks3uisu6rub7McwoojJbo2kqfVzeXL_aPXqMcCF-VGC8ntfyaA1L_Wa9Llqgnt16kn0eOkbgPV9Y7VD4CA_GdeYMt483Nx8bIniZeMLS0WE5_f5sDa0QlwiZe89MezlAM2jtZCRh1VatFEu-FDNvXIVhMfzTKL6E6Pn0rscXQoCG8RwXA8WF9V4aNE1nhtED2RE6MdsQ34J4U6Jit6odUMuxD_6QY2tFLAmAPJ_5S36htIRL_o3F1EsM_AoQsw-36NmTtP_FD4x25G8PGqoc1e90euOKdkdxct9JWXSD9LUvQM5CfngeWRUCC3BMySqwRbuBqZtvdjNgFD2aGnZIY4Kgu_-VyXxBU0LT5KtzGaArAfmfg0vD54MaTr0v1SdzyJLb4SA8JC1k2twZeHaQOG0bCE81P7SLDzsSMjWCy1hdpzPKhYw0iOApsGq76P9lwjC9qcgtDSdLeTbMNrbxauzYCjy3aQ4BTQDlVtypa04AlVUD_ooVHhFdzFF1gICkASF5ObiE-O9JmFj6w2YMTucYNp5rvqRdONkl7QslYjIP8hYyTvgvqFNkSseo0YJjT65PLDy_JrN0TmtUFmifZ9X1SP6PMpFpwFDerLqYE00vdl89yl8qniFU_2XTtKmRVVillA=="}]}}],"usage":{"prompt_tokens":279,"completion_tokens":64,"total_tokens":343,"cost":0.00098875,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.00034875,"upstream_inference_completions_cost":0.00064},"completion_tokens_details":{"reasoning_tokens":64,"image_tokens":0}}}
+[WARNING: 2025-12-20 18:05:58,330] OpenRouter request failed after retries: empty_response
+[INFO: 2025-12-20 18:06:13,367] ######## Offline TEST best ########
+[INFO: 2025-12-20 18:06:13,369] {'Bleu_1': 0.20369094115683806, 'Bleu_2': 9.218745544852617e-10, 'Bleu_3': 1.5952589833589968e-12, 'Bleu_4': 6.900970236017355e-14, 'ROUGE_L': 0.15286710973593118, 'CIDEr': 0.01298887352408901, 'METEOR': 0.05254326797210116, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 29, 'Undecodable_Ratio': 0.9666666666666667, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 18:37:16,959] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 18:37:18,141] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[ERROR: 2025-12-20 18:37:19,160] OpenRouter API error choice_error: {"error": {"message": "An error occurred while processing your request. You can retry your request, or contact us through our help center at help.openai.com if the error persists. Please include the r
+[ERROR: 2025-12-20 18:37:22,851] OpenRouter API error truncated_output: {"finish_reason": "length", "native_finish_reason": "max_output_tokens", "max_tokens": 64}
+[INFO: 2025-12-20 18:38:01,678] ######## Offline TEST best ########
+[INFO: 2025-12-20 18:38:01,678] {'Bleu_1': 0.49494949494782847, 'Bleu_2': 0.3221950215300994, 'Bleu_3': 0.215976109488396, 'Bleu_4': 0.1446679496255064, 'ROUGE_L': 0.3355654507985414, 'CIDEr': 0.5024642417092654, 'METEOR': 0.1661573490308085, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 9, 'Undecodable_Ratio': 0.3, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'a city street with cars and tall buildings in the background', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'two white sinks with chrome faucets in a bathroom', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'a living room with sofas and a coffee table', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'A table at an outdoor cafe with a basket of food on it.', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 18:43:04,315] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 18:43:06,568] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[ERROR: 2025-12-20 18:43:12,561] OpenRouter API error truncated_output: {"finish_reason": "length", "native_finish_reason": "max_output_tokens", "max_tokens": 64}
+[ERROR: 2025-12-20 18:43:29,850] OpenRouter API error api_error: {"error": {"message": "Provider returned error", "code": 502, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The server had an error processing your request. Sorry about that! You can retr
+[INFO: 2025-12-20 18:44:00,110] ######## Offline TEST best ########
+[INFO: 2025-12-20 18:44:00,111] {'Bleu_1': 0.30872412176647007, 'Bleu_2': 0.1582525073826473, 'Bleu_3': 0.09758524250108792, 'Bleu_4': 0.0669837930311827, 'ROUGE_L': 0.2346452293037145, 'CIDEr': 0.2247468487244295, 'METEOR': 0.09443550305959386, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 20, 'Undecodable_Ratio': 0.6666666666666666, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 18:50:06,334] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 18:50:07,275] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 18:50:12,565] ######## Offline TEST best ########
+[INFO: 2025-12-20 18:50:12,565] {'Bleu_1': 0.21021321528925754, 'Bleu_2': 3.5253827936545934e-09, 'Bleu_3': 9.434502806994534e-12, 'Bleu_4': 5.072383535406026e-13, 'ROUGE_L': 0.10769230769230768, 'CIDEr': 0.057431831536319713, 'METEOR': 0.05428381220962714, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 2, 'Undecodable_Ratio': 1.0, 'Total_Samples': 2, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 19:07:56,804] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 19:07:58,159] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 19:08:03,695] ######## Offline TEST best ########
+[INFO: 2025-12-20 19:08:03,695] {'Bleu_1': 0.2982797722051723, 'Bleu_2': 5.776162951265759e-09, 'Bleu_3': 1.621717849773723e-11, 'Bleu_4': 8.930585330091313e-13, 'ROUGE_L': 0.10427350427350426, 'CIDEr': 0.0, 'METEOR': 0.04355858045697618, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 1, 'Undecodable_Ratio': 1.0, 'Total_Samples': 1, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 19:09:30,004] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 19:09:30,987] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 19:09:51,217] ######## Offline TEST best ########
+[INFO: 2025-12-20 19:09:51,217] {'Bleu_1': 0.40476190476052804, 'Bleu_2': 0.2567627862963293, 'Bleu_3': 0.1836920359566487, 'Bleu_4': 0.1207632282021681, 'ROUGE_L': 0.2989011996548797, 'CIDEr': 0.40101589367804924, 'METEOR': 0.1472825246950039, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 17, 'Undecodable_Ratio': 0.5666666666666667, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'a cozy living room with sofas and a coffee table', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 19:12:19,212] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 19:12:20,528] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 19:12:25,984] ######## Offline TEST best ########
+[INFO: 2025-12-20 19:12:25,984] {'Bleu_1': 0.2982797722051723, 'Bleu_2': 5.776162951265759e-09, 'Bleu_3': 1.621717849773723e-11, 'Bleu_4': 8.930585330091313e-13, 'ROUGE_L': 0.10427350427350426, 'CIDEr': 0.0, 'METEOR': 0.04355858045697618, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 1, 'Undecodable_Ratio': 1.0, 'Total_Samples': 1, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 19:12:53,699] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 19:12:54,789] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 19:13:00,022] ######## Offline TEST best ########
+[INFO: 2025-12-20 19:13:00,023] {'Bleu_1': 0.2982797722051723, 'Bleu_2': 5.776162951265759e-09, 'Bleu_3': 1.621717849773723e-11, 'Bleu_4': 8.930585330091313e-13, 'ROUGE_L': 0.10427350427350426, 'CIDEr': 0.0, 'METEOR': 0.04355858045697618, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 1, 'Undecodable_Ratio': 1.0, 'Total_Samples': 1, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 19:13:23,320] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 19:13:24,195] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 19:13:33,489] ######## Offline TEST best ########
+[INFO: 2025-12-20 19:13:33,489] {'Bleu_1': 0.2982797722051723, 'Bleu_2': 5.776162951265759e-09, 'Bleu_3': 1.621717849773723e-11, 'Bleu_4': 8.930585330091313e-13, 'ROUGE_L': 0.10427350427350426, 'CIDEr': 0.0, 'METEOR': 0.04355858045697618, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 1, 'Undecodable_Ratio': 1.0, 'Total_Samples': 1, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 19:16:55,000] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[INFO: 2025-12-20 19:17:16,556] ######## Offline TEST best ########
+[INFO: 2025-12-20 19:17:16,556] {'Bleu_1': 0.7325227963503571, 'Bleu_2': 0.5621728055565219, 'Bleu_3': 0.4327916027560954, 'Bleu_4': 0.3227729553261883, 'ROUGE_L': 0.5734550527271112, 'CIDEr': 1.3164181644333746, 'METEOR': 0.3101125032165754, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 0, 'Undecodable_Ratio': 0.0, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'a small curly dog curled up on a shoe rack among sandals and sneakers', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'black and white city street with traffic lights and tall tower in the distance', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'an old toilet seat in a rustic bathroom', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'a cozy living room with sofas and a wooden coffee table', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'a sandwich in a red basket on an outdoor cafe table', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 19:19:20,278] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 19:19:21,710] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 19:19:36,121] ######## Offline TEST best ########
+[INFO: 2025-12-20 19:19:36,122] {'Bleu_1': 0.20740740740587107, 'Bleu_2': 9.296222516974271e-10, 'Bleu_3': 1.6024995225511066e-12, 'Bleu_4': 6.914810858703819e-14, 'ROUGE_L': 0.15583174858292298, 'CIDEr': 0.013346233164715135, 'METEOR': 0.0532066593514478, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 30, 'Undecodable_Ratio': 1.0, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 19:28:48,117] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 19:28:49,622] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 19:29:08,449] ######## Offline TEST best ########
+[INFO: 2025-12-20 19:29:08,450] {'Bleu_1': 0.47176079734062537, 'Bleu_2': 0.29502667255080406, 'Bleu_3': 0.2025246010008213, 'Bleu_4': 0.13321717563323962, 'ROUGE_L': 0.33188274866795264, 'CIDEr': 0.45577722925999864, 'METEOR': 0.16312752726937427, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 11, 'Undecodable_Ratio': 0.36666666666666664, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'a city street with tall buildings under a cloudy sky', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'two white bathroom sinks with a shared countertop', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'a cozy living room with sofas and a coffee table', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'a small outdoor cafe table with a bread basket and chairs', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 20:01:58,180] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[WARNING: 2025-12-20 20:02:04,735] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:02:05,321] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[INFO: 2025-12-20 20:02:16,634] ######## Offline TEST best ########
+[INFO: 2025-12-20 20:02:16,636] {'Bleu_1': 0.6805970149233416, 'Bleu_2': 0.4886377202264082, 'Bleu_3': 0.35608051497661425, 'Bleu_4': 0.25515353813585895, 'ROUGE_L': 0.5225657186599133, 'CIDEr': 1.0415577760397607, 'METEOR': 0.2729496612098397, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 2, 'Undecodable_Ratio': 0.06666666666666667, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'a small curly dog curled up on a shoe rack among various shoes', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'a black and white city street with buildings and a distant tower', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'an open toilet seat in a rustic, worn bathroom', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'a cozy living room with couches and a coffee table', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'a sandwich in a basket on an outdoor cafe table', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 20:02:36,473] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[WARNING: 2025-12-20 20:02:38,379] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:02:38,878] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[INFO: 2025-12-20 20:02:55,716] ######## Offline TEST best ########
+[INFO: 2025-12-20 20:02:55,716] {'Bleu_1': 0.7190332326262265, 'Bleu_2': 0.5529631859080724, 'Bleu_3': 0.42283018489974156, 'Bleu_4': 0.3033619921821144, 'ROUGE_L': 0.555377713097225, 'CIDEr': 1.2451993301879674, 'METEOR': 0.30246043315435345, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 2, 'Undecodable_Ratio': 0.06666666666666667, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'a small dog curled up on a shoe rack among various shoes', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'a city street in silhouette with a tall tower in the background', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'a cozy living room with sofas and a wooden coffee table', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'a sandwich in a red basket on an outdoor caf¨¦ table', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 20:05:05,400] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[WARNING: 2025-12-20 20:05:06,990] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:05:07,667] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:05:10,851] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[INFO: 2025-12-20 20:05:21,216] ######## Offline TEST best ########
+[INFO: 2025-12-20 20:05:21,216] {'Bleu_1': 0.697530864195378, 'Bleu_2': 0.5402074944503631, 'Bleu_3': 0.4047835403038608, 'Bleu_4': 0.28718779517819126, 'ROUGE_L': 0.530711216502962, 'CIDEr': 1.140888445704589, 'METEOR': 0.27994954466246413, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 3, 'Undecodable_Ratio': 0.1, 'Total_Samples': 30, 'Sample_Preview': [{'image_id': 1, 'generated': 'a small dog curled up on a shoe rack among various shoes', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'a city street in silhouette with a tall tower in the distance', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'an open toilet seat in a rustic bathroom setting', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'a cozy living room with two sofas and a wooden coffee table', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'A sandwich in a red basket on an outdoor cafe table.', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}
+[INFO: 2025-12-20 20:06:18,069] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[WARNING: 2025-12-20 20:06:29,026] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[ERROR: 2025-12-20 20:06:52,093] OpenRouter API error api_error: {"error": {"message": "Provider returned error", "code": 502, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The server had an error processing your request. Sorry about that! You can retr
+[INFO: 2025-12-20 20:07:23,951] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[WARNING: 2025-12-20 20:07:25,838] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:07:29,133] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:07:43,234] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:07:48,274] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[INFO: 2025-12-20 20:08:52,259] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[WARNING: 2025-12-20 20:08:54,619] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:08:55,764] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:08:55,771] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:09:22,286] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-20 20:09:27,497] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[INFO: 2025-12-20 20:09:41,886] ######## Offline TEST best ########
+[INFO: 2025-12-20 20:09:41,886] {'Bleu_1': 0.6841628959269827, 'Bleu_2': 0.5011986712437722, 'Bleu_3': 0.35264909734445166, 'Bleu_4': 0.24938636178834664, 'ROUGE_L': 0.4976088197041695, 'CIDEr': 1.0123816092257087, 'METEOR': 0.2640881255148873, 'SPICE': 0.0, 'XE_Loss': None, 'Undecodable_Count': 5, 'Undecodable_Ratio': 0.05, 'Total_Samples': 100, 'Sample_Preview': [{'image_id': 1, 'generated': 'this is a dummy caption for an undecodable image', 'reference': 'This wire metal rack holds several pairs of shoes and sandals', 'augmentation_idx': 0}, {'image_id': 2, 'generated': 'a city street with tall buildings silhouetted against a bright sky', 'reference': 'A traffic light over a street surrounded by tall buildings.', 'augmentation_idx': 0}, {'image_id': 3, 'generated': 'an open toilet seat in a rustic bathroom setting', 'reference': 'A toilet seat sits on top of a hole in the ground.', 'augmentation_idx': 0}, {'image_id': 4, 'generated': 'a cozy living room with two sofas and a wooden coffee table', 'reference': 'A coffee table sits in the middle of a living room.', 'augmentation_idx': 0}, {'image_id': 5, 'generated': 'a sandwich in a red basket on an outdoor cafe table', 'reference': 'a sandwich in a plastic food basket on a table', 'augmentation_idx': 0}]}

@@ -1,3 +1,7 @@
 [INFO: 2025-12-20 12:18:41,618] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
 [INFO: 2025-12-20 12:42:54,015] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
 [ERROR: 2025-12-20 12:42:54,839] OpenRouter API error 400: {"error":{"message":"Provider returned error","code":400,"metadata":{"raw":"{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your input and try again.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"input\",\n    \"code\": \"invalid_value\"\n  }\n}","provider_name":"OpenAI"}},"user_id":"user_30zyywE5aCHTpjm6PIckY59r9S0"}
+[INFO: 2025-12-20 18:22:22,329] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 18:22:23,263] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[ERROR: 2025-12-20 18:22:28,709] OpenRouter API error truncated_output: {"finish_reason": "length", "native_finish_reason": "max_output_tokens", "max_tokens": 64}
+[ERROR: 2025-12-20 18:22:37,244] OpenRouter API error choice_error: {"error": {"message": "An error occurred while processing your request. You can retry your request, or contact us through our help center at help.openai.com if the error persists. Please include the r

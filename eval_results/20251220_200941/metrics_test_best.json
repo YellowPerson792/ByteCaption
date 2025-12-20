@@ -1,0 +1,67 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_openrouter",
+  "model_name": "ByteCaption_XE_openrouter",
+  "model_type": "OPENROUTER",
+  "corrupt_type": [
+    "rbbf"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "bit_error_rate": 0.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.6841628959269827,
+    "Bleu_2": 0.5011986712437722,
+    "Bleu_3": 0.35264909734445166,
+    "Bleu_4": 0.24938636178834664,
+    "ROUGE_L": 0.4976088197041695,
+    "CIDEr": 1.0123816092257087,
+    "METEOR": 0.2640881255148873,
+    "SPICE": 0.0,
+    "XE_Loss": null,
+    "Undecodable_Count": 5,
+    "Undecodable_Ratio": 0.05,
+    "Total_Samples": 100,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a city street with tall buildings silhouetted against a bright sky",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "an open toilet seat in a rustic bathroom setting",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "a cozy living room with two sofas and a wooden coffee table",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "a sandwich in a red basket on an outdoor cafe table",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20251220_200941",
+  "references_annfile": "D:\\MLLMs\\ByteCaption\\PureT\\data\\coco_karpathy\\captions_test.json",
+  "captions_file": "eval_results\\20251220_200941\\captions_test_best.json",
+  "captions_count": 100
+}

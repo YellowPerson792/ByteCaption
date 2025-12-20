@@ -6,6 +6,7 @@ import time
 import tqdm
 import logging
 import argparse
+import json
 import numpy as np
 
 import torch
@@ -35,9 +36,52 @@ except ImportError:
 
 """
 Example:
-python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 30 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
+python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 100 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
 cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE --test_samples 5 --resume -1 --disable_wandb
 """
+
+def _project_root() -> str:
+    # main_test.py lives in <project>/PureT/main_test.py
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+
+
+def _resolve_reference_annfile(dataset: str):
+    dataset = (dataset or "").lower()
+    annfile = None
+    if dataset == "coco":
+        annfile = getattr(cfg.INFERENCE, "TEST_ANNFILE", None)
+    elif dataset == "flickr8k":
+        # Flickr8k evaluator in this repo uses VAL_ANNFILE for evaluation
+        annfile = getattr(cfg.INFERENCE, "VAL_ANNFILE", None)
+    if not annfile:
+        return None
+    ann_path = annfile
+    if not os.path.isabs(ann_path):
+        ann_path = os.path.abspath(os.path.join(_project_root(), ann_path))
+    return ann_path
+
+
+def _build_reference_map(ann_path: str):
+    """Build image_id -> [reference captions] map from COCO-style annotation JSON."""
+    if not ann_path or not os.path.exists(ann_path):
+        return None
+    try:
+        with open(ann_path, "r", encoding="utf-8") as f:
+            ann_data = json.load(f)
+    except Exception:
+        return None
+    ref_map = {}
+    for ann in ann_data.get("annotations", []):
+        image_id = ann.get("image_id")
+        caption = ann.get("caption")
+        if image_id is None or caption is None:
+            continue
+        try:
+            image_id = int(image_id)
+        except Exception:
+            pass
+        ref_map.setdefault(image_id, []).append(caption)
+    return ref_map
 
 class Tester(object):
     def __init__(self, args):
@@ -241,8 +285,10 @@ class Tester(object):
             self.logger.info(str(test_res))
             if self.is_master and self.use_wandb:
                 wandb.log({f"test/{k}": v for k, v in test_res.items()})
+            return test_res
         else:
             self.logger.info('TEST evaluation skipped (no test_evaler).')
+        return None
 
     def snapshot_path(self, name, epoch):
         snapshot_folder = os.path.join(cfg.ROOT_DIR, 'snapshot')
@@ -404,6 +450,30 @@ def parse_args():
         action="store_false",
         help="Disable DataLoader pin_memory during evaluation.",
     )
+    parser.add_argument(
+        "--metrics_out",
+        type=str,
+        default="eval_results/",
+        help=(
+            "Save evaluation metrics JSON. If this is a directory (recommended), "
+            "will write to <dir>/<timestamp>/metrics_<rname>.json. "
+            "If this is a file path (ends with .json), will write exactly to that file."
+        ),
+    )
+    parser.add_argument(
+        "--no_metrics_out",
+        action="store_true",
+        help="Disable saving evaluation metrics JSON.",
+    )
+    parser.add_argument(
+        "--save_captions",
+        type=int,
+        default=-1,
+        help=(
+            "Save generated captions with references into JSON alongside metrics. "
+            "-1 = all evaluated samples, 0 = disable, N>0 = first N samples."
+        ),
+    )
     parser.set_defaults(pin_memory=None)
 
     if len(sys.argv) == 1:
@@ -457,7 +527,7 @@ if __name__ == '__main__':
         epoch_str = str(args.resume)
     
     print(f"\nStarting TEST evaluation for epoch: {epoch_str}")
-    tester.eval(epoch_str)
+    metrics = tester.eval(epoch_str)
     # --- END: 关键修复 ---
 
     # (删除下面所有关于 best_path, latest_ckpt, load_state_dict 和 tester.eval 的旧代码块)
@@ -474,6 +544,118 @@ if __name__ == '__main__':
     # else:
     #     ...
     
+    if metrics is not None and not args.no_metrics_out:
+        rname = f"test_{epoch_str}"
+        model_folder = args.folder or cfg.ROOT_DIR or os.getcwd()
+        model_name = os.path.basename(str(model_folder).rstrip(os.sep))
+        timestamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
+        corruption_params = {}
+        for ctype in args.corrupt_types:
+            preset = jpeg_corruption.JPEG_CORRUPTION_PRESETS.get(ctype, {})
+            corruption_params[ctype] = preset.get(tester.corrupt_level, {})
+        run_record = {
+            "model_folder": str(model_folder),
+            "model_name": model_name,
+            "model_type": str(getattr(cfg.MODEL, "TYPE", "")),
+            "corrupt_type": list(args.corrupt_types),
+            "corrupt_level": tester.corrupt_level,
+            "corruption_params": corruption_params,
+            "metrics": metrics,
+            "rname": rname,
+            "timestamp": timestamp,
+        }
+        out_spec = args.metrics_out
+        if not out_spec:
+            out_spec = os.path.join(cfg.ROOT_DIR or model_folder or ".", "eval_results")
+
+        # Treat as directory if:
+        # - ends with a path separator, OR
+        # - exists and is a directory, OR
+        # - has no file extension (common: "eval_results")
+        has_ext = bool(os.path.splitext(out_spec)[1])
+        is_dir_spec = (
+            out_spec.endswith(("/", "\\"))
+            or os.path.isdir(out_spec)
+            or not has_ext
+        )
+
+        if is_dir_spec:
+            base_dir = out_spec.rstrip("/\\")
+            if not base_dir:
+                base_dir = "."
+            run_dir = os.path.join(base_dir, timestamp)
+            os.makedirs(run_dir, exist_ok=True)
+            out_path = os.path.join(run_dir, f"metrics_{rname}.json")
+        else:
+            out_path = out_spec
+            parent = os.path.dirname(out_path)
+            if parent:
+                os.makedirs(parent, exist_ok=True)
+
+        # Save per-sample generations + references (best-effort)
+        captions_out_path = None
+        captions_count = 0
+        if getattr(args, "save_captions", 0) != 0:
+            try:
+                result_path = os.path.join(str(model_folder), "result", f"result_{rname}.json")
+                if os.path.exists(result_path):
+                    with open(result_path, "r", encoding="utf-8") as f:
+                        raw_results = json.load(f)
+                else:
+                    raw_results = None
+
+                if isinstance(raw_results, list):
+                    max_n = int(getattr(args, "save_captions", -1))
+                    if max_n > 0:
+                        raw_results = raw_results[:max_n]
+
+                    dataset_type = getattr(tester, "dataset_type", getattr(args, "dataset", "coco"))
+                    ann_path = _resolve_reference_annfile(dataset_type)
+                    ref_map = _build_reference_map(ann_path) if ann_path else None
+
+                    id_key = getattr(cfg.INFERENCE, "ID_KEY", "image_id")
+                    cap_key = getattr(cfg.INFERENCE, "CAP_KEY", "caption")
+                    enriched = []
+                    for item in raw_results:
+                        if not isinstance(item, dict):
+                            continue
+                        image_id = item.get(id_key)
+                        generated = item.get(cap_key)
+                        lookup_id = image_id
+                        try:
+                            lookup_id = int(image_id)
+                        except Exception:
+                            pass
+                        references = []
+                        if ref_map is not None:
+                            references = ref_map.get(lookup_id) or ref_map.get(image_id) or []
+                        enriched.append(
+                            {
+                                id_key: image_id,
+                                cap_key: generated,
+                                "references": references,
+                            }
+                        )
+
+                    captions_count = len(enriched)
+                    # place next to metrics output
+                    captions_dir = run_dir if is_dir_spec else (os.path.dirname(out_path) or ".")
+                    captions_out_path = os.path.join(captions_dir, f"captions_{rname}.json")
+                    with open(captions_out_path, "w", encoding="utf-8") as f:
+                        json.dump(enriched, f, ensure_ascii=False, indent=2)
+
+                    run_record["references_annfile"] = ann_path
+                    run_record["captions_file"] = captions_out_path
+                    run_record["captions_count"] = captions_count
+            except Exception as exc:
+                run_record["captions_error"] = f"{type(exc).__name__}: {exc}"
+
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(run_record, f, ensure_ascii=False, indent=2)
+        print(f"[RESULT] Saved metrics JSON: {out_path}")
+        if captions_out_path:
+            print(f"[RESULT] Saved captions+references JSON: {captions_out_path} (n={captions_count})")
+
     tester.shutdown()
 
     # Extra safety: ensure buffered streams are flushed.
