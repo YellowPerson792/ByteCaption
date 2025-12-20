@@ -401,8 +401,11 @@ class OpenRouterCaptionModel(nn.Module):
             payload_bytes = json.dumps(payload).encode("utf-8")
             try:
                 req = urllib.request.Request(self.api_base, data=payload_bytes, headers=headers, method="POST")
-                opener = self._opener or urllib.request
-                with opener.open(req, timeout=self.timeout) as resp:
+                if self._opener is not None:
+                    open_fn = self._opener.open
+                else:
+                    open_fn = urllib.request.urlopen
+                with open_fn(req, timeout=self.timeout) as resp:
                     body = resp.read()
                     resp_headers = resp.headers
                 raw_text = body.decode("utf-8", errors="replace")

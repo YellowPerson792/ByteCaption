@@ -1,7 +1,7 @@
 [
   {
     "image_id": 1,
-    "caption": "this is a dummy caption for an undecodable image",
+    "caption": "Fluffy dog curled in wire cage surrounded by assorted shoes.",
     "references": [
       "This wire metal rack holds several pairs of shoes and sandals",
       "A dog sleeping on a show rack in the shoes.",
@@ -12,7 +12,7 @@
   },
   {
     "image_id": 2,
-    "caption": "a city street with tall buildings silhouetted against a bright sky",
+    "caption": "Traffic lights over urban street with distant Empire State Building.",
     "references": [
       "A traffic light over a street surrounded by tall buildings.",
       "A black and white shot of a city with a tall skyscraper in the distance.",
@@ -23,7 +23,7 @@
   },
   {
     "image_id": 3,
-    "caption": "an open toilet seat in a rustic bathroom setting",
+    "caption": "A white toilet with open lid in dilapidated stone-walled bathroom.",
     "references": [
       "A toilet seat sits on top of a hole in the ground.",
       "A toilet lid on a hole in a floor leading to the outside.",
@@ -34,7 +34,7 @@
   },
   {
     "image_id": 4,
-    "caption": "a cozy living room with two sofas and a wooden coffee table",
+    "caption": "Cozy living room with beige sofa, glass coffee table, and potted plants.",
     "references": [
       "A coffee table sits in the middle of a living room.",
       "a living room with two couches and colorful walls",
@@ -45,7 +45,7 @@
   },
   {
     "image_id": 5,
-    "caption": "a sandwich in a red basket on an outdoor cafe table",
+    "caption": "A large sandwich in red basket on outdoor green table.",
     "references": [
       "a sandwich in a plastic food basket on a table",
       "Sandwich and a lollipop in a bright orange serving tray sitting on a table.",
@@ -56,7 +56,7 @@
   },
   {
     "image_id": 6,
-    "caption": "children riding an elephant through a lush green jungle",
+    "caption": "Family rides elephant through lush jungle near stream.",
     "references": [
       "An elephant with a man and three children on its back drinking water in the jungle.",
       "A man riding on and elephants neck and guiding it while children ride on a seat behind him.",
@@ -67,7 +67,7 @@
   },
   {
     "image_id": 7,
-    "caption": "a man in glasses wearing a black shirt and patterned tie",
+    "caption": "A young man in glasses and green tie smiles with hands in pockets.",
     "references": [
       "A young man wearing black attire and a flowered tie is standing and smiling.",
       "A man with glasses and his eyes closed dressed in a black shirt and a necktie.",
@@ -78,7 +78,7 @@
   },
   {
     "image_id": 8,
-    "caption": "this is a dummy caption for an undecodable image",
+    "caption": "A woman in floral hat cuts pink cake at party table.",
     "references": [
       "A woman standing over a sheet cake sitting on top of a table.",
       "A LADY IS HAVING A CELEBRATION AND LOOKING AT HER CAKE",
@@ -89,7 +89,7 @@
   },
   {
     "image_id": 9,
-    "caption": "two small children celebrate a birthday with a large frosted cake",
+    "caption": "A baby in high chair faces birthday cake with candle.",
     "references": [
       "A baby in high chair with bib and cake.",
       "Two babies with a birthday cake with one candle.",
@@ -100,7 +100,7 @@
   },
   {
     "image_id": 10,
-    "caption": "this is a dummy caption for an undecodable image",
+    "caption": "Group of children riding red sled indoors on wooden floor.",
     "references": [
       "some children are riding on a mini orange train",
       "Several children are riding on a toy train ride.",
@@ -111,7 +111,7 @@
   },
   {
     "image_id": 11,
-    "caption": "a green vase with red roses on a windowsill",
+    "caption": "Bouquet of red roses in green vase beside spiky cactus.",
     "references": [
       "A green vase filed with red roses sitting on top of table.",
       "A bouquet of roses in a red walled road.",
@@ -122,7 +122,7 @@
   },
   {
     "image_id": 12,
-    "caption": "a black and white close up of a half eaten sandwich on a plate",
+    "caption": "A half-eaten burger with dark filling on white plate beside small bowl",
     "references": [
       "A meal is lying on a plate on a table.",
       "part of a sandwich sitting on a table",
@@ -133,7 +133,7 @@
   },
   {
     "image_id": 13,
-    "caption": "a giraffe grazing on grass in an open field",
+    "caption": "A young giraffe grazing on green grass in a field.",
     "references": [
       "A giraffe bending over while standing on green grass.",
       "A baby giraffe bending over to graze on the grass.",
@@ -144,7 +144,7 @@
   },
   {
     "image_id": 14,
-    "caption": "a vintage stove with pots and a teddy bear in a kitchen setting",
+    "caption": "Vintage kitchen stove with pots, canned goods, teddy bear, and washing machine.",
     "references": [
       "A kitchen scene with an oven and a stove.",
       "A desk with drawer on which daily use item are kept.",
@@ -155,7 +155,7 @@
   },
   {
     "image_id": 15,
-    "caption": "a cow standing in the back of a truck loaded with hay bales",
+    "caption": "A truck bed filled with barrels, trash, and a brown cow.",
     "references": [
       "A load of trash or work supplies in a dumpster outside.",
       "A utility truck on a street next to a building.",
@@ -166,7 +166,7 @@
   },
   {
     "image_id": 16,
-    "caption": "two people play a motion video game in a living room",
+    "caption": "A man and woman dancing in living room holding cat and remote.",
     "references": [
       "Two smiling young people playing a game of Wii.",
       "A man and woman playing a video game together.",
@@ -177,7 +177,7 @@
   },
   {
     "image_id": 17,
-    "caption": "a person taking a photo of snowy mountains and a frozen lake",
+    "caption": "Man in suit talks on phone overlooking snowy mountains.",
     "references": [
       "A man is holding a cell phone in front of a mountain.",
       "An older man standing on top of a snow covered slope.",
@@ -188,7 +188,7 @@
   },
   {
     "image_id": 18,
-    "caption": "a small sailboat floating on calm clear water near a distant shoreline",
+    "caption": "Sailboat anchored in calm blue sea with distant mountains and red buoy.",
     "references": [
       "A boat sailing on top of a body of water.",
       "A sailboat is in the distance with a buoy ball nearby.",
@@ -199,7 +199,7 @@
   },
   {
     "image_id": 19,
-    "caption": "a person snowboarding on a snowy slope",
+    "caption": "A young man in brown jacket snowboards down snowy slope.",
     "references": [
       "A man riding a snow board on top of a snow covered slope.",
       "A boy on a snowboard at the top of a hill.",
@@ -210,7 +210,7 @@
   },
   {
     "image_id": 20,
-    "caption": "Two women sit at a table with wine glasses in a modern bar.",
+    "caption": "Two women behind bar counter with wine glasses and champagne bottles.",
     "references": [
       "Two very attractive women enjoy a glass of white wine.",
       "A woman and her friend sitting on a table drinking wine.",
@@ -221,7 +221,7 @@
   },
   {
     "image_id": 21,
-    "caption": "an elderly man sitting on a park bench surrounded by many pigeons",
+    "caption": "Man in hat feeds flock of pigeons on park bench.",
     "references": [
       "A man sitting on top of a bench near some pigeons.",
       "a person sitting on a bench and feeding birds",
@@ -232,7 +232,7 @@
   },
   {
     "image_id": 22,
-    "caption": "a young girl happily eating a chocolate covered donut",
+    "caption": "A young girl in blue dress eats a chocolate donut at table.",
     "references": [
       "A little girl is eating a chocolate doughnut.",
       "A small child eats a chocolate doughnut at a table.",
@@ -243,7 +243,7 @@
   },
   {
     "image_id": 23,
-    "caption": "a group of old stuffed dolls and a teddy bear lying together",
+    "caption": "A pile of worn stuffed teddy bears and dolls in a box.",
     "references": [
       "A pile of teddy bears and dolls in a toy box.",
       "Three teddy bears and a doll like next to each other in a box.",
@@ -254,7 +254,7 @@
   },
   {
     "image_id": 24,
-    "caption": "a black and white cat sniffing an empty wooden bowl",
+    "caption": "A black and white cat peers into a wooden bowl with yarn.",
     "references": [
       "A cat peering into a wooden bowl which is sitting on a table.",
       "A CAT ON A WOODEN SURFACE IS LOOKING AT A WOODEN BOWL",
@@ -265,7 +265,7 @@
   },
   {
     "image_id": 25,
-    "caption": "A park bench partially submerged in floodwater near a riverbank",
+    "caption": "A wooden bench overlooks a calm river with boats and arched bridge.",
     "references": [
       "A bench near a bank of water with posts in the water.",
       "Water has risen out of the banks and into the seating area.",
@@ -276,7 +276,7 @@
   },
   {
     "image_id": 26,
-    "caption": "many small boats anchored in a blue bay near a rocky coastline",
+    "caption": "Terracotta rooftop overlooking harbor with numerous sailboats on blue sea.",
     "references": [
       "An inlet filled with boats of all kinds.",
       "A large number of small boats are sailing in a harbor.",
@@ -287,7 +287,7 @@
   },
   {
     "image_id": 27,
-    "caption": "a small dog standing on a brick path holding a yellow frisbee in its mouth",
+    "caption": "A white and brown spaniel dog holds a yellow frisbee in its mouth.",
     "references": [
       "A dog holding a yellow frisbee in it's mouth.",
       "a dog that is standing on a brick pathway with a freez bee",
@@ -298,7 +298,7 @@
   },
   {
     "image_id": 28,
-    "caption": "two bowls of creamy soup topped with broccoli on a wooden table",
+    "caption": "Two bowls of creamy broccoli soup on wooden table with spoons.",
     "references": [
       "Two bowls filled with broccoli soup on top of a table.",
       "Cream of broccoli soup can be a filling lunch.",
@@ -309,7 +309,7 @@
   },
   {
     "image_id": 29,
-    "caption": "storm clouds gathering over a rural field with a stop sign",
+    "caption": "A red stop sign in a grassy field under dark clouds.",
     "references": [
       "The sky is cloudy over a stop sign.",
       "A traffic sign near a high grass field near a road.",
@@ -320,7 +320,7 @@
   },
   {
     "image_id": 30,
-    "caption": "a group of people standing on snow with skis and backpacks",
+    "caption": "Group of skiers with backpacks standing in snowy pine forest.",
     "references": [
       "a group of young people getting ready to go ski",
       "A group of people have backpacks as they stand on snow skis in the snow.",
@@ -331,7 +331,7 @@
   },
   {
     "image_id": 31,
-    "caption": "people skiing along a snow-covered city street",
+    "caption": "A woman and boy cross-country ski on snowy urban street.",
     "references": [
       "A group of people riding skis down a snow covered street.",
       "A family skiing a city street while others clean snow off their cars.",
@@ -342,7 +342,7 @@
   },
   {
     "image_id": 32,
-    "caption": "a person sitting at a table with assorted donuts and pastries",
+    "caption": "Woman at table with assorted donuts on napkins and in box.",
     "references": [
       "A table topped with donuts and a small box of even more donuts.",
       "Various pastries on napkins that include donuts and donut holes.",
@@ -353,7 +353,7 @@
   },
   {
     "image_id": 33,
-    "caption": "a skateboarder in a yellow helmet riding on a ramp",
+    "caption": "Skateboarder in yellow helmet and cape performs trick on wooden ramp.",
     "references": [
       "A man riding a skateboard up the side of a wooden ramp.",
       "A man is grinding a ramp on a skateboard",
@@ -364,7 +364,7 @@
   },
   {
     "image_id": 34,
-    "caption": "a man kneeling to install a toilet in a bathroom",
+    "caption": "A man in black shirt repairs toilet in checkered bathroom.",
     "references": [
       "A young man bending next to a toilet.",
       "A man is kneeling and holding on to a toilet.",
@@ -375,7 +375,7 @@
   },
   {
     "image_id": 35,
-    "caption": "Navy personnel in uniform working with radios and computers on a ship bridge",
+    "caption": "Group of sailors in white uniforms at naval ship bridge controls.",
     "references": [
       "People in navy uniforms and one person talking on a walkie- talkie.",
       "Group of sailors in command center with one talking on walkie talkie.",
@@ -386,7 +386,7 @@
   },
   {
     "image_id": 36,
-    "caption": "people walking with umbrellas on a rainy city street",
+    "caption": "People with umbrellas walking on rainy street near historic cathedral.",
     "references": [
       "A man sticking his head out of a doorway into a rainy city street.",
       "A man peeks out a window during a light rain.",
@@ -397,7 +397,7 @@
   },
   {
     "image_id": 37,
-    "caption": "a young woman sitting on a bed using a laptop",
+    "caption": "A red-haired woman with glasses uses a laptop on a bed.",
     "references": [
       "there is a woman sitting on a bed using a lap top",
       "a woman in glasses using an apple fruit",
@@ -408,7 +408,7 @@
   },
   {
     "image_id": 38,
-    "caption": "A large white yacht docked in a calm blue harbor near rocky hills.",
+    "caption": "A large white superyacht docked in a mountainous harbor.",
     "references": [
       "A white boat floating on a lake under mountains.",
       "A yacht next to smaller boats docked on water.",
@@ -419,7 +419,7 @@
   },
   {
     "image_id": 39,
-    "caption": "two people riding bicycles on a rural dirt road near trees",
+    "caption": "Two cyclists ride bicycles on a forested dirt road.",
     "references": [
       "Black and white photo of two men riding bikes.",
       "Two men are bicycling down a dirt road next to the woods.",
@@ -430,7 +430,7 @@
   },
   {
     "image_id": 40,
-    "caption": "a cozy living room with a beige sofa and a small round coffee table",
+    "caption": "A beige sofa with backpack beside coffee table and wine bottle in living room.",
     "references": [
       "A few bags laying around in a living room.",
       "A living room with a couch, two tables and a painting.",
@@ -441,7 +441,7 @@
   },
   {
     "image_id": 41,
-    "caption": "two boys flying kites on a street lined with shops",
+    "caption": "Two boys walk along a bustling urban street with shops and a blue car.",
     "references": [
       "A couple of young men standing next to each other on a street.",
       "Two children on a street in a developing nation.",
@@ -452,7 +452,7 @@
   },
   {
     "image_id": 42,
-    "caption": "a person taking a photo of a pizza at a restaurant",
+    "caption": "A man photographs seaweed-topped pizza in restaurant booth.",
     "references": [
       "A man sits in a diner photographing his meal",
       "Photographer taking a picture of a meal in a small restaurant.",
@@ -463,7 +463,7 @@
   },
   {
     "image_id": 43,
-    "caption": "A woman stands on a train platform holding bags as a subway train waits with open doors.",
+    "caption": "Woman in hijab holds shopping bags outside open train doors.",
     "references": [
       "A woman holding three bags stands by the open doors of a subway car, through which other people can be seen.",
       "Woman getting ready to enter an empty subway car.",
@@ -474,7 +474,7 @@
   },
   {
     "image_id": 44,
-    "caption": "a small yellow fire hydrant between two empty park benches",
+    "caption": "Weathered wooden benches near lamppost, tree, and fire hydrant by brick wall.",
     "references": [
       "A set of park benches near a lamp post",
       "A park with benches, a lamppost, and trees.",
@@ -485,7 +485,7 @@
   },
   {
     "image_id": 45,
-    "caption": "Two young girls standing side by side in a small bedroom.",
+    "caption": "Two children hold hands facing curtained window in vintage room.",
     "references": [
       "Two small young girls hold hands as they look into a bedroom.",
       "A black and white photograph of two girls looking at a bed.",
@@ -496,7 +496,7 @@
   },
   {
     "image_id": 46,
-    "caption": "a knight in armor sitting by a wooden trough with a horse nearby",
+    "caption": "Armored knight sits on wooden fence beside saddled horse.",
     "references": [
       "A BLACK AND WHITE PIC OF A MAN AND A HORSE",
       "A man in armor is seated on a wood frame by a horse.",
@@ -507,7 +507,7 @@
   },
   {
     "image_id": 47,
-    "caption": "a street scene with a house, a bus and a person walking",
+    "caption": "A beige two-story house with palm trees and orange bus on suburban street.",
     "references": [
       "Group of pedestrians walking in front of a domestic house.",
       "A bus parked at a stop beside a small home",
@@ -518,7 +518,7 @@
   },
   {
     "image_id": 48,
-    "caption": "a bed with patterned bedding and a pillow inside a tent",
+    "caption": "A bed with patterned blanket and red pillows inside a tent.",
     "references": [
       "a long skinny bed with a floral blanket on it",
       "A small bed sits under a tent where the sunlight peeks through.",
@@ -529,7 +529,7 @@
   },
   {
     "image_id": 49,
-    "caption": "A man and a young girl wearing a helmet sit together on a parked motorcycle at night.",
+    "caption": "A father and daughter pose on a silver Kawasaki motorcycle in a garage.",
     "references": [
       "The man is giving the young girl a ride on his motorcycle.",
       "A man on a Kawasaki motorcycle with a young girl on the back.",
@@ -540,7 +540,7 @@
   },
   {
     "image_id": 50,
-    "caption": "a baseball game in a stadium with a batter at the plate",
+    "caption": "A baseball pitcher delivers to batter in crowded stadium.",
     "references": [
       "A field full of players in action in a baseball game.",
       "A baseball game taking place at night with players.",
@@ -551,7 +551,7 @@
   },
   {
     "image_id": 51,
-    "caption": "a tall clock tower against a clear blue sky",
+    "caption": "Ornate stone clock tower with large white clock face under blue sky.",
     "references": [
       "A IMAGE OF A TOWER CLOCK WITH THE CLOCK ON IT",
       "A clock tower rises into the sky as it displays the time.",
@@ -562,7 +562,7 @@
   },
   {
     "image_id": 52,
-    "caption": "a blue and white streetcar traveling down city tracks",
+    "caption": "A blue and white tram on tracks beside green trees and buildings.",
     "references": [
       "A blue and white train is moving on the rails.",
       "A five car blue and white train with passengers",
@@ -573,7 +573,7 @@
   },
   {
     "image_id": 53,
-    "caption": "a person wearing a necklace with a scissor-shaped pendant",
+    "caption": "A woman wearing a gold necklace with scissor pendant on her neck.",
     "references": [
       "A silver colored necklace with a pair of mini scissors on it.",
       "Woman wearing a necklace with miniature scissors pendant.",
@@ -584,7 +584,7 @@
   },
   {
     "image_id": 54,
-    "caption": "chopped and sliced carrots on a cutting board next to a knife",
+    "caption": "A knife chopping orange carrots on a wooden cutting board.",
     "references": [
       "A knife sitting next to carrots on top of a cutting board.",
       "Carrots are being cut into pieces with a large knife.",
@@ -595,7 +595,7 @@
   },
   {
     "image_id": 55,
-    "caption": "A table set outdoors with a pie, a white pitcher, and a vase of red flowers.",
+    "caption": "A sliced cake on a plate beside red flowers and white jug outdoors.",
     "references": [
       "A cake on a pan with a spatula, a flower white with roses and a white beverage holder.",
       "A table containing a cake and white pitcher.",
@@ -606,7 +606,7 @@
   },
   {
     "image_id": 56,
-    "caption": "a public restroom toilet with a plunger nearby",
+    "caption": "A white toilet with raised seat beside a black plunger in tiled bathroom.",
     "references": [
       "A white toilet bowl with a plunger standing near it",
       "a bathroom with a white toilet in it",
@@ -617,7 +617,7 @@
   },
   {
     "image_id": 57,
-    "caption": "a man standing by a fence with two giraffes in the background",
+    "caption": "A man in orange shirt and cap watches two giraffes at zoo enclosure.",
     "references": [
       "Man posing in front of a pair of giraffes in background.",
       "The man poses for a picture with the two giraffes.",
@@ -628,7 +628,7 @@
   },
   {
     "image_id": 58,
-    "caption": "a young man lying in bed with his face close to a laptop screen",
+    "caption": "A young man in red tank top uses silver laptop on bed.",
     "references": [
       "A young boy hunched over a laptop computer.",
       "A kid sitting down with their head on their laptop.",
@@ -639,7 +639,7 @@
   },
   {
     "image_id": 59,
-    "caption": "a person playing with a frisbee on a sandy beach",
+    "caption": "Two men walking on sandy beach near sea, one holding yellow pole.",
     "references": [
       "A man doing tricks with a frisbee in front of a young lady.",
       "A man catching a frisbee on the beach",
@@ -650,7 +650,7 @@
   },
   {
     "image_id": 60,
-    "caption": "a small child in a red coat holding an umbrella on a rainy sidewalk",
+    "caption": "Smiling girl in red coat holds clear umbrella on wet driveway near hedge.",
     "references": [
       "A little girl is holding an umbrella on a wet day.",
       "A small child stands in the rain with an umbrella.",
@@ -661,7 +661,7 @@
   },
   {
     "image_id": 61,
-    "caption": "a surfer in a wetsuit riding a large wave",
+    "caption": "A surfer performs an aerial flip on a crashing ocean wave.",
     "references": [
       "there is a male surfer that is riding in the wave",
       "a man on a surf board rides a wave",
@@ -672,7 +672,7 @@
   },
   {
     "image_id": 62,
-    "caption": "a high tech toilet with a control panel and open seat",
+    "caption": "A modern bidet toilet with electronic controls and open seat in bathroom.",
     "references": [
       "A white toilet bowl with an electronic brown seat.",
       "An electronic toilet that has the seat up.",
@@ -683,7 +683,7 @@
   },
   {
     "image_id": 63,
-    "caption": "a man in a red shirt and white apron holding food baskets in a kitchen",
+    "caption": "A smiling chef in hat and apron holds two red bowls of pancakes.",
     "references": [
       "A man in foodservice holding baskets with food.",
       "Smiling man, in red jacket and white apron and cap, holds two red trays with sandwiches.",
@@ -694,7 +694,7 @@
   },
   {
     "image_id": 64,
-    "caption": "kitesurfers riding on the ocean with mountains in the background",
+    "caption": "Colorful windsurfers with sails glide across bay near distant hill.",
     "references": [
       "People in the water and parachutes overhead.",
       "Many different sails flying over a large body of water.",
@@ -705,7 +705,7 @@
   },
   {
     "image_id": 65,
-    "caption": "a skateboarder performs an aerial trick on an indoor ramp",
+    "caption": "Skateboarder performs mid-air trick on ramp in arched hall.",
     "references": [
       "A man in black doing jumps on a skateboard",
       "A boy skateboards on a skateboard ramp.",
@@ -716,7 +716,7 @@
   },
   {
     "image_id": 66,
-    "caption": "a colorful kite flying in a clear blue sky",
+    "caption": "A red and white kite sails against a clear blue sky.",
     "references": [
       "This is a large kite flying high in the sky.",
       "A large orange and white kite flying in a blue sky.",
@@ -727,7 +727,7 @@
   },
   {
     "image_id": 67,
-    "caption": "a modern hotel room with two neatly made twin beds",
+    "caption": "A cozy hotel room with twin beds, lamp, and window view.",
     "references": [
       "A narrow hotel room with two made up beds.",
       "a large modern hotel room with double beds",
@@ -738,7 +738,7 @@
   },
   {
     "image_id": 68,
-    "caption": "a green traffic light above a street with a car approaching",
+    "caption": "A green traffic light over a winter street with a distant blue car.",
     "references": [
       "A green traffic light above a street with a car on coming.",
       "A green traffic light above a street with one car driving by.",
@@ -749,7 +749,7 @@
   },
   {
     "image_id": 69,
-    "caption": "a commercial airplane taxiing on the runway near airport ground equipment",
+    "caption": "ANA airplane parked at airport gate with baggage carts and jet bridge.",
     "references": [
       "A large airplane is on the airport runway.",
       "A giant airplane sitting on the tarmac of an airport.",
@@ -760,7 +760,7 @@
   },
   {
     "image_id": 70,
-    "caption": "A stone clock tower with arched window against a blue sky.",
+    "caption": "Gray stone church tower with large clock and crenellated top.",
     "references": [
       "A building with a black and gold clock on it.",
       "A large clock towers next to a forest filled with green trees.",
@@ -771,7 +771,7 @@
   },
   {
     "image_id": 71,
-    "caption": "a plate with shredded chicken and a container of green vegetable stew",
+    "caption": "Black container of green curry with shredded chicken on white plate.",
     "references": [
       "The meal consists of chopped chicken with cheese and brocolli.",
       "A styrofoam plate with shredded chicken and a dish of broccoli with cheese sauce.",
@@ -782,7 +782,7 @@
   },
   {
     "image_id": 72,
-    "caption": "two officials stand at a podium surrounded by microphones during a press conference",
+    "caption": "Woman and man at Moroccan press conference podium with flags and portrait.",
     "references": [
       "A lady and woman addressing the press with microphones on the stand",
       "A man and woman standing in front of a podium.",
@@ -793,7 +793,7 @@
   },
   {
     "image_id": 73,
-    "caption": "a surfer in a wetsuit riding a breaking wave",
+    "caption": "A surfer in black wetsuit jumps on surfboard atop ocean wave.",
     "references": [
       "A surfer is at the peak of a wave and circling around.",
       "a person riding a surf board on a wave",
@@ -804,7 +804,7 @@
   },
   {
     "image_id": 74,
-    "caption": "a shaggy brown cow standing under a tree in a field",
+    "caption": "A shaggy brown cow stands in a grassy field under trees.",
     "references": [
       "A young alpaca under a tree in the country.",
       "a brown bull is standing in his pen and some trees",
@@ -815,7 +815,7 @@
   },
   {
     "image_id": 75,
-    "caption": "a small bedroom with a bed and posters on the wall",
+    "caption": "A cozy bedroom with bed, colorful pillows, and posters on walls.",
     "references": [
       "A bedroom has many posters on the wall.",
       "A bedroom has gold paint and posters on the wall.",
@@ -826,7 +826,7 @@
   },
   {
     "image_id": 76,
-    "caption": "a man in colonial clothing stands by a brick building",
+    "caption": "A colonial-dressed man talks on a cell phone outside a brick building.",
     "references": [
       "A man in costume standing next to a building.",
       "He is dressed in the times that his tours encompass.",
@@ -837,7 +837,7 @@
   },
   {
     "image_id": 77,
-    "caption": "Two airplanes parked on an airport runway near a boarding gate.",
+    "caption": "A white Qantas airplane parked at airport gate with attached jet bridge.",
     "references": [
       "A bunch of airplanes are parked on the runway.",
       "Some big commercial planes all parked by each other.",
@@ -848,7 +848,7 @@
   },
   {
     "image_id": 78,
-    "caption": "a person holding a freshly baked cheese pizza on a tray",
+    "caption": "A person holds a cheesy pizza on a baking sheet with oven mitt.",
     "references": [
       "There is a freshly made pizza out of the oven",
       "A man holding a square shaped pizza pie.",
@@ -859,7 +859,7 @@
   },
   {
     "image_id": 79,
-    "caption": "a white cat standing on a stone pavement watching a flock of pigeons",
+    "caption": "A white cat watches a flock of pigeons on cobblestone pavement.",
     "references": [
       "A very cute cat near a bunch of birds.",
       "A cat is standing outside next to a group of pigeons.",
@@ -870,7 +870,7 @@
   },
   {
     "image_id": 80,
-    "caption": "a sandwich meal with chips and a drink on a table",
+    "caption": "Subway sandwich, Lay's chips, and tumbler on table with wrapper.",
     "references": [
       "A Subway Sandwich with chips, raisins and a coffee cup.",
       "A Subway sandwich, potato chips, raisins, and a mug of coffee.",
@@ -881,7 +881,7 @@
   },
   {
     "image_id": 81,
-    "caption": "a small dog with its head inside a toilet bowl",
+    "caption": "A brown dog peers into an open toilet bowl in a small bathroom.",
     "references": [
       "A cat drinking out of a white toilet bowl.",
       "A cat perched on the edge of a toilet, drinking out of it.",
@@ -892,7 +892,7 @@
   },
   {
     "image_id": 82,
-    "caption": "this is a dummy caption for an undecodable image",
+    "caption": "A ornate clock tower with ivy, balcony, and spire under cloudy sky.",
     "references": [
       "A clock tower sits on top of an old building.",
       "a large tower with a clock on top of it",
@@ -903,7 +903,7 @@
   },
   {
     "image_id": 83,
-    "caption": "small kitchen with wooden cabinets and a door at the end",
+    "caption": "A kitchen counter with wooden cabinets, coffee maker, and adjacent door with blinds.",
     "references": [
       "A kitchen with a black automatic dishwasher next to a  doorway.",
       "A kitchen with white walls and tiled flooring.",
@@ -914,7 +914,7 @@
   },
   {
     "image_id": 84,
-    "caption": "A display counter filled with various rectangular pizzas and focaccia.",
+    "caption": "Assorted rectangular pizzas with various toppings on wooden counter",
     "references": [
       "A large assortment of pizzas out for display",
       "A pizza buffet with several varieties of pizza, located in a kitchen.",
@@ -925,7 +925,7 @@
   },
   {
     "image_id": 85,
-    "caption": "a zebra and its foal standing together in tall dry grass",
+    "caption": "A mother zebra and her foal grazing in dry savanna grass.",
     "references": [
       "Zebra grazing on dry grass in a fried up field.",
       "A mother zebra and her young on a grassy plain.",
@@ -936,7 +936,7 @@
   },
   {
     "image_id": 86,
-    "caption": "A group of officials cutting a red ribbon during an outdoor ceremony on a street.",
+    "caption": "Men in suits cutting red ribbon at outdoor ceremony.",
     "references": [
       "there are many men preparing to cut a red ribbon",
       "a number of people wearing suits cutting a ribbon",
@@ -947,7 +947,7 @@
   },
   {
     "image_id": 87,
-    "caption": "two colorful airplanes parked on an airport runway",
+    "caption": "Several airplanes parked on airport tarmac under cloudy skies.",
     "references": [
       "a couple of red and white planes are on a runway",
       "a big plane sits parked in a air port",
@@ -958,7 +958,7 @@
   },
   {
     "image_id": 88,
-    "caption": "a snowboarder standing in deep snow on a snowy slope",
+    "caption": "Person in pink hat and black coat stands in deep snow with snowboard.",
     "references": [
       "A snowboarder buried up to his waste in snow.",
       "A person standing in the snow with their hand up to their face.",
@@ -969,7 +969,7 @@
   },
   {
     "image_id": 89,
-    "caption": "an ornate clock on a white mantel in front of a tapestry",
+    "caption": "Ornate gold clock with boar base on marble mantelpiece beside painting.",
     "references": [
       "A golden clock rhino sculpture sitting on top of a fireplace.",
       "A clock on top of a rhino on a shelf",
@@ -980,7 +980,7 @@
   },
   {
     "image_id": 90,
-    "caption": "a person bending over a red motorcycle with a cat sitting in the sidecar",
+    "caption": "Woman bending over white scooter beside gray car outside brick house.",
     "references": [
       "A person near a bike and a car on a street.",
       "A parked motorcycle with a cat and a person leaning on top of it.",
@@ -991,7 +991,7 @@
   },
   {
     "image_id": 91,
-    "caption": "a cat looking at a computer screen showing another cat",
+    "caption": "A black-and-white cat watches another cat on a computer screen.",
     "references": [
       "A gray and white sitting in front of a TV.",
       "A cat is looking at the other cat on the computer screen.",
@@ -1002,7 +1002,7 @@
   },
   {
     "image_id": 92,
-    "caption": "a plate of sandwiches and french fries with condiments",
+    "caption": "Sub sandwich with fries, ketchup, lettuce, and onion on plate.",
     "references": [
       "A plate of food which includes onions, tomato, lettuce, sauce, fries, and a sandwich.",
       "A sandwich, french fries, bowl of ketchup, onion slice, lettuce slice, tomato slice, and knife sit on the white plate.",
@@ -1013,7 +1013,7 @@
   },
   {
     "image_id": 93,
-    "caption": "People wait and board a city bus at a busy street stop.",
+    "caption": "Police officers and worker direct traffic near subway shuttle bus.",
     "references": [
       "A city bus parked next to a crowd of people.",
       "A large crowd of people are near the subway shuttle bus.",
@@ -1024,7 +1024,7 @@
   },
   {
     "image_id": 94,
-    "caption": "A group of performers in matching outfits balance acrobatically on a moving motorcycle.",
+    "caption": "Acrobats in red and white suits perform motorcycle stunt on rainy bridge.",
     "references": [
       "A group of men riding on the back of a motorcycle.",
       "a bunch of people are doing tricks on a single motorcycle",
@@ -1035,7 +1035,7 @@
   },
   {
     "image_id": 95,
-    "caption": "a small bathroom with a toilet, sink, and cityscape shower curtain",
+    "caption": "A bathroom with blue towel, white shower curtain, toilet, and sink.",
     "references": [
       "A room filled with furniture and curtains on top of carpet.",
       "A look into a very tiny narrow rest room.",
@@ -1046,7 +1046,7 @@
   },
   {
     "image_id": 96,
-    "caption": "this is a dummy caption for an undecodable image",
+    "caption": "A small bathroom with blue shower curtain, white toilet, sink, and checkered floor.",
     "references": [
       "A bathroom with a blue shower curtain and blue walls.",
       "A bathroom with a toilet and a blue shower curtain.",
@@ -1057,7 +1057,7 @@
   },
   {
     "image_id": 97,
-    "caption": "an old stone gatehouse with a clock tower surrounded by trees",
+    "caption": "Old stone gatehouse with clock tower and arched entrance amid trees.",
     "references": [
       "A large clock tower over a church next to trees.",
       "A large clock tower above a masonry building.",
@@ -1068,7 +1068,7 @@
   },
   {
     "image_id": 98,
-    "caption": "a small bathroom with a sink and walls covered in framed pictures",
+    "caption": "Bathroom sink and mirror amid walls covered in framed pictures and yellow flowers.",
     "references": [
       "A sink is shown in front of a frame covered wall.",
       "A metal sink and a mirror in a room.",
@@ -1079,7 +1079,7 @@
   },
   {
     "image_id": 99,
-    "caption": "a skateboarder grinding on a ledge at night",
+    "caption": "Skateboarder ollies on urban ledge at night with glass buildings.",
     "references": [
       "a kid riding his skate board on the edge of a concrete wall",
       "A man on a skateboard performs a trick on the ledge",
@@ -1090,13 +1090,233 @@
   },
   {
     "image_id": 100,
-    "caption": "a surfer riding a wave in the ocean",
+    "caption": "A surfer in black shorts rides a white surfboard on a crashing ocean wave.",
     "references": [
       "A man riding a wave on top of a surfboard.",
       "A man on a surfboard is riding a big wave.",
       "A man that is on a surfboard in the water.",
       "A surfer almost horizontal on the crest of a wave",
       "A man surfing waves on his surf board"
+    ]
+  },
+  {
+    "image_id": 101,
+    "caption": "Four young men relax on sofa with drinks and snacks in living room.",
+    "references": [
+      "A man standing in a living room holding a Nintendo Wii game controller.",
+      "Three people with cups on the couch and one with remote standing",
+      "A man holding a motion controlled video game controller",
+      "Man with video game controller in living room with onlooker seated nearby.",
+      "A man playing a video game while two men sit on a couch."
+    ]
+  },
+  {
+    "image_id": 102,
+    "caption": "A baseball catcher in protective gear squats behind home plate.",
+    "references": [
+      "A catches crouches on a patch of dirt.",
+      "A catcher squatting at a base with his gloved hand extended.",
+      "A baseball catcher stands ready to catch a ball.",
+      "a catcher kneeling at the mound waiting for a baseball",
+      "A catcher in white uniform during a baseball game."
+    ]
+  },
+  {
+    "image_id": 103,
+    "caption": "A young girl in a car holds a flip phone amid sunlight.",
+    "references": [
+      "A woman sitting in a car holding a smart phone.",
+      "A young girl texting  on a cell phone in a car.",
+      "A girl checks her phone in a vehicle inside a parking lot.",
+      "Girl texting on a cell phone in a parking lot.",
+      "A female on a cell phone in a car."
+    ]
+  },
+  {
+    "image_id": 104,
+    "caption": "Soccer players in black jerseys kick ball toward goalposts on grassy field.",
+    "references": [
+      "Soccor players approach a ball that is in the air.",
+      "Several young male soccer players play on a field as a ball sails overhead.",
+      "a group of people playing soccer in a field",
+      "Soccer players look on as the soccer ball flies in the air.",
+      "Several men playing with a soccer ball in a park."
+    ]
+  },
+  {
+    "image_id": 105,
+    "caption": "A herd of elephants grazing in a dry savanna with trees.",
+    "references": [
+      "An albino elephant with its baby standing in a marsh area with others.",
+      "Elephants of mixed ages standing in a muddy landscape.",
+      "A herd of elephants standing on top of a muddy field.",
+      "Some elephants are in a muddy brown field.",
+      "A herd of elephants stop for a drink."
+    ]
+  },
+  {
+    "image_id": 106,
+    "caption": "A fighter jet soars through scattered white clouds.",
+    "references": [
+      "An experimental airplane flying through a  cloudy blue sky.",
+      "an image of a plane in the air amongst the clouds",
+      "There is a plane turning in mid air",
+      "An airplane flies in a cloudy sky as a backdrop.",
+      "A military jet flying overhead in the sky"
+    ]
+  },
+  {
+    "image_id": 107,
+    "caption": "Women using tablets and smartphones on public transport.",
+    "references": [
+      "A series of photos showing a woman sitting down with different digital devices.",
+      "a collage of photos with many electronics",
+      "a bunch of photos of people looking at cell phones",
+      "There are several pictures of people on different electronic devices.",
+      "A collage of eight photos of people using cell phones."
+    ]
+  },
+  {
+    "image_id": 108,
+    "caption": "Elderly woman holds white teddy bear beside man in festive room.",
+    "references": [
+      "An elderly  man and woman look at something out of the camera's view.",
+      "An older woman sitting in a wheel chair next to an older man.",
+      "An old couple is sitting together holding a stuffed bear.",
+      "The old man is sitting next to the old woman holding a teddy bear.",
+      "An elderly man and woman sitting down"
+    ]
+  },
+  {
+    "image_id": 109,
+    "caption": "this is a dummy caption for an undecodable image",
+    "references": [
+      "A purse sitting next to its contents and a laptop",
+      "The contents of a purse laid out on a bed.",
+      "A wallet, MP3 player, headphones, change, cellphone, flash drive, mascara, pencil, bracelets, keys, and handbag sit on a bed in front of a laptop.",
+      "The contents of a purse sitting on top of a bed.",
+      "A purse, laptop, iPod, cell phone, coins, earphones and a pencil laying on a bed."
+    ]
+  },
+  {
+    "image_id": 110,
+    "caption": "A woman in black coat holds pink umbrella on wet pavement.",
+    "references": [
+      "Someone walking down the street while holding a pink umbrella",
+      "a woman walking down the road with a pink umbrella",
+      "A woman holding a purple umbrella walking in the rain",
+      "A woman walking down a sidewalk holding a pink umbrella.",
+      "a lady walking in the rain carrying a pink umbrella"
+    ]
+  },
+  {
+    "image_id": 111,
+    "caption": "Silver wireless keyboard and mouse on a modern desk.",
+    "references": [
+      "A computer workstation with a keyboard and multiple mice.",
+      "A keyboard and two mice on the table",
+      "A wireless mouse is connected to the keyboard for a full charge.",
+      "A computer keyboard with a mouse sitting on top of it.",
+      "A keyboard is shown with three computer mouses."
+    ]
+  },
+  {
+    "image_id": 112,
+    "caption": "Wooden table with green salads, cheesy casserole, and condiments.",
+    "references": [
+      "Someone prepares salads as part of a healthy meal.",
+      "A meal of homemade pizza and salad for two people.",
+      "There are plates of salad and pizza on a pan.",
+      "Some plates of salad by a pan of pizza with chicken and broccoli.",
+      "A cookie sheet has a casserole on it next to plates."
+    ]
+  },
+  {
+    "image_id": 113,
+    "caption": "Woman on phone beside man holding baby on patterned couch.",
+    "references": [
+      "A woman sitting on the back of a couch next to a man wearing glasses.",
+      "The man and the woman are eating pizza.",
+      "A man and a woman sitting on a couch.",
+      "A woman and a man sitting on a couch with one on a cell phone.",
+      "Two people are sitting on a couch while eating pizza."
+    ]
+  },
+  {
+    "image_id": 114,
+    "caption": "Baking sheet of cauliflower and tomatoes next to pot on stove",
+    "references": [
+      "Different assortment of noodles and vegetables sitting in a pot and tray.",
+      "A pot of pasta cooking on the stove next to a tray",
+      "A large pot of water and pasta sits on top of a stove.",
+      "an image of food items on top of the stove",
+      "A pot of noodles is being cooked with more ingredients beside it."
+    ]
+  },
+  {
+    "image_id": 115,
+    "caption": "A woman throws a green frisbee on the beach.",
+    "references": [
+      "A woman about to catch a frisbee on a beach.",
+      "a girl on a beach playing with a frisbee",
+      "The woman is playing Frisbee on the beach by the water.",
+      "a girl looking up at a freeze be next to a body of water.",
+      "A woman standing on a beach trying to catch a frisbee."
+    ]
+  },
+  {
+    "image_id": 116,
+    "caption": "A bearded man sleeps in bed with two cats nearby.",
+    "references": [
+      "A man that is laying down underneath a cat.",
+      "The man is sleeping in a bed near two cats.",
+      "A bearded man sleeping with a cat on top of his head.",
+      "a man is sleeping next to a couple of cats",
+      "A man sleeping in a bed with two cats."
+    ]
+  },
+  {
+    "image_id": 117,
+    "caption": "Man in glasses examines blue bird cage in crowded market stall.",
+    "references": [
+      "Man in a coat walking with other people in the background.",
+      "Man walking next many birds in cages at a street market.",
+      "A man is walking through a market in china.",
+      "A man is walking through an outside market.",
+      "A man in a shopping district looking at a bird."
+    ]
+  },
+  {
+    "image_id": 118,
+    "caption": "A family of giraffes walking in a grassy zoo enclosure.",
+    "references": [
+      "a couple of giraffes that are standing in a fence",
+      "two giraffe stand behind a fence in a zoo enclosure",
+      "Two giraffes roaming around an enclosed area on a sunny day.",
+      "Two giraffes in a grassy area with a fence and trees next to them.",
+      "The two giraffes are walking in their pen."
+    ]
+  },
+  {
+    "image_id": 119,
+    "caption": "Orange and white small airplane parked on airport tarmac with others.",
+    "references": [
+      "That small plane looks like it is ready for takeoff.",
+      "A man cleaning a small single engine airplane.",
+      "An airplane sitting at an airport while a man looks inside of it.",
+      "a orange and white Cessna airplane parked near a runway",
+      "Small plane and attendant at airfield on clear day."
+    ]
+  },
+  {
+    "image_id": 120,
+    "caption": "Group of motorcyclists riding on winding mountain road.",
+    "references": [
+      "one motorcycle rider riding going up the mountain two going down",
+      "A group of people riding motorcycles down a winding road.",
+      "Men with helmets on motorcycles driving on a hilly road.",
+      "Many people riding motorcycles on a street in the mountains.",
+      "Four people are riding motorcycles in the mountains."
     ]
   }
 ]

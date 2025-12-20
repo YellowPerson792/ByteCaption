@@ -14,54 +14,54 @@
     }
   },
   "metrics": {
-    "Bleu_1": 0.697530864195378,
-    "Bleu_2": 0.5402074944503631,
-    "Bleu_3": 0.4047835403038608,
-    "Bleu_4": 0.28718779517819126,
-    "ROUGE_L": 0.530711216502962,
-    "CIDEr": 1.140888445704589,
-    "METEOR": 0.27994954466246413,
+    "Bleu_1": 0.6944079304363,
+    "Bleu_2": 0.47839136062345194,
+    "Bleu_3": 0.3218358034654503,
+    "Bleu_4": 0.2196289009197607,
+    "ROUGE_L": 0.46158316471229893,
+    "CIDEr": 0.9852310829364836,
+    "METEOR": 0.24277061221680282,
     "SPICE": 0.0,
     "XE_Loss": null,
-    "Undecodable_Count": 3,
-    "Undecodable_Ratio": 0.1,
-    "Total_Samples": 30,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 120,
     "Sample_Preview": [
       {
         "image_id": 1,
-        "generated": "a small dog curled up on a shoe rack among various shoes",
+        "generated": "A curly-haired dog lying among shoes on a rack.",
         "reference": "This wire metal rack holds several pairs of shoes and sandals",
         "augmentation_idx": 0
       },
       {
         "image_id": 2,
-        "generated": "a city street in silhouette with a tall tower in the distance",
+        "generated": "Silhouetted city street with traffic lights and tall building.",
         "reference": "A traffic light over a street surrounded by tall buildings.",
         "augmentation_idx": 0
       },
       {
         "image_id": 3,
-        "generated": "an open toilet seat in a rustic bathroom setting",
+        "generated": "Open toilet seat with a view of rough stone surface.",
         "reference": "A toilet seat sits on top of a hole in the ground.",
         "augmentation_idx": 0
       },
       {
         "image_id": 4,
-        "generated": "a cozy living room with two sofas and a wooden coffee table",
+        "generated": "Cozy living room with sofas, coffee table, and wall art.",
         "reference": "A coffee table sits in the middle of a living room.",
         "augmentation_idx": 0
       },
       {
         "image_id": 5,
-        "generated": "A sandwich in a red basket on an outdoor cafe table.",
+        "generated": "A sandwich in a red basket on an outdoor table.",
         "reference": "a sandwich in a plastic food basket on a table",
         "augmentation_idx": 0
       }
     ]
   },
   "rname": "test_best",
-  "timestamp": "20251220_200521",
+  "timestamp": "20251220_215214",
   "references_annfile": "D:\\MLLMs\\ByteCaption\\PureT\\data\\coco_karpathy\\captions_test.json",
-  "captions_file": "eval_results\\20251220_200521\\captions_test_best.json",
-  "captions_count": 30
+  "captions_file": "eval_results\\20251220_215214\\captions_test_best.json",
+  "captions_count": 120
 }

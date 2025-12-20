@@ -13,10 +13,10 @@ python tools/run_batch_corruption_eval.py \
     
 python tools/run_batch_corruption_eval.py \
 --models PureT/experiments/ByteCaption_XE_openrouter \
---corrupt-types rbbf \
---corrupt-levels S2 \
+--corrupt-types rbbf rbsl \
+--corrupt-levels S0 S1 S2 S3 S4 S5 \
 --save-captions 500 \
---test-samples 30
+--test-samples 0
 """
 
 import argparse
