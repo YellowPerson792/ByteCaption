@@ -36,7 +36,7 @@ except ImportError:
 
 """
 Example:
-python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 100 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
+python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 120 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
 cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE --test_samples 5 --resume -1 --disable_wandb
 """
 

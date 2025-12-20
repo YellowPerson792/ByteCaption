@@ -284,9 +284,9 @@ class PILSave(BaseTransformation):
         )
         group.add_argument(
             "--image-augmentation.pil-save.quality",
-            help="JPEG quality if using JPEG encoding. Defaults to 100.",
+            help="JPEG quality if using JPEG encoding. Defaults to 60.",
             type=int,
-            default=100,
+            default=60,
         )
         return parser
 

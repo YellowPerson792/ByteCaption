@@ -46,6 +46,8 @@ if not hasattr(opts.image_augmentation, "pil_save"):
     opts.image_augmentation.pil_save = _argparse.Namespace()
 if not hasattr(opts.image_augmentation.pil_save, "corrupt_level"):
     opts.image_augmentation.pil_save.corrupt_level = "none"
+if not hasattr(opts.image_augmentation.pil_save, "quality"):
+    opts.image_augmentation.pil_save.quality = 60
 if not hasattr(opts.image_augmentation, "byte_stream_corrupter"):
     opts.image_augmentation.byte_stream_corrupter = _argparse.Namespace()
 
@@ -295,7 +297,7 @@ def blip_collate_val(batch: Sequence[Tuple[Any, ...]]):
     # 2. 对批次中的每个原始图像执行“编码 -> 损坏 -> 解码”流程
     for i, img_tensor in enumerate(att_feats):
         try:
-            byte_stream = image_bytes._image_to_bytes(img_tensor, format="jpeg", quality=95)
+            byte_stream = image_bytes._image_to_bytes(img_tensor, format="jpeg", quality=60)
             original_bytes = byte_stream.getvalue()
 
             # --- START: 收集码流长度 ---
@@ -371,7 +373,7 @@ def openrouter_collate_val(batch: Sequence[Tuple[Any, ...]]):
 
     for img_tensor in att_feats:
         try:
-            byte_stream = image_bytes._image_to_bytes(img_tensor, format="jpeg", quality=95)
+            byte_stream = image_bytes._image_to_bytes(img_tensor, format="jpeg", quality=60)
             original_bytes = byte_stream.getvalue()
             _BYTE_STREAM_LENGTHS.append(len(original_bytes))
         except Exception:
