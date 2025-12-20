@@ -10,7 +10,7 @@ TRAIN:
 
 ############################ TEST ############################
 TEST:
-  BATCH_SIZE: 20
+  BATCH_SIZE: 60
 
 ############################ DATA_LOADER ############################
 DATA_LOADER:
@@ -40,7 +40,12 @@ CORRUPTION:
 MODEL:
   TYPE: 'OPENROUTER'
   OPENROUTER:
-    MODEL_ID: 'google/gemini-2.5-flash'
+    # MODEL_ID: 'google/gemini-2.5-flash'
+    MODEL_ID: 'openai/gpt-5.1'
+    # MODEL_ID: 'qwen/qwen3-vl-32b-instruct'
+    # MODEL_ID: 'x-ai/grok-4'
+    # MODEL_ID: 'mistralai/mistral-large-2512'
+    # MODEL_ID: 'qwen/qwen-2.5-vl-7b-instruct:free'
     API_BASE: 'https://openrouter.ai/api/v1/chat/completions'
     API_KEY: ''
     API_KEY_PATH: 'openrouter_api'
@@ -49,13 +54,14 @@ MODEL:
     PROXY: 'http://127.0.0.1:7897'
     # PROXY: ''
     TIMEOUT: 15
-    MAX_TOKENS: 64
+    MAX_TOKENS: 32
     TEMPERATURE: 0.0
     TOP_P: 1.0
-    MAX_WORKERS: 20
+    MAX_WORKERS: 60
     BATCH_SIZE: 0
     SYSTEM_PROMPT: 'You are a vision captioning model.'
-    USER_PROMPT: 'You are given a possibly corrupted image. Generate the most descriptive COCO-style caption you can. Use 5-12 words, concise and factual. Output only the caption.'
+    USER_PROMPT: 'You are given a possibly corrupted JPEG image. Output a short COCO-style caption. Use 5-12 words. Output only the caption with no extra text.'
+    # USER_PROMPT: 'You are given a possibly corrupted JPEG image. If you can decode it, output a short COCO-style caption. If you cannot decode it, output exactly: this is a dummy caption for an undecodable image Output only the caption with no extra text.'
     IMAGE_DETAIL: 'low'
     REASONING: { enabled: false }
     PLACEHOLDER: 'this is a dummy caption for an undecodable image'

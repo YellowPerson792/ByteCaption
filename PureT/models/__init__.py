@@ -16,6 +16,8 @@ __factory = {
     'HF': HFCaptionModel,
     'GIT': HFCaptionModel,
     'HF_GIT': HFCaptionModel,
+    'QWEN': HFCaptionModel,
+    'HF_QWEN': HFCaptionModel,
     'OPENROUTER': OpenRouterCaptionModel,
 }
 

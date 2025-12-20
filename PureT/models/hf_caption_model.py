@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 from transformers import (
     AutoProcessor,
+    AutoModelForCausalLM,
     AutoModelForVision2Seq,
     BlipForConditionalGeneration,
     BlipProcessor,
@@ -65,11 +66,12 @@ class HFCaptionModel(nn.Module):
         self.local_dir = local_dir or (hf_cfg.LOCAL_DIR if hf_cfg else None)
         self.trust_remote_code = trust_remote_code if trust_remote_code is not None else (hf_cfg.TRUST_REMOTE_CODE if hf_cfg else False)
         self.use_safetensors = use_safetensors if use_safetensors is not None else (hf_cfg.SAFE_SERIALIZATION if hf_cfg else True)
+        self.torch_dtype = self._resolve_torch_dtype(getattr(hf_cfg, "TORCH_DTYPE", "") if hf_cfg else "")
+        self.low_cpu_mem_usage = bool(getattr(hf_cfg, "LOW_CPU_MEM_USAGE", False)) if hf_cfg else False
+        self.prompt_source, self.system_prompt, self.user_prompt, self.placeholder = self._resolve_prompt_settings(hf_cfg)
+        self.use_chat_template = bool(getattr(hf_cfg, "USE_CHAT_TEMPLATE", False)) if hf_cfg else False
         gen_cfg = hf_cfg.GENERATION if hf_cfg and hasattr(hf_cfg, "GENERATION") else None
-        self.generation_kwargs = generation_kwargs or {
-            "max_length": gen_cfg.MAX_LENGTH if gen_cfg else 50,
-            "num_beams": gen_cfg.NUM_BEAMS if gen_cfg else 3,
-        }
+        self.generation_kwargs = generation_kwargs or self._resolve_generation_kwargs(gen_cfg)
         mirror = getattr(hf_cfg, "MIRROR", None) if hf_cfg else None
         mirror = mirror or None
         disable_proxy = bool(getattr(hf_cfg, "DISABLE_PROXY", False)) if hf_cfg else False
@@ -85,6 +87,7 @@ class HFCaptionModel(nn.Module):
             if self._needs_download():
                 self._download_snapshot()
             load_from = self.local_dir if self._local_dir_ready() else self.model_id
+            model_kwargs = self._build_model_kwargs()
 
             # Prefer BLIP-specific classes when the model id looks like BLIP for better compatibility
             if "blip" in self.model_id.lower():
@@ -94,31 +97,24 @@ class HFCaptionModel(nn.Module):
                 try:
                     self.model = BlipForConditionalGeneration.from_pretrained(
                         load_from,
-                        trust_remote_code=self.trust_remote_code,
-                        use_safetensors=self.use_safetensors,
+                        **model_kwargs,
                     )
                 except OSError:
                     self.model = BlipForConditionalGeneration.from_pretrained(
                         load_from,
-                        trust_remote_code=self.trust_remote_code,
-                        use_safetensors=False,
+                        **self._with_unsafe_safetensors(model_kwargs),
                     )
             else:
                 self.processor = AutoProcessor.from_pretrained(
                     load_from, trust_remote_code=self.trust_remote_code
                 )
-                try:
-                    self.model = AutoModelForVision2Seq.from_pretrained(
-                        load_from,
-                        trust_remote_code=self.trust_remote_code,
-                        use_safetensors=self.use_safetensors,
-                    )
-                except OSError:
-                    self.model = AutoModelForVision2Seq.from_pretrained(
-                        load_from,
-                        trust_remote_code=self.trust_remote_code,
-                        use_safetensors=False,
-                    )
+                self.model = self._load_auto_model(load_from, model_kwargs)
+
+        if not self.placeholder:
+            self.placeholder = "this is a dummy caption for an undecodable image"
+        if not self.use_chat_template and (self.system_prompt or self.user_prompt):
+            if hasattr(self.processor, "apply_chat_template"):
+                self.use_chat_template = True
 
         self.model.to(self.device)
         self.model.eval()
@@ -137,6 +133,93 @@ class HFCaptionModel(nn.Module):
                 has_weights = True
                 break
         return has_config and has_weights
+
+    def _resolve_generation_kwargs(self, gen_cfg) -> dict:
+        max_new_tokens = None
+        if gen_cfg and hasattr(gen_cfg, "MAX_NEW_TOKENS"):
+            try:
+                max_new_tokens = int(gen_cfg.MAX_NEW_TOKENS)
+            except Exception:
+                max_new_tokens = None
+        max_length = int(gen_cfg.MAX_LENGTH) if gen_cfg and hasattr(gen_cfg, "MAX_LENGTH") else 50
+        num_beams = int(gen_cfg.NUM_BEAMS) if gen_cfg and hasattr(gen_cfg, "NUM_BEAMS") else 3
+        generation_kwargs = {"num_beams": num_beams}
+        if max_new_tokens is not None and max_new_tokens > 0:
+            generation_kwargs["max_new_tokens"] = max_new_tokens
+        else:
+            generation_kwargs["max_length"] = max_length
+        return generation_kwargs
+
+    def _resolve_prompt_settings(self, hf_cfg) -> Tuple[str, str, str, str]:
+        prompt_source = str(getattr(hf_cfg, "PROMPT_SOURCE", "") or "").strip().lower() if hf_cfg else ""
+        if prompt_source == "openrouter":
+            or_cfg = getattr(cfg.MODEL, "OPENROUTER", None)
+            system_prompt = (or_cfg.SYSTEM_PROMPT if or_cfg else "").strip()
+            user_prompt = (or_cfg.USER_PROMPT if or_cfg else "").strip()
+            placeholder = (or_cfg.PLACEHOLDER if or_cfg else "").strip()
+        else:
+            system_prompt = (hf_cfg.SYSTEM_PROMPT if hf_cfg else "").strip()
+            user_prompt = (hf_cfg.USER_PROMPT if hf_cfg else "").strip()
+            placeholder = (hf_cfg.PLACEHOLDER if hf_cfg else "").strip()
+
+        if not placeholder:
+            placeholder = "this is a dummy caption for an undecodable image"
+
+        if prompt_source == "openrouter" and not user_prompt:
+            user_prompt = (
+                "You are given a possibly corrupted JPEG image. "
+                "If you can decode it, output a short COCO-style caption. "
+                f"If you cannot decode it, output exactly: {placeholder} "
+                "Output only the caption with no extra text."
+            )
+        return prompt_source, system_prompt, user_prompt, placeholder
+
+    def _resolve_torch_dtype(self, dtype_value):
+        if not dtype_value:
+            return None
+        if isinstance(dtype_value, str):
+            lowered = dtype_value.strip().lower()
+            if not lowered:
+                return None
+            if lowered == "auto":
+                return "auto"
+            if lowered in ("float16", "fp16", "half"):
+                return torch.float16
+            if lowered in ("bfloat16", "bf16"):
+                return torch.bfloat16
+            if lowered in ("float32", "fp32"):
+                return torch.float32
+        if isinstance(dtype_value, torch.dtype):
+            return dtype_value
+        return None
+
+    def _build_model_kwargs(self) -> dict:
+        model_kwargs = {
+            "trust_remote_code": self.trust_remote_code,
+            "use_safetensors": self.use_safetensors,
+        }
+        if self.torch_dtype is not None:
+            model_kwargs["torch_dtype"] = self.torch_dtype
+        if self.low_cpu_mem_usage:
+            model_kwargs["low_cpu_mem_usage"] = True
+        return model_kwargs
+
+    def _with_unsafe_safetensors(self, model_kwargs: dict) -> dict:
+        updated = dict(model_kwargs)
+        updated["use_safetensors"] = False
+        return updated
+
+    def _load_auto_model(self, load_from: str, model_kwargs: dict):
+        try:
+            return AutoModelForVision2Seq.from_pretrained(load_from, **model_kwargs)
+        except Exception:
+            try:
+                return AutoModelForVision2Seq.from_pretrained(load_from, **self._with_unsafe_safetensors(model_kwargs))
+            except Exception:
+                try:
+                    return AutoModelForCausalLM.from_pretrained(load_from, **model_kwargs)
+                except Exception:
+                    return AutoModelForCausalLM.from_pretrained(load_from, **self._with_unsafe_safetensors(model_kwargs))
 
     def _needs_download(self) -> bool:
         return bool(self.local_dir) and not self._local_dir_ready()
@@ -177,21 +260,74 @@ class HFCaptionModel(nn.Module):
         original_indices, valid_images = zip(*valid_images_with_indices)
         return list(original_indices), list(valid_images)
 
+    def _compose_prompt_text(self) -> str:
+        if self.system_prompt and self.user_prompt:
+            return f"{self.system_prompt}\n{self.user_prompt}"
+        return self.user_prompt or self.system_prompt or ""
+
+    def _apply_chat_template(self, messages: List[dict]) -> str:
+        if not hasattr(self.processor, "apply_chat_template"):
+            return ""
+        try:
+            return self.processor.apply_chat_template(
+                messages,
+                tokenize=False,
+                add_generation_prompt=True,
+            )
+        except TypeError:
+            return self.processor.apply_chat_template(messages, tokenize=False)
+
+    def _build_chat_messages(self, image) -> List[dict]:
+        messages: List[dict] = []
+        if self.system_prompt:
+            messages.append({"role": "system", "content": self.system_prompt})
+        user_content = []
+        if self.user_prompt:
+            user_content.append({"type": "text", "text": self.user_prompt})
+        user_content.append({"type": "image", "image": image})
+        messages.append({"role": "user", "content": user_content})
+        return messages
+
+    def _prepare_model_inputs(self, images: List) -> dict:
+        if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
+            texts = [self._apply_chat_template(self._build_chat_messages(image)) for image in images]
+            inputs = self.processor(text=texts, images=images, return_tensors="pt")
+        else:
+            prompt_text = self._compose_prompt_text()
+            if prompt_text:
+                texts = [prompt_text for _ in images]
+                inputs = self.processor(text=texts, images=images, return_tensors="pt")
+            else:
+                inputs = self.processor(images=images, return_tensors="pt")
+        return inputs.to(self.device)
+
+    def _trim_generated_ids(self, generated_ids: torch.Tensor, inputs: dict) -> torch.Tensor:
+        if getattr(self.model.config, "is_encoder_decoder", False):
+            return generated_ids
+        input_ids = inputs.get("input_ids") if hasattr(inputs, "get") else None
+        if input_ids is None:
+            return generated_ids
+        prompt_len = input_ids.shape[1]
+        if generated_ids.shape[1] <= prompt_len:
+            return generated_ids
+        return generated_ids[:, prompt_len:]
+
     def decode_beam(self, **kwargs):
         images = kwargs[cfg.PARAM.ATT_FEATS]
         beam_size = kwargs.get("BEAM_SIZE", self.generation_kwargs.get("num_beams", 3))
 
         original_indices, valid_images = self._prepare_inputs(images)
-        dummy_caption = "this is a dummy caption for an undecodable image"
+        dummy_caption = self.placeholder
 
         if not valid_images:
             return [dummy_caption for _ in range(len(images))], None
 
-        inputs = self.processor(images=valid_images, return_tensors="pt").to(self.device)
+        inputs = self._prepare_model_inputs(valid_images)
         gen_kwargs = dict(self.generation_kwargs)
         gen_kwargs["num_beams"] = beam_size
 
         generated_ids = self.model.generate(**inputs, **gen_kwargs)
+        generated_ids = self._trim_generated_ids(generated_ids, inputs)
         generated_captions = self.processor.batch_decode(generated_ids, skip_special_tokens=True)
 
         final_captions = [dummy_caption for _ in range(len(images))]

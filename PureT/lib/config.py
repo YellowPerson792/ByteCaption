@@ -235,8 +235,16 @@ __C.MODEL.HF.TRUST_REMOTE_CODE = False
 __C.MODEL.HF.MIRROR = ''  # Optional HF mirror endpoint, e.g. https://hf-mirror.com
 __C.MODEL.HF.DISABLE_PROXY = False  # Disable HTTP(S) proxy during HF downloads
 __C.MODEL.HF.ALLOW_UNSAFE_TORCH_LOAD = False  # Allow .bin loading with torch<2.6 (security risk)
+__C.MODEL.HF.TORCH_DTYPE = ''  # '', 'auto', 'float16', 'bfloat16'
+__C.MODEL.HF.LOW_CPU_MEM_USAGE = False
+__C.MODEL.HF.PROMPT_SOURCE = ''  # '', 'openrouter', 'hf'
+__C.MODEL.HF.SYSTEM_PROMPT = ''
+__C.MODEL.HF.USER_PROMPT = ''
+__C.MODEL.HF.PLACEHOLDER = 'this is a dummy caption for an undecodable image'
+__C.MODEL.HF.USE_CHAT_TEMPLATE = False
 __C.MODEL.HF.GENERATION = edict()
 __C.MODEL.HF.GENERATION.MAX_LENGTH = 50
+__C.MODEL.HF.GENERATION.MAX_NEW_TOKENS = -1
 __C.MODEL.HF.GENERATION.NUM_BEAMS = 3
 
 # OpenRouter vision captioning options (API-based models)

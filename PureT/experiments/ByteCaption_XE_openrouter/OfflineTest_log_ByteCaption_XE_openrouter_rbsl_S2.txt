@@ -1,0 +1,3 @@
+[INFO: 2025-12-20 23:25:39,629] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 23:25:40,663] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[ERROR: 2025-12-20 23:27:04,269] OpenRouter API error choice_error: {"error": {"message": "Network connection lost.", "code": 502, "metadata": {"provider_name": "OpenAI"}}}

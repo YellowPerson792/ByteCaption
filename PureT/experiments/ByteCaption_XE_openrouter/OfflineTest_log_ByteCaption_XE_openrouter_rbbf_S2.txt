@@ -1,3 +1,9 @@
 [INFO: 2025-12-20 12:18:48,348] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
 [INFO: 2025-12-20 18:27:44,014] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
 [ERROR: 2025-12-20 18:27:45,038] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 22:31:06,810] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 22:31:07,904] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 22:57:50,489] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 22:57:51,501] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[ERROR: 2025-12-20 23:01:45,617] OpenRouter API error 500: {"error": {"message": "Internal Server Error", "code": 500}}
+[ERROR: 2025-12-20 23:04:10,272] OpenRouter API error 502: {"error": {"message": "Provider returned error", "code": 502, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The server had an error processing your request. Sorry about that! You can retr

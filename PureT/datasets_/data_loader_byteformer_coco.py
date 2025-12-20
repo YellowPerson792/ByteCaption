@@ -455,7 +455,7 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
     force_openrouter = _os.getenv("FORCE_OPENROUTER", "").lower() in ("1", "true", "yes")
     model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
     is_openrouter = "openrouter" in model_type or model_type.startswith("gpt") or "gpt" in model_type
-    is_hf = model_type.startswith("hf") or "blip" in model_type or "git" in model_type
+    is_hf = model_type.startswith("hf") or "blip" in model_type or "git" in model_type or "qwen" in model_type
     # 调试：显示当前模型类型
     print(f"[数据加载器] cfg.MODEL.TYPE = {cfg.MODEL.TYPE}")
     if force_openrouter or is_openrouter:

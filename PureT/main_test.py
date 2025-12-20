@@ -37,7 +37,7 @@ except ImportError:
 """
 Example:
 python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 120 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE --test_samples 5 --resume -1 --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 5 --resume -1 --disable_wandb
 """
 
 def _project_root() -> str:
@@ -248,6 +248,7 @@ class Tester(object):
             model_type.startswith("hf")
             or "blip" in model_type
             or "git" in model_type
+            or "qwen" in model_type
             or "openrouter" in model_type
             or model_type.startswith("gpt")
             or "gpt" in model_type
@@ -504,6 +505,9 @@ if __name__ == '__main__':
             if "git" in args.folder.lower() or os.getenv("FORCE_GIT", "").lower() in ("1", "true", "yes"):
                 cfg.MODEL.TYPE = "GIT"
                 print(f"[CONFIG] FORCE_GIT active or folder contains 'git'; cfg.MODEL.TYPE set to GIT")
+            if "qwen" in args.folder.lower() or os.getenv("FORCE_QWEN", "").lower() in ("1", "true", "yes"):
+                cfg.MODEL.TYPE = "QWEN"
+                print(f"[CONFIG] FORCE_QWEN active or folder contains 'qwen'; cfg.MODEL.TYPE set to QWEN")
         else:
             # 若找不到，仍尝试读取 generic config.yml（兼容旧项目）
             alt = os.path.join(args.folder, 'config.yml')
