@@ -411,7 +411,7 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
     import os as _os
     force_blip = _os.getenv("FORCE_BLIP", "").lower() in ("1", "true", "yes")
     model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
-    is_hf = model_type.startswith("hf") or "blip" in model_type
+    is_hf = model_type.startswith("hf") or "blip" in model_type or "git" in model_type
     # 调试：显示当前模型类型
     print(f"[数据加载器] cfg.MODEL.TYPE = {cfg.MODEL.TYPE}")
     if force_blip or is_hf:
@@ -419,7 +419,7 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
             print("[数据加载器] FORCE_BLIP=1 -> overriding cfg.MODEL.TYPE to BLIP for collate/eval.")
             cfg.MODEL.TYPE = "BLIP"
         active_collate_fn = blip_collate_val
-        print(f"[数据加载器] 已配置为 HF/BLIP 评估模式。")
+        print(f"[数据加载器] 已配置为 HF/BLIP/GIT 评估模式。")
     else:
         active_collate_fn = byteformer_collate_val
         print(f"[数据加载器] 已配置为 ByteFormer 评估模式。")

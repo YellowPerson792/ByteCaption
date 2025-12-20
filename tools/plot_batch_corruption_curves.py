@@ -3,8 +3,8 @@ Plot corruption severity curves from batch evaluation JSONs.
 
 Example:
   python tools/plot_batch_corruption_curves.py \
-    --input-dir batch_reports/20251219_222531 \
-    --models ByteCaption_XE ByteCaption_XE_blip \
+    --input-dir batch_reports/20251219_234627 \
+    --models ByteCaption_XE ByteCaption_XE_blip ByteCaption_XE_git \
     --corrupt-types rbbf rbsl \
     --plot-metrics CIDEr Bleu_4 SPICE
 """

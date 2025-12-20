@@ -197,9 +197,9 @@ class Tester(object):
         else:
             self.model = model.to(self.device)
 
-        # 仅在模型不是BLIP时才加载本地检查点。
+        # 仅在模型不是 HF/BLIP/GIT 时才加载本地检查点。
         model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
-        is_hf = model_type.startswith("hf") or "blip" in model_type
+        is_hf = model_type.startswith("hf") or "blip" in model_type or "git" in model_type
         if is_hf:
             self.logger.info(f"{cfg.MODEL.TYPE} model uses HF weights. Skipping local checkpoint loading.")
             return
@@ -423,6 +423,9 @@ if __name__ == '__main__':
             if "blip" in args.folder.lower() or os.getenv("FORCE_BLIP", "").lower() in ("1", "true", "yes"):
                 cfg.MODEL.TYPE = "BLIP"
                 print(f"[CONFIG] FORCE_BLIP active or folder contains 'blip'; cfg.MODEL.TYPE set to BLIP")
+            if "git" in args.folder.lower() or os.getenv("FORCE_GIT", "").lower() in ("1", "true", "yes"):
+                cfg.MODEL.TYPE = "GIT"
+                print(f"[CONFIG] FORCE_GIT active or folder contains 'git'; cfg.MODEL.TYPE set to GIT")
         else:
             # 若找不到，仍尝试读取 generic config.yml（兼容旧项目）
             alt = os.path.join(args.folder, 'config.yml')

@@ -13,6 +13,8 @@ __factory = {
     'BLIP': HFCaptionModel,
     'HF_BLIP': HFCaptionModel,
     'HF': HFCaptionModel,
+    'GIT': HFCaptionModel,
+    'HF_GIT': HFCaptionModel,
 }
 
 def names():

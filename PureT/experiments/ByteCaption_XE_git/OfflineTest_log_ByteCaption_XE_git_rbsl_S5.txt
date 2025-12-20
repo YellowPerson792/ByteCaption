@@ -1,0 +1,1 @@
+[INFO: 2025-12-20 00:02:12,959] GIT model uses HF weights. Skipping local checkpoint loading.
