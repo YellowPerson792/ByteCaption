@@ -1,29 +1,5 @@
 [INFO: 2025-12-20 12:18:55,271] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
-[INFO: 2025-12-21 14:09:08,440] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
-[ERROR: 2025-12-21 14:09:11,623] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Unable to process input image. Please retry or report in ht
-[ERROR: 2025-12-21 14:13:02,668] OpenRouter API error api_error: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Unable to process input image. Please retry or report in ht
-[WARNING: 2025-12-21 14:19:58,243] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:22:33,832] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:22:51,337] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:23:17,869] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:23:42,177] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:23:42,396] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:23:43,707] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:24:09,960] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:24:09,981] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:24:19,418] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:24:26,303] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:24:27,385] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:25:22,457] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:26:00,079] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:26:00,579] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:26:01,107] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:26:08,458] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:26:54,968] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:27:03,145] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:27:10,501] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:27:10,637] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:27:12,494] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:27:21,403] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:27:28,839] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
-[WARNING: 2025-12-21 14:27:39,021] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[INFO: 2025-12-20 22:31:19,561] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 22:31:20,525] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-20 23:04:58,660] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-20 23:04:59,655] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your

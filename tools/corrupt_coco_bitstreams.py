@@ -8,7 +8,7 @@ Quick run examples (from repo root, with venv python):
       --config PureT/experiments/ByteCaption_XE/config_coco.yml \
       --images-per-cat 10 --max-images 200 \
       --severity-levels S1 S2 S3 S4 S5 \
-      --corrupt-types rbbf rbsl metadata_loss \
+      --corrupt-types rbbf rbsl \
       --mode sequential \
       --output-dir ./evaluation_samples/bitstream_corruption_test
 """

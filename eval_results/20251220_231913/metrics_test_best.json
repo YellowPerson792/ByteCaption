@@ -1,0 +1,67 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_openrouter",
+  "model_name": "ByteCaption_XE_openrouter",
+  "model_type": "OPENROUTER",
+  "corrupt_type": [
+    "rbbf"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "bit_error_rate": 0.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.5756303121699101,
+    "Bleu_2": 0.35485973136900995,
+    "Bleu_3": 0.20793135580238162,
+    "Bleu_4": 0.11330408842133559,
+    "ROUGE_L": 0.39931142881479076,
+    "CIDEr": 0.8000918793791291,
+    "METEOR": 0.21972053302561767,
+    "SPICE": 0.18205959207499328,
+    "XE_Loss": null,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 120,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "Curly dog curled up on crowded shoe rack",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "Silhouetted city street with distant tower at sunset",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "Old toilet with open lid in decaying bathroom",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "Cozy living room with sofas, cushions, and coffee table",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "Sandwich baskets on outdoor cafe table in sunlight",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20251220_231913",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20251220_231913/captions_test_best.json",
+  "captions_count": 120
+}
