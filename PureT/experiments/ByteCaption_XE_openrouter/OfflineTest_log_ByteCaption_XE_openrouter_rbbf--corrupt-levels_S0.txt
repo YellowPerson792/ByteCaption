@@ -1,0 +1,62 @@
+[INFO: 2025-12-23 15:43:04,760] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-23 15:43:07,512] OpenRouter API error 429: {"error": {"message": "Provider returned error", "code": 429, "metadata": {"raw": "opengvlab/internvl3-78b is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate
+[WARNING: 2025-12-23 15:43:16,119] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:16,386] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:16,607] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:16,788] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:16,809] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:16,840] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:16,881] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,016] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,022] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-23 15:43:17,164] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-23 15:43:17,242] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,281] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,296] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
+[WARNING: 2025-12-23 15:43:17,315] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,401] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,415] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,436] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,454] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,600] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,629] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,630] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,720] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,740] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,753] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,796] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,831] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,844] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,904] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,922] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,943] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,944] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,953] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:17,979] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,170] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,318] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,351] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,371] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,404] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,468] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,562] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,563] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,692] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,817] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:18,995] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:19,127] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:19,236] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:19,526] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:19,552] OpenRouter request failed after retries: HTTP 429
+[WARNING: 2025-12-23 15:43:19,606] OpenRouter request failed after retries: HTTP 429
+[INFO: 2025-12-23 15:52:01,939] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-23 15:52:09,101] OpenRouter API error 429: {"error": {"message": "Provider returned error", "code": 429, "metadata": {"raw": "opengvlab/internvl3-78b is temporarily rate-limited upstream. Please retry shortly, or add your own key to accumulate
+[INFO: 2025-12-23 15:53:09,540] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-23 15:53:11,191] OpenRouter API error truncated_output: {"finish_reason": "length", "native_finish_reason": "length", "max_tokens": 32}
+[ERROR: 2025-12-23 15:53:51,705] OpenRouter API error missing_choices: 
+         
+{"id":"gen-1766476435-2RJSuChQXl1ZMgiJpCb6","provider":"Z.AI","model":"z-ai/glm-4.6v","object":"chat.completion","created":1766476435,"choices":[{"logprobs":null,"finish_reason":"stop","native_finish_reason":"sensitive","index":0,"message":{"role":"assistant","content":"","refusal":null,"reasoning":null}}],"usage":{"prompt_tokens":1494,"completion_tokens":0,"total_tokens":1494,"cost":0.000443718,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":null,"upstream_inference_prompt_cost":0.0004482,"upstream_inference_completions_cost":0},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0}}}
+[INFO: 2025-12-23 15:56:18,084] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-23 15:56:46,280] OpenRouter API error choice_error: {"error": {"message": "Network connection lost.", "code": 502, "metadata": {"provider_name": "OpenAI"}}}
+[INFO: 2025-12-23 16:16:17,004] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[INFO: 2025-12-23 16:20:12,181] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
