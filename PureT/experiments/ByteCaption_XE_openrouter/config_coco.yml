@@ -10,7 +10,7 @@ TRAIN:
 
 ############################ TEST ############################
 TEST:
-  BATCH_SIZE: 60
+  BATCH_SIZE: 20
 
 ############################ DATA_LOADER ############################
 DATA_LOADER:
@@ -41,11 +41,10 @@ MODEL:
   TYPE: 'OPENROUTER'
   OPENROUTER:
     # MODEL_ID: 'google/gemini-2.5-flash'
-    MODEL_ID: 'openai/gpt-5.1'
+    # MODEL_ID: 'openai/gpt-5.1'
     # MODEL_ID: 'qwen/qwen3-vl-32b-instruct'
-    # MODEL_ID: 'x-ai/grok-4'
+    MODEL_ID: 'x-ai/grok-4'
     # MODEL_ID: 'mistralai/mistral-large-2512'
-    # MODEL_ID: 'qwen/qwen-2.5-vl-7b-instruct:free'
     API_BASE: 'https://openrouter.ai/api/v1/chat/completions'
     API_KEY: ''
     API_KEY_PATH: 'openrouter_api'
