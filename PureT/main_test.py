@@ -37,7 +37,7 @@ except ImportError:
 """
 Example:
 python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 120 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_qwen --test_samples 200 --resume 0 --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_qwen --test_samples 0 --resume -1 --disable_wandb
 """
 
 def _project_root() -> str:
@@ -245,6 +245,8 @@ class Tester(object):
             or "blip" in model_type
             or "git" in model_type
             or "qwen" in model_type
+            or "mistral" in model_type
+            or "ministral" in model_type
             or "openrouter" in model_type
             or model_type.startswith("gpt")
             or "gpt" in model_type
