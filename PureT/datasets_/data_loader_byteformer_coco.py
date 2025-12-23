@@ -356,6 +356,15 @@ def blip_collate_val(batch: Sequence[Tuple[Any, ...]]):
     return expanded_indices, expanded_gv_feat, blip_image_tensors, None
 
 
+def hf_collate_val(batch: Sequence[Tuple[Any, ...]]):
+    """Validation collate for HF caption models on clean images (no byte corruption)."""
+    indices, gv_feat, att_feats = zip(*batch)
+    indices = np.stack(indices, axis=0).reshape(-1)
+    gv_feat = torch.cat([torch.from_numpy(b) for b in gv_feat], 0)
+    images = list(att_feats)
+    return indices, gv_feat, images, None
+
+
 def openrouter_collate_val(batch: Sequence[Tuple[Any, ...]]):
     """
     Validation collate for OpenRouter API models.
@@ -418,7 +427,16 @@ def load_train(distributed: bool, epoch: int, coco_set: CocoDataset):
     if sys.platform.startswith("win"):
         num_workers = 0
     num_workers = max(0, int(num_workers))
-    persistent_workers = num_workers > 0 and not sys.platform.startswith("win")
+    persistent_workers = (
+        bool(getattr(cfg.DATA_LOADER, "PERSISTENT_WORKERS", True))
+        and num_workers > 0
+        and not sys.platform.startswith("win")
+    )
+    pin_memory = bool(getattr(cfg.DATA_LOADER, "PIN_MEMORY", False)) and torch.cuda.is_available()
+    prefetch_factor = int(getattr(cfg.DATA_LOADER, "PREFETCH_FACTOR", 2))
+    loader_kwargs = {}
+    if num_workers > 0:
+        loader_kwargs["prefetch_factor"] = max(1, prefetch_factor)
 
     sampler = distributed_samplers.DistributedSampler(coco_set, epoch=epoch) if distributed else None
     shuffle = cfg.DATA_LOADER.SHUFFLE if sampler is None else False
@@ -428,17 +446,29 @@ def load_train(distributed: bool, epoch: int, coco_set: CocoDataset):
         shuffle=shuffle,
         sampler=sampler,
         num_workers=num_workers,
-        pin_memory=True if torch.cuda.is_available() else False,
+        pin_memory=pin_memory,
         persistent_workers=persistent_workers,
         collate_fn=byteformer_collate,
         worker_init_fn=_worker_init_fn,
         drop_last=False,
+        **loader_kwargs,
     )
     return loader
 
 def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_samples: int = 200, eval_mode='byteformer'):  # noqa: D401
     """构建验证 DataLoader（进入数据集 validation 模式）。"""
     _apply_corruption_cfg_overrides()
+    import os as _os
+    force_blip = _os.getenv("FORCE_BLIP", "").lower() in ("1", "true", "yes")
+    force_openrouter = _os.getenv("FORCE_OPENROUTER", "").lower() in ("1", "true", "yes")
+    model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
+    is_openrouter = "openrouter" in model_type or model_type.startswith("gpt") or "gpt" in model_type
+    is_hf = model_type.startswith("hf") or "blip" in model_type or "git" in model_type or "qwen" in model_type
+    use_clean_hf = is_hf and not force_blip and not force_openrouter
+    level = str(getattr(cfg.CORRUPTION, "BYTE_STREAM_LEVEL", "S0")).upper()
+    if level not in {"S0", "M0"}:
+        use_clean_hf = False
+
     coco_set = CocoDataset(
         image_ids_path=image_ids_path,
         input_seq=None,  # None 触发 validation mode
@@ -447,15 +477,10 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
         seq_per_img=1,
         max_feat_num=cfg.DATA_LOADER.MAX_FEAT,
         max_samples=max_samples,
+        return_pil=use_clean_hf,
     )
 
     # 加一个选择，先这样加，之后再说
-    import os as _os
-    force_blip = _os.getenv("FORCE_BLIP", "").lower() in ("1", "true", "yes")
-    force_openrouter = _os.getenv("FORCE_OPENROUTER", "").lower() in ("1", "true", "yes")
-    model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
-    is_openrouter = "openrouter" in model_type or model_type.startswith("gpt") or "gpt" in model_type
-    is_hf = model_type.startswith("hf") or "blip" in model_type or "git" in model_type or "qwen" in model_type
     # 调试：显示当前模型类型
     print(f"[数据加载器] cfg.MODEL.TYPE = {cfg.MODEL.TYPE}")
     if force_openrouter or is_openrouter:
@@ -464,6 +489,9 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
             print("[data_loader] FORCE_OPENROUTER=1 -> overriding cfg.MODEL.TYPE to OPENROUTER.")
         active_collate_fn = openrouter_collate_val
         print("[data_loader] OpenRouter API evaluation mode enabled.")
+    elif use_clean_hf:
+        active_collate_fn = hf_collate_val
+        print("[数据加载器] 已配置为 HF 评估模式 (clean images).")
     elif force_blip or is_hf:
         if force_blip and "blip" not in model_type:
             print("[数据加载器] FORCE_BLIP=1 -> overriding cfg.MODEL.TYPE to BLIP for collate/eval.")
@@ -479,17 +507,27 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
     if sys.platform.startswith("win"):
         num_workers = 0
     num_workers = max(0, int(num_workers))
-    persistent_workers = num_workers > 0 and not sys.platform.startswith("win")
+    persistent_workers = (
+        bool(getattr(cfg.DATA_LOADER, "PERSISTENT_WORKERS", True))
+        and num_workers > 0
+        and not sys.platform.startswith("win")
+    )
+    pin_memory = bool(getattr(cfg.DATA_LOADER, "PIN_MEMORY", False)) and torch.cuda.is_available()
+    prefetch_factor = int(getattr(cfg.DATA_LOADER, "PREFETCH_FACTOR", 2))
+    loader_kwargs = {}
+    if num_workers > 0:
+        loader_kwargs["prefetch_factor"] = max(1, prefetch_factor)
 
     loader = torch.utils.data.DataLoader(
         coco_set,
         batch_size=cfg.TEST.BATCH_SIZE,
         shuffle=False,
         num_workers=num_workers,
-        pin_memory=True if torch.cuda.is_available() else False,
+        pin_memory=pin_memory,
         persistent_workers=persistent_workers,
         collate_fn=active_collate_fn,
         worker_init_fn=_worker_init_fn,
         drop_last=False,
+        **loader_kwargs,
     )
     return loader

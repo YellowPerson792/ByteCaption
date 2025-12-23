@@ -1,4 +1,5 @@
 import os
+import sys
 import torch
 from torchvision import transforms
 from lib.config import cfg
@@ -81,13 +82,28 @@ def load_train(distributed, epoch, coco_set):
     sampler = samplers.distributed.DistributedSampler(coco_set, epoch=epoch) \
         if distributed else None
     shuffle = cfg.DATA_LOADER.SHUFFLE if sampler is None else False
-    
+
+    num_workers = int(getattr(cfg.DATA_LOADER, "NUM_WORKERS", 0))
+    if sys.platform.startswith("win"):
+        num_workers = 0
+    num_workers = max(0, num_workers)
+    pin_memory = bool(getattr(cfg.DATA_LOADER, "PIN_MEMORY", False)) and torch.cuda.is_available()
+    persistent_workers = bool(getattr(cfg.DATA_LOADER, "PERSISTENT_WORKERS", True)) and num_workers > 0 and not sys.platform.startswith("win")
+    prefetch_factor = int(getattr(cfg.DATA_LOADER, "PREFETCH_FACTOR", 2))
+    loader_kwargs = {}
+    if num_workers > 0:
+        loader_kwargs["prefetch_factor"] = max(1, prefetch_factor)
+
     loader = torch.utils.data.DataLoader(
         coco_set,
         batch_size=cfg.TRAIN.BATCH_SIZE,
         shuffle=shuffle,
         sampler=sampler,
-        collate_fn=sample_collate
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        persistent_workers=persistent_workers,
+        collate_fn=sample_collate,
+        **loader_kwargs,
     )
     return loader
 
@@ -103,10 +119,25 @@ def load_val(image_ids_path, gv_feat_path='', att_feats_folder=None, max_samples
         max_samples=max_samples  # Use dynamic max_samples parameter
     )
 
+    num_workers = int(getattr(cfg.DATA_LOADER, "NUM_WORKERS", 0))
+    if sys.platform.startswith("win"):
+        num_workers = 0
+    num_workers = max(0, num_workers)
+    pin_memory = bool(getattr(cfg.DATA_LOADER, "PIN_MEMORY", False)) and torch.cuda.is_available()
+    persistent_workers = bool(getattr(cfg.DATA_LOADER, "PERSISTENT_WORKERS", True)) and num_workers > 0 and not sys.platform.startswith("win")
+    prefetch_factor = int(getattr(cfg.DATA_LOADER, "PREFETCH_FACTOR", 2))
+    loader_kwargs = {}
+    if num_workers > 0:
+        loader_kwargs["prefetch_factor"] = max(1, prefetch_factor)
+
     loader = torch.utils.data.DataLoader(
         coco_set,
         batch_size=cfg.TEST.BATCH_SIZE,
         shuffle=False,
-        collate_fn=sample_collate_val
+        num_workers=num_workers,
+        pin_memory=pin_memory,
+        persistent_workers=persistent_workers,
+        collate_fn=sample_collate_val,
+        **loader_kwargs,
     )
     return loader

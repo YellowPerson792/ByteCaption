@@ -66,11 +66,15 @@ class CocoDataset(data.Dataset):
         seq_per_img,
         max_feat_num,
         max_samples=None,  # Add parameter to limit dataset size
+        return_captions: bool = False,
+        return_pil: bool = False,
     ):
         # 基础配置保存
         self.max_feat_num: int = max_feat_num
         self.seq_per_img: int = seq_per_img
         self.max_samples: Optional[int] = max_samples 
+        self.return_captions = bool(return_captions)
+        self.return_pil = bool(return_pil)
 
         # Optional global feature dict
         self.gv_feat = (
@@ -118,45 +122,53 @@ class CocoDataset(data.Dataset):
 
         # Optional sequence pkls; if unavailable, auto-build sequences from HF captions
         self.auto_seq: bool = False
-        use_pkls = False
-        if isinstance(input_seq, str) and isinstance(target_seq, str):
-            if os.path.exists(input_seq) and os.path.exists(target_seq):
-                use_pkls = True
-
-        if use_pkls:
-            self.input_seq = pickle.load(open(input_seq, 'rb'), encoding='bytes')
-            self.target_seq = pickle.load(open(target_seq, 'rb'), encoding='bytes')
-            first_key = None
-            if len(self.image_ids) > 0 and self.image_ids[0] in self.input_seq:
-                first_key = self.image_ids[0]
-            elif len(self.input_seq) > 0:
-                first_key = next(iter(self.input_seq.keys()))
-            self.seq_len = int(getattr(cfg.MODEL, 'SEQ_LEN', 17)) if first_key is None else int(self.input_seq[first_key].shape[1])
+        if self.return_captions:
+            # HF caption training path does not need seq/vocab construction
+            self.input_seq = None
+            self.target_seq = None
+            self.seq_len = int(getattr(cfg.MODEL, 'SEQ_LEN', 17))
+            self.auto_seq = False
+            self.is_validation = False
         else:
-            self.is_validation = (input_seq is None and target_seq is None)
-            if not self.is_validation:
-                self.auto_seq = True
-                self.input_seq = None
-                self.target_seq = None
-                self.seq_len = int(getattr(cfg.MODEL, 'SEQ_LEN', 17))
-                self.vocab_path = "./PureT/data/coco/coco_vocabulary.txt"
-                if not os.path.exists(self.vocab_path):
-                    print(f"Building vocabulary file at {self.vocab_path}")
-                    self._build_vocab_file(self.vocab_path, vocab_size=int(getattr(cfg.MODEL, 'VOCAB_SIZE', 9487)))
-                self.vocab = utils.load_vocab(self.vocab_path)
-                self.w2i = {w: i for i, w in enumerate(self.vocab)}
-                print(f"Loaded vocabulary with {len(self.vocab)} words")
+            use_pkls = False
+            if isinstance(input_seq, str) and isinstance(target_seq, str):
+                if os.path.exists(input_seq) and os.path.exists(target_seq):
+                    use_pkls = True
+
+            if use_pkls:
+                self.input_seq = pickle.load(open(input_seq, 'rb'), encoding='bytes')
+                self.target_seq = pickle.load(open(target_seq, 'rb'), encoding='bytes')
+                first_key = None
+                if len(self.image_ids) > 0 and self.image_ids[0] in self.input_seq:
+                    first_key = self.image_ids[0]
+                elif len(self.input_seq) > 0:
+                    first_key = next(iter(self.input_seq.keys()))
+                self.seq_len = int(getattr(cfg.MODEL, 'SEQ_LEN', 17)) if first_key is None else int(self.input_seq[first_key].shape[1])
             else:
-                self.auto_seq = False
-                self.input_seq = None
-                self.target_seq = None
-                self.vocab_path = cfg.INFERENCE.VOCAB
-                if not os.path.exists(self.vocab_path):
-                    print(f"Building vocabulary file for validation at {self.vocab_path}")
-                    self._build_vocab_file(self.vocab_path, vocab_size=int(getattr(cfg.MODEL, 'VOCAB_SIZE', 9487)))
-                self.vocab = utils.load_vocab(self.vocab_path)
-                self.w2i = {w: i for i, w in enumerate(self.vocab)}
-                print(f"Loaded vocabulary for validation with {len(self.vocab)} words")
+                self.is_validation = (input_seq is None and target_seq is None)
+                if not self.is_validation:
+                    self.auto_seq = True
+                    self.input_seq = None
+                    self.target_seq = None
+                    self.seq_len = int(getattr(cfg.MODEL, 'SEQ_LEN', 17))
+                    self.vocab_path = "./PureT/data/coco/coco_vocabulary.txt"
+                    if not os.path.exists(self.vocab_path):
+                        print(f"Building vocabulary file at {self.vocab_path}")
+                        self._build_vocab_file(self.vocab_path, vocab_size=int(getattr(cfg.MODEL, 'VOCAB_SIZE', 9487)))
+                    self.vocab = utils.load_vocab(self.vocab_path)
+                    self.w2i = {w: i for i, w in enumerate(self.vocab)}
+                    print(f"Loaded vocabulary with {len(self.vocab)} words")
+                else:
+                    self.auto_seq = False
+                    self.input_seq = None
+                    self.target_seq = None
+                    self.vocab_path = cfg.INFERENCE.VOCAB
+                    if not os.path.exists(self.vocab_path):
+                        print(f"Building vocabulary file for validation at {self.vocab_path}")
+                        self._build_vocab_file(self.vocab_path, vocab_size=int(getattr(cfg.MODEL, 'VOCAB_SIZE', 9487)))
+                    self.vocab = utils.load_vocab(self.vocab_path)
+                    self.w2i = {w: i for i, w in enumerate(self.vocab)}
+                    print(f"Loaded vocabulary for validation with {len(self.vocab)} words")
 
     def set_seq_per_img(self, seq_per_img: int) -> None:
         """动态调整每图序列数量（兼容旧接口）。"""
@@ -180,12 +192,19 @@ class CocoDataset(data.Dataset):
         img = self._extract_image(sample)
         
         gv_feat = np.zeros((1,), dtype=np.float32)
-        att_feats = pil_to_tensor_transform(img)  # [1, 224, 224]
+        if self.return_pil:
+            att_feats = img
+        else:
+            att_feats = pil_to_tensor_transform(img)  # [1, 224, 224]
         # gv_feat is a placeholder, att_feats is preprocessed image for Swin backbone
 
         if self.max_feat_num > 0 and hasattr(att_feats, 'shape') and len(att_feats.shape) > 0:
             # For image tensors this generally does nothing; kept for API parity
             pass
+
+        if self.return_captions:
+            captions = self._extract_captions_from_sample(sample)
+            return indices, captions, gv_feat, att_feats
 
         # Check if we're in validation mode
         if hasattr(self, 'is_validation') and self.is_validation:

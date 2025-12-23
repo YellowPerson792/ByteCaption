@@ -25,6 +25,7 @@ import models
 # COCO 组件
 from datasets_.coco_dataset_hf import CocoDataset
 from datasets_.data_loader_byteformer_coco import load_train as load_train_coco
+from datasets_.data_loader_hf_caption import load_train as load_train_hf
 from evaluation.evaler_coco import CocoEvaler
 from scorer.coco_scorer import CocoScorer
 
@@ -43,8 +44,8 @@ from lib.config import cfg, cfg_from_file
 
 """
 cd /d/MLLMs/ByteCaption && python PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 100 --dataset coco --freeze_backbone --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main.py --folder PureT/experiments/ByteCaption_XE --dataset coco --eval_steps 1600 --early_stop_patience 4 --val_samples 0 --load_weights --freeze_backbone  --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption torchrun --nproc_per_node=2 --master_port=12355 PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 600 --val_samples 50 --dataset coco --load_weights --freeze_backbone
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main.py --folder PureT/experiments/ByteCaption_XE --dataset coco --eval_steps 300 --early_stop_patience 4 --val_samples 100 --load_weights --freeze_backbone  --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption torchrun --nproc_per_node=2 --master_port=12355 PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 300 --val_samples 50 --dataset coco --load_weights --freeze_backbone
 """
 
 class Trainer(object):
@@ -54,6 +55,11 @@ class Trainer(object):
         
         # 获取数据集选择参数
         self.dataset_type = getattr(args, 'dataset', 'coco').lower()
+        self.best_metric = getattr(args, 'best_metric', 'CIDEr')
+        grad_steps = getattr(args, 'grad_accum_steps', 1)
+        if grad_steps is None:
+            grad_steps = 1
+        self.grad_accum_steps = max(1, int(grad_steps))
         
         # 设置随机数种子
         if cfg.SEED > 0:
@@ -100,7 +106,7 @@ class Trainer(object):
         else:
             self.scorer = Scorer()
 
-        # 初始化早停和最佳分数变量（基于 CIDEr）
+        # 初始化早停和最佳分数变量（基于 best_metric）
         self.best_cider = float('-inf')
         self.best_epoch = -1
         self.best_step = None
@@ -170,7 +176,9 @@ class Trainer(object):
                 gv_feat_path=cfg.DATA_LOADER.TRAIN_GV_FEAT,
                 seq_per_img=cfg.DATA_LOADER.SEQ_PER_IMG,
                 max_feat_num=cfg.DATA_LOADER.MAX_FEAT,
-                max_samples=train_samples
+                max_samples=train_samples,
+                return_captions=self._is_hf_training(),
+                return_pil=self._is_hf_training(),
             )
             self._log(f"Training dataset (COCO): Using {train_samples if train_samples else 'ALL'} samples", prefix="DATASET")
         elif self.dataset_type == 'flickr8k':
@@ -181,7 +189,9 @@ class Trainer(object):
                 gv_feat_path=cfg.DATA_LOADER.TRAIN_GV_FEAT,
                 seq_per_img=cfg.DATA_LOADER.SEQ_PER_IMG,
                 max_feat_num=cfg.DATA_LOADER.MAX_FEAT,
-                max_samples=train_samples
+                max_samples=train_samples,
+                return_captions=self._is_hf_training(),
+                return_pil=self._is_hf_training(),
             )
             self._log(f"Training dataset (Flickr8k): Using {train_samples if train_samples else 'ALL'} samples", prefix="DATASET")
         else:
@@ -193,11 +203,19 @@ class Trainer(object):
     # DataLoader
     def setup_loader(self, epoch):
         if self.dataset_type == 'coco':
-            self.training_loader = load_train_coco(
-                self.distributed, epoch, self.training_dataset)
+            if self._is_hf_training():
+                self.training_loader = load_train_hf(
+                    self.distributed, epoch, self.training_dataset)
+            else:
+                self.training_loader = load_train_coco(
+                    self.distributed, epoch, self.training_dataset)
         elif self.dataset_type == 'flickr8k':
-            self.training_loader = load_train_f8k(
-                self.distributed, epoch, self.training_dataset)
+            if self._is_hf_training():
+                self.training_loader = load_train_hf(
+                    self.distributed, epoch, self.training_dataset)
+            else:
+                self.training_loader = load_train_f8k(
+                    self.distributed, epoch, self.training_dataset)
         else:
             raise ValueError(f"Unsupported dataset type: {self.dataset_type}")
 
@@ -286,6 +304,7 @@ class Trainer(object):
         print(f"  Validation Samples   : {val_samples if val_samples > 0 else 'ALL'}")
         print(f"  Evaluation Schedule  : {'Every ' + str(eval_steps) + ' steps' if eval_steps > 0 else 'Every epoch'}")
         print(f"  Logging Frequency    : Every {log_steps} steps")
+        print(f"  Best Metric          : {self.best_metric}")
         print(f"  Backbone Training    : {'FROZEN' if freeze_backbone else 'TRAINABLE'}")
         print(f"  Wandb Integration    : {'ENABLED' if use_wandb else 'DISABLED'}")
         print(f"  Distributed Training : {'YES' if self.distributed else 'NO'}")
@@ -295,6 +314,8 @@ class Trainer(object):
     def _maybe_disable_slow_metrics(self):
         """Skip slow metrics (METEOR/SPICE) during training-only runs unless explicitly kept."""
         if getattr(self.args, 'keep_full_metrics', False):
+            return
+        if str(self.best_metric).upper() in {"METEOR", "SPICE"}:
             return
         slow_metrics = {'METEOR', 'SPICE'}
         paired = list(zip(list(cfg.SCORER.TYPES), list(cfg.SCORER.WEIGHTS)))
@@ -323,6 +344,45 @@ class Trainer(object):
             self._log("Old result files cleared successfully", prefix="CLEANUP")
         else:
             self._log("No old result files to clear", prefix="CLEANUP")
+
+    def _is_hf_model(self):
+        model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
+        return (
+            model_type.startswith("hf")
+            or "blip" in model_type
+            or "git" in model_type
+            or "qwen" in model_type
+            or "openrouter" in model_type
+            or model_type.startswith("gpt")
+            or "gpt" in model_type
+        )
+
+    def _is_hf_training(self):
+        hf_cfg = getattr(cfg.MODEL, "HF", None)
+        lora_enabled = bool(getattr(getattr(hf_cfg, "LORA", None), "ENABLED", False)) if hf_cfg else False
+        trainable = bool(getattr(hf_cfg, "TRAINABLE", False)) if hf_cfg else False
+        return self._is_hf_model() and (trainable or lora_enabled)
+
+    def _move_to_device(self, obj):
+        if torch.is_tensor(obj):
+            return obj.to(self.device)
+        if isinstance(obj, dict):
+            return {k: self._move_to_device(v) for k, v in obj.items()}
+        if isinstance(obj, (list, tuple)):
+            return type(obj)(self._move_to_device(v) for v in obj)
+        return obj
+
+    def _unwrap_model(self):
+        model = self.model
+        if isinstance(model, (torch.nn.DataParallel, torch.nn.parallel.DistributedDataParallel)):
+            return model.module
+        return model
+
+    def _save_lora_adapter(self, output_dir: str) -> bool:
+        base_model = self._unwrap_model()
+        if hasattr(base_model, "save_lora_adapter"):
+            return base_model.save_lora_adapter(output_dir)
+        return False
 
     def setup_wandb(self):
         """设置wandb日志记录"""
@@ -354,6 +414,7 @@ class Trainer(object):
             'batch_size': cfg.TRAIN.BATCH_SIZE,
             'learning_rate': cfg.SOLVER.BASE_LR,
             'model_type': cfg.MODEL.TYPE,
+            'best_metric': self.best_metric,
         }
         
         # 初始化wandb
@@ -372,9 +433,10 @@ class Trainer(object):
     def setup_network(self):
         # 模型构建
         model = models.create(cfg.MODEL.TYPE)
+        is_hf = self._is_hf_model()
         
         load_weights = getattr(self.args, 'load_weights', False)
-        if load_weights:
+        if load_weights and not is_hf:
             self._log("Loading pretrained weights to backbone...", prefix="MODEL")
             weights = torch.load("byteformer_hf_migration/weights/imagenet_jpeg_q60_k4_w128.pt", map_location='cpu')
             # 加载backbone部分权重
@@ -384,8 +446,9 @@ class Trainer(object):
         
         # 根据启动参数决定是否冻结backbone
         freeze_backbone = getattr(self.args, 'freeze_backbone', False)
-        for _name, _weight in model.backbone.named_parameters():
-            _weight.requires_grad = not freeze_backbone
+        if not is_hf:
+            for _name, _weight in model.backbone.named_parameters():
+                _weight.requires_grad = not freeze_backbone
             
         if self.is_master:
             self._log("Model architecture loaded successfully", prefix="MODEL")
@@ -406,16 +469,17 @@ class Trainer(object):
 
         # 如果resume > 0，则需要导入参数
         # 此处导入参数到CPU上？
-        if self.args.resume > 0:
-            self.model.load_state_dict(
-                torch.load(self.snapshot_path("caption_model", self.args.resume),
+        if not is_hf:
+            if self.args.resume > 0:
+                self.model.load_state_dict(
+                    torch.load(self.snapshot_path("caption_model", self.args.resume),
+                        map_location=lambda storage, loc: storage)
+                )
+            elif self.args.resume == -1:
+                self.model.load_state_dict(
+                    torch.load("/root/autodl-tmp/ByteCaption/PureT/experiments/ByteCaption_XE/byteformer_20k/best_model.pth",
                     map_location=lambda storage, loc: storage)
-            )
-        elif self.args.resume == -1:
-            self.model.load_state_dict(
-                torch.load("/root/autodl-tmp/ByteCaption/PureT/experiments/ByteCaption_XE/byteformer_20k/best_model.pth",
-                map_location=lambda storage, loc: storage)
-            )
+                )
 
         # 判断是否导入epoch
         self.load_epoch = -1
@@ -533,6 +597,11 @@ class Trainer(object):
         if not os.path.exists(snapshot_folder):
             os.mkdir(snapshot_folder)
         improved = False
+        hf_cfg = getattr(cfg.MODEL, "HF", None)
+        lora_cfg = getattr(hf_cfg, "LORA", None) if hf_cfg else None
+        lora_enabled = bool(getattr(lora_cfg, "ENABLED", False)) if lora_cfg else False
+        save_full_model = bool(getattr(lora_cfg, "SAVE_FULL_MODEL", True)) if lora_cfg else True
+        use_lora_adapter = self._is_hf_model() and lora_enabled and not save_full_model
         
         # 保存当前模型（仅在epoch快照时）
         save_snapshot = False
@@ -541,9 +610,12 @@ class Trainer(object):
             is_last_epoch = (epoch + 1) == cfg.SOLVER.MAX_EPOCH
             save_snapshot = is_snapshot_iter or is_last_epoch
             if save_snapshot:
-                current_model_path = self.snapshot_path("caption_model", epoch + 1)
-                torch.save(self.model.state_dict(), current_model_path)
-                self._log(f"Saving snapshot to: {current_model_path}", prefix="CHECKPOINT")
+                if use_lora_adapter:
+                    self._log("Skipping full checkpoint snapshot for LoRA model.", prefix="CHECKPOINT")
+                else:
+                    current_model_path = self.snapshot_path("caption_model", epoch + 1)
+                    torch.save(self.model.state_dict(), current_model_path)
+                    self._log(f"Saving snapshot to: {current_model_path}", prefix="CHECKPOINT")
 
         # 基于指标保存最佳模型（支持step或epoch评估）
         if val_score is not None and val_score > self.best_cider:
@@ -552,8 +624,16 @@ class Trainer(object):
                 self.best_epoch = epoch + 1
             if iteration is not None:
                 self.best_step = iteration
-            best_path = os.path.join(snapshot_folder, "best_model.pth")
-            torch.save(self.model.state_dict(), best_path)
+            if use_lora_adapter:
+                best_path = os.path.join(snapshot_folder, "best_lora")
+                saved = self._save_lora_adapter(best_path)
+                if not saved:
+                    self._log("LoRA adapter save failed; falling back to full checkpoint.", level="WARNING", prefix="CHECKPOINT")
+                    best_path = os.path.join(snapshot_folder, "best_model.pth")
+                    torch.save(self.model.state_dict(), best_path)
+            else:
+                best_path = os.path.join(snapshot_folder, "best_model.pth")
+                torch.save(self.model.state_dict(), best_path)
             improved = True
             if self.is_master:
                 location = f"step {iteration}" if is_step_eval and iteration is not None else f"epoch {epoch + 1}" if epoch is not None else "unknown"
@@ -598,7 +678,7 @@ class Trainer(object):
         self.evals_since_improvement += 1
         if self.is_master and logger is not None:
             logger(
-                f"No CIDEr improvement for {self.evals_since_improvement}/{self.early_stop_patience} evaluations "
+                f"No {self.best_metric} improvement for {self.evals_since_improvement}/{self.early_stop_patience} evaluations "
                 f"(best {self.best_cider:.4f} at {self._best_marker_label()})."
             )
 
@@ -863,38 +943,53 @@ class Trainer(object):
                 running_reward_baseline = .0
                 loss_window = deque(maxlen=log_steps if log_steps > 0 else None)
                 reward_baseline_window = deque(maxlen=log_steps if log_steps > 0 else None)
+                self.optim.zero_grad()
                 # 每一个Epoch内部Iteration迭代 - 不再使用epoch进度条，只更新总进度条
                 for step_idx, (indices, input_seq, target_seq, gv_feat, att_feats, att_mask) in enumerate(self.training_loader):
                     if stop_training:
                         break
                     # data_time.update(time.time() - start)
-                    input_seq = input_seq.to(self.device)
-                    target_seq = target_seq.to(self.device)
-                    gv_feat = gv_feat.to(self.device)
-                    att_feats = att_feats.to(self.device)
+                    input_seq = self._move_to_device(input_seq)
+                    target_seq = self._move_to_device(target_seq)
+                    gv_feat = self._move_to_device(gv_feat)
+                    att_feats = self._move_to_device(att_feats)
                     if att_mask is not None:
-                        att_mask = att_mask.to(self.device)
+                        att_mask = self._move_to_device(att_mask)
 
                     kwargs = self.make_kwargs(indices, input_seq, target_seq, gv_feat, att_feats, att_mask)
                     # 1、计算模型损失（XE训练 或 SCST训练）
                     loss, loss_info = self.forward(kwargs)
-                    # 2、梯度清零（清空过往梯度）
-                    self.optim.zero_grad()
-                    # 3、计算新梯度及梯度裁剪
-                    loss.backward()  # 非混合精度训练
-                    utils.clip_gradient(self.optim.optimizer, self.model,
-                        cfg.SOLVER.GRAD_CLIP_TYPE, cfg.SOLVER.GRAD_CLIP)
-                    # 4、权重更新
-                    self.optim.step() # 非混合精度训练
-                    # 5、（XE）、优化器lr更新（用于XE训练），在SCST时不起作用
-                    self.optim.scheduler_step('Iter')
+                    # 2、梯度累积与反向传播
+                    loss_value = loss.item()
+                    scaled_loss = loss / self.grad_accum_steps
+                    needs_sync = (
+                        self.distributed
+                        and self.grad_accum_steps > 1
+                        and ((step_idx + 1) % self.grad_accum_steps != 0)
+                    )
+                    if needs_sync:
+                        with self.model.no_sync():
+                            scaled_loss.backward()
+                    else:
+                        scaled_loss.backward()
+
+                    update_now = ((step_idx + 1) % self.grad_accum_steps == 0) or (
+                        step_idx + 1 == len(self.training_loader)
+                    )
+                    if update_now:
+                        utils.clip_gradient(
+                            self.optim.optimizer, self.model,
+                            cfg.SOLVER.GRAD_CLIP_TYPE, cfg.SOLVER.GRAD_CLIP
+                        )
+                        self.optim.step()
+                        self.optim.scheduler_step('Iter')
+                        self.optim.zero_grad()
 
                     # batch_time.update(time.time() - start)
                     # start = time.time()
                     # losses.update(loss.item())
                     # self.display(iteration, data_time, batch_time, losses, loss_info)
                     # tqdm 迭代信息更新
-                    loss_value = loss.item()
                     running_loss += loss_value
                     loss_window.append(loss_value)
                     recent_avg_loss = sum(loss_window) / len(loss_window)
@@ -969,13 +1064,13 @@ class Trainer(object):
                         # 可选：基于验证结果进行学习率调度
                         # self.optim.scheduler_step('Epoch', val)
 
-                        cider_score = None
+                        metric_score = None
                         if self.latest_val_res is not None:
-                            cider_score = self.latest_val_res.get('CIDEr')
+                            metric_score = self.latest_val_res.get(self.best_metric)
 
                         improved = None
-                        if cider_score is not None:
-                            improved = self.save_model(epoch, cider_score, is_step_eval=True, iteration=iteration) or False
+                        if metric_score is not None:
+                            improved = self.save_model(epoch, metric_score, is_step_eval=True, iteration=iteration) or False
 
                         stop_trigger = self._update_patience(improved, overall_pbar.write if self.is_master else None, context_label=f"step {iteration}")
 
@@ -997,14 +1092,14 @@ class Trainer(object):
                 val = self.eval(epoch)
                 print("一轮结束后的val", val)
 
-                cider_score = None
+                metric_score = None
                 if self.latest_val_res is not None:
-                    cider_score = self.latest_val_res.get('CIDEr')
+                    metric_score = self.latest_val_res.get(self.best_metric)
 
-                # 每一个Epoch结束保存模型（基于 CIDEr 最佳）
+                # 每一个Epoch结束保存模型（基于 best_metric 最佳）
                 improved = None
-                if cider_score is not None:
-                    improved = self.save_model(epoch, cider_score) or False
+                if metric_score is not None:
+                    improved = self.save_model(epoch, metric_score) or False
                 # 模型验证测试，返回的val仅用于SCST训练过程
                 # 如果使用基于步数的评估，可以跳过epoch评估或减少频率
                 # if eval_steps == 0:  # 只有在不使用步数评估时才进行epoch评估
@@ -1019,7 +1114,7 @@ class Trainer(object):
                 self.optim.scheduler_step('Epoch', val)
                 self.scheduled_sampling(epoch)
                 
-                # 早停检查（基于验证集 CIDEr）
+                # 早停检查（基于验证集 best_metric）
                 stop_trigger = self._update_patience(improved, overall_pbar.write if self.is_master else None, context_label=f"epoch {epoch + 1}")
 
                 if self.distributed:
@@ -1063,6 +1158,10 @@ def parse_args():
                         help='Path to pretrained weights file (.pth) to load')
     parser.add_argument("--keep_full_metrics", action='store_true',
                         help='Do not strip slow metrics (METEOR/SPICE) during training evaluations')
+    parser.add_argument("--best_metric", type=str, default="CIDEr",
+                        help="Metric name to select best checkpoint (e.g., SPICE, CIDEr)")
+    parser.add_argument("--grad_accum_steps", type=int, default=1,
+                        help="Gradient accumulation steps (effective batch = batch_size * grad_accum_steps)")
     parser.add_argument("--wandb_project", type=str, default="ByteCaption",
                         help='Wandb project name')
     parser.add_argument("--wandb_name", type=str, default=None,

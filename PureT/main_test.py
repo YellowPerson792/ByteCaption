@@ -37,7 +37,7 @@ except ImportError:
 """
 Example:
 python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 120 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 5 --resume -1 --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_qwen --test_samples 200 --resume 0 --disable_wandb
 """
 
 def _project_root() -> str:
@@ -124,13 +124,9 @@ class Tester(object):
         # Force safe DataLoader defaults for offline evaluation to avoid process hang on exit.
         # (Common culprit: multi-worker DataLoader + persistent workers.)
         if hasattr(args, "num_workers") and args.num_workers is not None:
-            cfg.DATA_LOADER.NUM_WORKERS = int(args.num_workers)
-        else:
-            cfg.DATA_LOADER.NUM_WORKERS = 0
+            cfg.DATA_LOADER.NUM_WORKERS = max(0, int(args.num_workers))
         if hasattr(args, "pin_memory") and args.pin_memory is not None:
             cfg.DATA_LOADER.PIN_MEMORY = bool(args.pin_memory)
-        else:
-            cfg.DATA_LOADER.PIN_MEMORY = bool(torch.cuda.is_available())
 
         self._print_eval_summary(args)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -254,7 +250,25 @@ class Tester(object):
             or "gpt" in model_type
         )
         if is_hf:
-            self.logger.info(f"{cfg.MODEL.TYPE} model uses HF weights. Skipping local checkpoint loading.")
+            adapter_dir = None
+            if self.args.resume == -1:
+                candidate = os.path.join(cfg.ROOT_DIR, "snapshot", "best_lora")
+                if os.path.isdir(candidate):
+                    adapter_dir = candidate
+            elif self.args.resume > 0:
+                candidate = os.path.join(cfg.ROOT_DIR, "snapshot", f"lora_{self.args.resume}")
+                if os.path.isdir(candidate):
+                    adapter_dir = candidate
+
+            if adapter_dir is not None:
+                base_model = self.model.module if hasattr(self.model, "module") else self.model
+                if hasattr(base_model, "load_lora_adapter"):
+                    if base_model.load_lora_adapter(adapter_dir):
+                        self.logger.info(f"Loaded LoRA adapter from {adapter_dir}")
+                    else:
+                        self.logger.info(f"Failed to load LoRA adapter from {adapter_dir}")
+            else:
+                self.logger.info(f"{cfg.MODEL.TYPE} model uses HF weights. Skipping local checkpoint loading.")
             return
 
         if self.args.resume > 0:
@@ -433,12 +447,12 @@ def parse_args():
     parser.add_argument("--wandb_name", type=str, default=None, help="A specific name for the wandb run.")
     parser.add_argument("--disable_wandb", action="store_true", help="Disable wandb logging.")
 
-    # DataLoader stability options (evaluation default: single-process).
+    # DataLoader options for evaluation (defaults to config values).
     parser.add_argument(
         "--num_workers",
         type=int,
-        default=0,
-        help="DataLoader workers for evaluation (default: 0 to avoid exit hangs).",
+        default=None,
+        help="DataLoader workers for evaluation (default: use config).",
     )
     parser.add_argument(
         "--pin_memory",

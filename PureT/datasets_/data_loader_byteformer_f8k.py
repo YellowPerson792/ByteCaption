@@ -133,7 +133,16 @@ def load_train(distributed, epoch, flickr_set):
     if sys.platform.startswith("win"):
         num_workers = 0
     num_workers = max(0, int(num_workers))
-    persistent_workers = num_workers > 0 and not sys.platform.startswith("win")
+    persistent_workers = (
+        bool(getattr(cfg.DATA_LOADER, "PERSISTENT_WORKERS", True))
+        and num_workers > 0
+        and not sys.platform.startswith("win")
+    )
+    pin_memory = bool(getattr(cfg.DATA_LOADER, "PIN_MEMORY", False)) and torch.cuda.is_available()
+    prefetch_factor = int(getattr(cfg.DATA_LOADER, "PREFETCH_FACTOR", 2))
+    loader_kwargs = {}
+    if num_workers > 0:
+        loader_kwargs["prefetch_factor"] = max(1, prefetch_factor)
 
     loader = torch.utils.data.DataLoader(
         flickr_set,
@@ -142,9 +151,10 @@ def load_train(distributed, epoch, flickr_set):
         sampler=sampler,
         num_workers=num_workers,
         collate_fn=byteformer_collate,
-        pin_memory=True,
+        pin_memory=pin_memory,
         persistent_workers=persistent_workers,
         worker_init_fn=_worker_init_fn,
+        **loader_kwargs,
     )
     return loader
 
@@ -165,7 +175,16 @@ def load_val(image_ids_path, gv_feat_path='', att_feats_folder=None, max_samples
     if sys.platform.startswith("win"):
         num_workers = 0
     num_workers = max(0, int(num_workers))
-    persistent_workers = num_workers > 0 and not sys.platform.startswith("win")
+    persistent_workers = (
+        bool(getattr(cfg.DATA_LOADER, "PERSISTENT_WORKERS", True))
+        and num_workers > 0
+        and not sys.platform.startswith("win")
+    )
+    pin_memory = bool(getattr(cfg.DATA_LOADER, "PIN_MEMORY", False)) and torch.cuda.is_available()
+    prefetch_factor = int(getattr(cfg.DATA_LOADER, "PREFETCH_FACTOR", 2))
+    loader_kwargs = {}
+    if num_workers > 0:
+        loader_kwargs["prefetch_factor"] = max(1, prefetch_factor)
 
     loader = torch.utils.data.DataLoader(
         flickr_set,
@@ -173,8 +192,9 @@ def load_val(image_ids_path, gv_feat_path='', att_feats_folder=None, max_samples
         shuffle=False,
         num_workers=num_workers,
         collate_fn=byteformer_collate_val,
-        pin_memory=True,
+        pin_memory=pin_memory,
         persistent_workers=persistent_workers,
         worker_init_fn=_worker_init_fn,
+        **loader_kwargs,
     )
     return loader
