@@ -1,2 +1,4 @@
 [INFO: 2025-12-20 23:38:34,927] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
 [ERROR: 2025-12-20 23:38:54,475] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-23 23:51:28,757] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-23 23:51:55,012] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Could not process image\"},\"request_
