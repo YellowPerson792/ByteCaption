@@ -234,7 +234,10 @@ class Tester(object):
     def setup_network(self):
         model = models.create(cfg.MODEL.TYPE)
         if torch.cuda.is_available():
-            self.model = torch.nn.DataParallel(model).cuda()
+            if not self.distributed and torch.cuda.device_count() > 1:
+                self.model = torch.nn.DataParallel(model).cuda()
+            else:
+                self.model = model.to(self.device)
         else:
             self.model = model.to(self.device)
 
