@@ -60,6 +60,35 @@ try:
     from transformers import Qwen3VLForConditionalGeneration  # type: ignore
 except Exception:  # pragma: no cover - optional import
     Qwen3VLForConditionalGeneration = None
+try:
+    from transformers import Mistral3Config, Mistral3ForConditionalGeneration  # type: ignore
+except Exception:  # pragma: no cover - optional import
+    Mistral3Config = None
+    Mistral3ForConditionalGeneration = None
+try:
+    from transformers import Ministral3Config, Ministral3ForCausalLM  # type: ignore
+except Exception:  # pragma: no cover - optional import
+    Ministral3Config = None
+    Ministral3ForCausalLM = None
+
+
+def _patch_autocast_enabled():
+    original = torch.is_autocast_enabled
+    try:
+        original("cuda")
+        return
+    except TypeError:
+        pass
+    except Exception:
+        return
+
+    def _wrapper(device_type=None):
+        return original()
+
+    torch.is_autocast_enabled = _wrapper
+
+
+_patch_autocast_enabled()
 
 
 def parse_args():
@@ -336,7 +365,28 @@ def _from_pretrained_with_attn_fallback(model_cls, load_from: str, model_kwargs:
         raise
 
 
-def _is_text_only_model(model_id: str) -> bool:
+def _is_text_only_model(model_id: str, local_dir: Optional[str] = None, trust_remote_code: bool = False) -> bool:
+    local_exists = bool(local_dir and os.path.isdir(local_dir))
+    load_from = local_dir if local_exists else model_id
+    config = None
+    if load_from:
+        try:
+            config = AutoConfig.from_pretrained(
+                load_from,
+                trust_remote_code=trust_remote_code,
+                local_files_only=local_exists,
+            )
+        except Exception:
+            config = None
+
+    if config is not None:
+        if getattr(config, "vision_config", None) is not None:
+            return False
+        if getattr(config, "image_token_index", None) is not None:
+            return False
+        if Mistral3Config is not None and isinstance(config, Mistral3Config):
+            return False
+
     lowered = str(model_id or "").lower()
     return "mistral" in lowered or "ministral" in lowered
 
@@ -481,23 +531,65 @@ def _load_text_tokenizer(load_from: str, trust_remote_code: bool):
         return _TekkenTokenizerWrapper(tokenizer, model_dir=load_from)
 
 
+def _maybe_disable_fp8_quantization(config) -> bool:
+    if not hasattr(config, "quantization_config"):
+        return False
+    quant_cfg = getattr(config, "quantization_config", None)
+    if not quant_cfg:
+        return False
+    if isinstance(quant_cfg, dict):
+        quant_method = quant_cfg.get("quant_method", "")
+    else:
+        quant_method = getattr(quant_cfg, "quant_method", "")
+    if "fp8" not in str(quant_method).lower():
+        return False
+    try:
+        delattr(config, "quantization_config")
+    except Exception:
+        config.quantization_config = {"quant_method": "none"}
+    return True
+
+
+def _resolve_text_model_cls(load_from: str, trust_remote_code: bool):
+    try:
+        config = AutoConfig.from_pretrained(load_from, trust_remote_code=trust_remote_code)
+    except Exception:
+        return AutoModelForCausalLM, None
+
+    if sys.version_info >= (3, 12):
+        if _maybe_disable_fp8_quantization(config):
+            print("[HF] Disabling FP8 quantization for Python 3.12 compatibility.")
+
+    if Mistral3Config is not None and isinstance(config, Mistral3Config):
+        if Mistral3ForConditionalGeneration is not None:
+            print("[HF] Using Mistral3ForConditionalGeneration for Mistral3 config.")
+            return Mistral3ForConditionalGeneration, config
+    if Ministral3Config is not None and isinstance(config, Ministral3Config):
+        if Ministral3ForCausalLM is not None:
+            print("[HF] Using Ministral3ForCausalLM for Ministral3 config.")
+            return Ministral3ForCausalLM, config
+
+    return AutoModelForCausalLM, config
+
+
 def _load_model_and_processor(hf_cfg, text_only: bool = False):
     model_id = getattr(hf_cfg, "MODEL_ID", "")
     processor_id = getattr(hf_cfg, "PROCESSOR_ID", "") or model_id
     local_dir = getattr(hf_cfg, "LOCAL_DIR", None)
     load_from = local_dir if (local_dir and os.path.isdir(local_dir)) else model_id
     processor_load_from = local_dir if (local_dir and os.path.isdir(local_dir)) else processor_id
+    trust_remote_code = bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False))
     if text_only:
         processor = _load_text_tokenizer(
             processor_load_from,
-            trust_remote_code=bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False)),
+            trust_remote_code=trust_remote_code,
         )
         if processor.pad_token_id is None:
             processor.pad_token = processor.eos_token or processor.bos_token
         processor.padding_side = "left"
     else:
         processor = AutoProcessor.from_pretrained(
-            processor_load_from, trust_remote_code=bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False))
+            processor_load_from, trust_remote_code=trust_remote_code
         )
 
     model_kwargs = _build_model_kwargs(hf_cfg)
@@ -507,11 +599,14 @@ def _load_model_and_processor(hf_cfg, text_only: bool = False):
     is_qwen_vl = "qwen" in model_id_lower and "vl" in model_id_lower
 
     if text_only:
+        model_cls, model_config = _resolve_text_model_cls(load_from, trust_remote_code)
+        if model_config is not None:
+            model_kwargs["config"] = model_config
         try:
-            model = _from_pretrained_with_attn_fallback(AutoModelForCausalLM, load_from, model_kwargs)
+            model = _from_pretrained_with_attn_fallback(model_cls, load_from, model_kwargs)
         except OSError:
             model = _from_pretrained_with_attn_fallback(
-                AutoModelForCausalLM, load_from, {**model_kwargs, "use_safetensors": False}
+                model_cls, load_from, {**model_kwargs, "use_safetensors": False}
             )
     elif is_qwen_vl and Qwen3VLForConditionalGeneration is not None:
         try:
@@ -520,6 +615,20 @@ def _load_model_and_processor(hf_cfg, text_only: bool = False):
             model_kwargs["use_safetensors"] = False
             model = _from_pretrained_with_attn_fallback(Qwen3VLForConditionalGeneration, load_from, model_kwargs)
     else:
+        model_config = None
+        try:
+            model_config = AutoConfig.from_pretrained(
+                load_from,
+                trust_remote_code=trust_remote_code,
+                local_files_only=bool(local_dir and os.path.isdir(local_dir)),
+            )
+        except Exception:
+            model_config = None
+        if model_config is not None and sys.version_info >= (3, 12):
+            if _maybe_disable_fp8_quantization(model_config):
+                print("[HF] Disabling FP8 quantization for Python 3.12 compatibility.")
+        if model_config is not None:
+            model_kwargs["config"] = model_config
         try:
             model = _from_pretrained_with_attn_fallback(AutoModelForVision2Seq, load_from, model_kwargs)
         except Exception:
@@ -652,6 +761,10 @@ class HFTrainerCollator:
     def _is_qwen3_vl(self) -> bool:
         model_type = (self._model_type or "").lower()
         return "qwen3_vl" in model_type
+
+    def _is_mistral3(self) -> bool:
+        model_type = (self._model_type or "").lower()
+        return "mistral3" in model_type
 
     def _build_chat_text(self, caption: str, with_answer: bool) -> str:
         prompt = ""
@@ -858,7 +971,7 @@ class HFTrainerCollator:
             if labels is not None and self._pad_token_id is not None:
                 labels[labels == self._pad_token_id] = self.label_ignore
         else:
-            if self.use_chat_template and hasattr(self.processor, "apply_chat_template") and self._is_qwen3_vl():
+            if self.use_chat_template and hasattr(self.processor, "apply_chat_template") and (self._is_qwen3_vl() or self._is_mistral3()):
                 full_messages = [
                     self._build_chat_messages(img, cap)
                     for img, cap in zip(expanded_images, expanded_captions)
@@ -1038,7 +1151,15 @@ class HFDecodeWrapper:
                 inputs = self.processor(text=texts, images=images, return_tensors="pt", padding=True)
             else:
                 inputs = self.processor(images=images, return_tensors="pt", padding=True)
-        return inputs.to(self.device)
+        if "token_type_ids" in inputs:
+            inputs.pop("token_type_ids", None)
+        inputs = inputs.to(self.device)
+        pixel_values = inputs.get("pixel_values") if hasattr(inputs, "get") else None
+        if torch.is_tensor(pixel_values) and pixel_values.is_floating_point():
+            target_dtype = next(self.model.parameters()).dtype
+            if pixel_values.dtype != target_dtype:
+                inputs["pixel_values"] = pixel_values.to(dtype=target_dtype)
+        return inputs
 
     def _trim_generated_ids(self, generated_ids: torch.Tensor, inputs: dict) -> torch.Tensor:
         if getattr(self.model.config, "is_encoder_decoder", False):
@@ -1102,7 +1223,15 @@ class CaptionTrainer(Trainer):
         best_metric: Optional[str] = None,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        tokenizer = kwargs.get("tokenizer", None)
+        try:
+            super().__init__(*args, **kwargs)
+        except TypeError as exc:
+            if "tokenizer" not in str(exc):
+                raise
+            kwargs.pop("tokenizer", None)
+            super().__init__(*args, **kwargs)
+            self.tokenizer = tokenizer
         self.caption_evaler = evaler
         self.eval_name = eval_name
         self.processor = processor
@@ -1339,7 +1468,11 @@ def main():
     if not str(getattr(hf_cfg, "TORCH_DTYPE", "") or "").strip():
         if torch.cuda.is_available() and torch.cuda.is_bf16_supported():
             hf_cfg.TORCH_DTYPE = "bfloat16"
-    text_only = _is_text_only_model(getattr(hf_cfg, "MODEL_ID", ""))
+    text_only = _is_text_only_model(
+        getattr(hf_cfg, "MODEL_ID", ""),
+        local_dir=getattr(hf_cfg, "LOCAL_DIR", None),
+        trust_remote_code=bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False)),
+    )
     model, processor = _load_model_and_processor(hf_cfg, text_only=text_only)
     model, lora_enabled = _apply_lora(model, hf_cfg)
 

@@ -11,10 +11,10 @@ Example (CLI overrides, aligned with Qwen3-VL header style):
         --dataset coco \
         --model_id mistralai/Ministral-3-8B-Instruct-2512 \
         --processor_id mistralai/Ministral-3-8B-Instruct-2512 \
-        --local_dir /autodl-fs/mistralai_Ministral-3-8B-Instruct-2512 \
+        --local_dir Ministral-3-8B-Instruct-2512 \
         --train_samples 0 \
         --val_samples 200 \
-        --eval_steps 200 \
+        --eval_steps 5 \
         --best_metric SPICE \
         --early_stop_patience 4 \
         --max_epoch 2 \
