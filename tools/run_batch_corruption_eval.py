@@ -6,8 +6,8 @@ PureT/experiments/ByteCaption_XE
 Example:
 python tools/run_batch_corruption_eval.py \
 --models PureT/experiments/ByteCaption_XE_qwen \
---corrupt-types rbbf \
---corrupt-levels S1 S2 S3 S4 S5 \
+--corrupt-types rbsl \
+--corrupt-levels S2 S3 \
 --save-captions 500 \
 --test-samples 0
     
@@ -65,6 +65,9 @@ def cleanup_torch():
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.ipc_collect()
+        # Additional aggressive cleanup for Qwen models
+        torch.cuda.synchronize()
+        torch.cuda.reset_peak_memory_stats()
 
 
 def load_config(model_folder: Path):
@@ -162,8 +165,14 @@ def run_single_eval(
     finally:
         if tester is not None:
             try:
-                if hasattr(tester, "model"):
-                    tester.model = None
+                # Explicitly delete model to break reference cycles
+                if hasattr(tester, "model") and tester.model is not None:
+                    if hasattr(tester.model, "cpu"):
+                        tester.model.cpu()  # Move to CPU first
+                    del tester.model
+                # Also clear test_evaler to release GPU memory
+                if hasattr(tester, "test_evaler") and tester.test_evaler is not None:
+                    del tester.test_evaler
             except Exception:
                 pass
         tester = None
@@ -190,13 +199,23 @@ def load_caption_samples(
         return None
     if not isinstance(results, list):
         return None
-    samples = results[:max_samples]
+    # Limit to max_samples to reduce memory usage
+    samples = results[:max_samples] if len(results) > max_samples else results
+    
     if not reference_map:
-        return samples
+        # Return minimal sample structure to save memory
+        return [{
+            id_key: item.get(id_key),
+            "caption": item.get("caption", "")
+        } for item in samples]
+    
     enriched = []
     for item in samples:
-        sample = dict(item)
-        image_id = sample.get(id_key)
+        sample = {
+            id_key: item.get(id_key),
+            "caption": item.get("caption", "")
+        }
+        image_id = item.get(id_key)
         lookup_id = image_id
         try:
             lookup_id = int(image_id)
@@ -281,7 +300,7 @@ def main():
     args = parse_args()
     if args.val_samples is not None:
         args.test_samples = args.val_samples
-    output_dir = Path(args.output_dir) / datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = Path(args.output_dir).resolve() / datetime.now().strftime("%Y%m%d_%H%M%S")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     all_results = []
@@ -335,7 +354,15 @@ def main():
                     per_run_path = output_dir / f"{model_name}_{ctype}_{level}.json"
                     with open(per_run_path, "w", encoding="utf-8") as f:
                         json.dump(run_record, f, ensure_ascii=False, indent=2)
+                    
+                    # Clear references to reduce memory footprint
+                    run_record = None
+                    caption_samples = None
+                    metrics = None
                     pbar.update(1)
+            
+            # Clear reference_map after model is done
+            reference_map = None
 
     # Aggregate summary
     summary_path = output_dir / "summary.json"
