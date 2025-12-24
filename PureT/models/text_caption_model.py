@@ -1,17 +1,10 @@
 import os
-import textwrap
 from contextlib import contextmanager
 from typing import List, Optional, Sequence, Tuple
 
 import torch
 import torch.nn as nn
-from transformers import (
-    AutoProcessor,
-    AutoModelForCausalLM,
-    AutoModelForVision2Seq,
-    BlipForConditionalGeneration,
-    BlipProcessor,
-)
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from lib.config import cfg
 
@@ -44,16 +37,16 @@ def _hf_env(mirror: Optional[str], disable_proxy: bool):
                 os.environ[key] = value
 
 
-class HFCaptionModel(nn.Module):
+class HFTextCaptionModel(nn.Module):
     """
-    Generic HuggingFace vision captioning wrapper (BLIP-compatible).
-    Accepts a list of PIL images (with optional None placeholders) via cfg.PARAM.ATT_FEATS.
+    Text-only HF caption wrapper (ignores images, uses prompt-only generation).
+    Accepts a list of images but does not condition on them.
     """
 
     def __init__(
         self,
         model_id: Optional[str] = None,
-        processor_id: Optional[str] = None,
+        tokenizer_id: Optional[str] = None,
         local_dir: Optional[str] = None,
         generation_kwargs: Optional[dict] = None,
         device: Optional[str] = None,
@@ -62,17 +55,14 @@ class HFCaptionModel(nn.Module):
     ):
         super().__init__()
         hf_cfg = getattr(cfg.MODEL, "HF", None)
-        self.model_id = model_id or (hf_cfg.MODEL_ID if hf_cfg else "Salesforce/blip-image-captioning-base")
-        self.processor_id = processor_id or (hf_cfg.PROCESSOR_ID if hf_cfg else "") or self.model_id
+        self.model_id = model_id or (hf_cfg.MODEL_ID if hf_cfg else "")
+        self.tokenizer_id = tokenizer_id or (hf_cfg.PROCESSOR_ID if hf_cfg else "") or self.model_id
         self.local_dir = local_dir or (hf_cfg.LOCAL_DIR if hf_cfg else None)
         self.trust_remote_code = trust_remote_code if trust_remote_code is not None else (hf_cfg.TRUST_REMOTE_CODE if hf_cfg else False)
         self.use_safetensors = use_safetensors if use_safetensors is not None else (hf_cfg.SAFE_SERIALIZATION if hf_cfg else True)
         self.torch_dtype = self._resolve_torch_dtype(getattr(hf_cfg, "TORCH_DTYPE", "") if hf_cfg else "")
         if self.torch_dtype is None and torch.cuda.is_available():
-            if torch.cuda.is_bf16_supported():
-                self.torch_dtype = torch.bfloat16
-            else:
-                self.torch_dtype = torch.float16
+            self.torch_dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
         self.low_cpu_mem_usage = bool(getattr(hf_cfg, "LOW_CPU_MEM_USAGE", False)) if hf_cfg else False
         self.prompt_source, self.system_prompt, self.user_prompt, self.placeholder = self._resolve_prompt_settings(hf_cfg)
         self.use_chat_template = bool(getattr(hf_cfg, "USE_CHAT_TEMPLATE", False)) if hf_cfg else False
@@ -87,19 +77,6 @@ class HFCaptionModel(nn.Module):
         self.lora_cfg = getattr(hf_cfg, "LORA", None) if hf_cfg else None
         self.lora_enabled = bool(getattr(self.lora_cfg, "ENABLED", False)) if self.lora_cfg else False
 
-        # Debug: visualize actual model inputs during training.
-        # Enable via env vars (preferred for quick debugging):
-        #   BYTECAPTION_DEBUG_INPUTS=1
-        #   BYTECAPTION_DEBUG_INPUTS_ONCE=1 (default)
-        #   BYTECAPTION_DEBUG_INPUTS_EVERY=0 (default: only once)
-        #   BYTECAPTION_DEBUG_INPUTS_MAX_TOKENS=256
-        self.debug_print_inputs = bool(int(os.environ.get("BYTECAPTION_DEBUG_INPUTS", "0") or "0"))
-        self.debug_print_inputs_once = bool(int(os.environ.get("BYTECAPTION_DEBUG_INPUTS_ONCE", "1") or "1"))
-        self.debug_print_inputs_every = int(os.environ.get("BYTECAPTION_DEBUG_INPUTS_EVERY", "0") or "0")
-        self.debug_print_inputs_max_tokens = int(os.environ.get("BYTECAPTION_DEBUG_INPUTS_MAX_TOKENS", "256") or "256")
-        self._debug_printed_steps = 0
-
-        # Decide device
         cfg_device = hf_cfg.DEVICE if hf_cfg and hasattr(hf_cfg, "DEVICE") else None
         self.device = _get_device(device or cfg_device)
 
@@ -110,44 +87,32 @@ class HFCaptionModel(nn.Module):
                 self._download_snapshot()
             load_from = self.local_dir if self._local_dir_ready() else self.model_id
             model_kwargs = self._build_model_kwargs()
-
-            # Prefer BLIP-specific classes when the model id looks like BLIP for better compatibility
-            if "blip" in self.model_id.lower():
-                self.processor = BlipProcessor.from_pretrained(
-                    load_from, trust_remote_code=self.trust_remote_code
+            self.tokenizer = AutoTokenizer.from_pretrained(
+                load_from, trust_remote_code=self.trust_remote_code
+            )
+            if self.tokenizer.pad_token_id is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token or self.tokenizer.bos_token
+            self.tokenizer.padding_side = "left"
+            try:
+                self.model = self._from_pretrained_with_attn_fallback(
+                    AutoModelForCausalLM, load_from, model_kwargs
                 )
-                try:
-                    self.model = self._from_pretrained_with_attn_fallback(
-                        BlipForConditionalGeneration,
-                        load_from,
-                        model_kwargs,
-                    )
-                except OSError:
-                    self.model = self._from_pretrained_with_attn_fallback(
-                        BlipForConditionalGeneration,
-                        load_from,
-                        self._with_unsafe_safetensors(model_kwargs),
-                    )
-            else:
-                self.processor = AutoProcessor.from_pretrained(
-                    load_from, trust_remote_code=self.trust_remote_code
+            except OSError:
+                self.model = self._from_pretrained_with_attn_fallback(
+                    AutoModelForCausalLM, load_from, self._with_unsafe_safetensors(model_kwargs)
                 )
-                self.model = self._load_auto_model(load_from, model_kwargs)
 
         if hf_cfg and bool(getattr(hf_cfg, "GRADIENT_CHECKPOINTING", False)):
             if hasattr(self.model, "gradient_checkpointing_enable"):
                 self.model.gradient_checkpointing_enable()
+                if hasattr(self.model.config, "use_cache"):
+                    self.model.config.use_cache = False
 
         if not self.placeholder:
             self.placeholder = "this is a dummy caption for an undecodable image"
         if not self.use_chat_template and (self.system_prompt or self.user_prompt):
-            if hasattr(self.processor, "apply_chat_template"):
+            if hasattr(self.tokenizer, "apply_chat_template"):
                 self.use_chat_template = True
-
-        if not getattr(self.model.config, "is_encoder_decoder", False):
-            tokenizer = getattr(self.processor, "tokenizer", None)
-            if tokenizer is not None and getattr(tokenizer, "padding_side", None) != "left":
-                tokenizer.padding_side = "left"
 
         if self.lora_enabled:
             self._apply_lora()
@@ -161,188 +126,25 @@ class HFCaptionModel(nn.Module):
 
     def forward(self, *args, **kwargs):
         if not self.trainable:
-            raise NotImplementedError("HFCaptionModel is inference-only in this pipeline.")
+            raise NotImplementedError("HFTextCaptionModel is inference-only in this pipeline.")
 
         input_ids = kwargs.get(cfg.PARAM.INPUT_SENT)
         labels = kwargs.get(cfg.PARAM.TARGET_SENT)
         attention_mask = kwargs.get(cfg.PARAM.ATT_FEATS_MASK)
-        att_feats = kwargs.get(cfg.PARAM.ATT_FEATS)
 
         model_inputs = {}
-        is_encoder_decoder = bool(getattr(self.model.config, "is_encoder_decoder", False))
-        label_ignore = int(getattr(getattr(cfg.MODEL, "HF", None), "TRAIN_LABEL_IGNORE", -1))
-        pass_labels = labels is not None and label_ignore == -100
-        if not is_encoder_decoder:
-            if input_ids is not None:
-                model_inputs["input_ids"] = input_ids
-            if attention_mask is not None:
-                model_inputs["attention_mask"] = attention_mask
-        else:
-            if input_ids is not None and not pass_labels:
-                model_inputs["decoder_input_ids"] = input_ids
-        if pass_labels:
+        if input_ids is not None:
+            model_inputs["input_ids"] = input_ids
+        if attention_mask is not None:
+            model_inputs["attention_mask"] = attention_mask
+        if labels is not None:
             model_inputs["labels"] = labels
-        if isinstance(att_feats, dict):
-            model_inputs.update(att_feats)
-        elif att_feats is not None:
-            model_inputs["pixel_values"] = att_feats
-
-        if self._should_debug_print_inputs():
-            self._debug_print_model_inputs(model_inputs)
 
         outputs = self.model(**model_inputs)
         logits = outputs.logits if hasattr(outputs, "logits") else outputs[0]
         if str(cfg.LOSSES.XE_TYPE).lower() == "crossentropy":
             return torch.log_softmax(logits, dim=-1)
         return logits
-
-    def _should_debug_print_inputs(self) -> bool:
-        if not self.debug_print_inputs:
-            return False
-        if self.debug_print_inputs_every > 0:
-            # Print on step 0, every N calls.
-            return (self._debug_printed_steps % self.debug_print_inputs_every) == 0
-        if self.debug_print_inputs_once:
-            return self._debug_printed_steps == 0
-        return False
-
-    def _decode_preview(self, input_ids: torch.Tensor) -> str:
-        if input_ids is None:
-            return ""
-        tokenizer = getattr(self.processor, "tokenizer", None)
-        try:
-            ids_cpu = input_ids.detach().to("cpu")
-            ids_1 = ids_cpu[0]
-            # Hard truncate preview length to avoid giant prints.
-            if ids_1.numel() > self.debug_print_inputs_max_tokens:
-                ids_1 = ids_1[: self.debug_print_inputs_max_tokens]
-            if tokenizer is not None and hasattr(tokenizer, "decode"):
-                return tokenizer.decode(ids_1.tolist(), skip_special_tokens=False)
-            if hasattr(self.processor, "decode"):
-                return self.processor.decode(ids_1.tolist(), skip_special_tokens=False)
-        except Exception:
-            return ""
-        return ""
-
-    def _decode_id_list(self, token_ids: List[int]) -> str:
-        if not token_ids:
-            return ""
-        tokenizer = getattr(self.processor, "tokenizer", None)
-        try:
-            if tokenizer is not None and hasattr(tokenizer, "decode"):
-                return tokenizer.decode(token_ids, skip_special_tokens=False)
-            if hasattr(self.processor, "decode"):
-                return self.processor.decode(token_ids, skip_special_tokens=False)
-        except Exception:
-            return ""
-        return ""
-
-    def _tensor_brief(self, value: torch.Tensor) -> str:
-        if not isinstance(value, torch.Tensor):
-            return str(type(value))
-        parts = [f"shape={tuple(value.shape)}", f"dtype={value.dtype}"]
-        if value.device is not None:
-            parts.append(f"device={value.device}")
-        try:
-            v = value.detach()
-            if v.numel() > 0 and v.is_floating_point():
-                v_cpu = v.to("cpu")
-                parts.append(f"min={float(v_cpu.min()):.4g}")
-                parts.append(f"max={float(v_cpu.max()):.4g}")
-                parts.append(f"mean={float(v_cpu.mean()):.4g}")
-            elif v.numel() > 0:
-                v_cpu = v.to("cpu")
-                parts.append(f"min={int(v_cpu.min())}")
-                parts.append(f"max={int(v_cpu.max())}")
-        except Exception:
-            pass
-        return ", ".join(parts)
-
-    def _debug_print_model_inputs(self, model_inputs: dict) -> None:
-        # Guard against repeated noisy prints.
-        self._debug_printed_steps += 1
-
-        print("\n" + "=" * 88)
-        print("[ByteCaption][DEBUG] HF model_inputs (actual tensors fed into model)")
-        print("- Keys:")
-        for key in sorted(model_inputs.keys()):
-            value = model_inputs[key]
-            if isinstance(value, torch.Tensor):
-                print(f"  - {key}: {self._tensor_brief(value)}")
-            else:
-                print(f"  - {key}: {type(value)}")
-
-        input_ids = model_inputs.get("input_ids")
-        attention_mask = model_inputs.get("attention_mask")
-        labels = model_inputs.get("labels")
-
-        # Qwen-VL style: these grids indicate how many visual tokens the model expects.
-        image_grid_thw = model_inputs.get("image_grid_thw")
-        video_grid_thw = model_inputs.get("video_grid_thw")
-        if isinstance(image_grid_thw, torch.Tensor):
-            try:
-                g = image_grid_thw.detach().to("cpu")
-                if g.ndim == 2 and g.shape[1] == 3:
-                    t, h, w = [int(x) for x in g[0].tolist()]
-                    print(f"- image_grid_thw[0]: (t,h,w)=({t},{h},{w}), grid_tokens=t*h*w={t*h*w}")
-            except Exception:
-                pass
-        if isinstance(video_grid_thw, torch.Tensor):
-            try:
-                g = video_grid_thw.detach().to("cpu")
-                if g.ndim == 2 and g.shape[1] == 3:
-                    t, h, w = [int(x) for x in g[0].tolist()]
-                    print(f"- video_grid_thw[0]: (t,h,w)=({t},{h},{w}), grid_tokens=t*h*w={t*h*w}")
-            except Exception:
-                pass
-
-        if isinstance(input_ids, torch.Tensor):
-            preview = self._decode_preview(input_ids)
-            if preview:
-                preview = preview.replace("\r", "")
-                preview = textwrap.shorten(preview, width=2000, placeholder=" ...")
-                print("- Decoded input_ids[0] preview:")
-                print(textwrap.indent(preview, prefix="  "))
-
-        if isinstance(labels, torch.Tensor):
-            try:
-                labels_cpu = labels.detach().to("cpu")
-                ignore = -100
-                ignored = int((labels_cpu == ignore).sum().item())
-                total = int(labels_cpu.numel())
-                print(f"- labels: ignore_id={ignore}, ignored={ignored}/{total}")
-            except Exception:
-                pass
-
-            # Decode the supervised caption region from labels[0] (tokens where label != -100).
-            try:
-                row = labels.detach().to("cpu")[0]
-                ignore = -100
-                # Keep only supervised token ids; drop ignore and any negative ids.
-                supervised_ids = [int(x) for x in row.tolist() if int(x) != ignore and int(x) >= 0]
-                if supervised_ids:
-                    # Also truncate for preview.
-                    if len(supervised_ids) > self.debug_print_inputs_max_tokens:
-                        supervised_ids = supervised_ids[: self.debug_print_inputs_max_tokens]
-                    caption_preview = self._decode_id_list(supervised_ids)
-                    if caption_preview:
-                        caption_preview = caption_preview.replace("\r", "")
-                        caption_preview = textwrap.shorten(caption_preview, width=2000, placeholder=" ...")
-                        print("- Supervised caption (decoded from labels[0] where labels!=-100):")
-                        print(textwrap.indent(caption_preview, prefix="  "))
-            except Exception:
-                pass
-
-        if isinstance(attention_mask, torch.Tensor):
-            try:
-                am_cpu = attention_mask.detach().to("cpu")
-                lens = am_cpu.sum(dim=1).tolist() if am_cpu.ndim == 2 else []
-                if lens:
-                    print(f"- attention_mask: seq_lens={lens[:8]}{'...' if len(lens) > 8 else ''}")
-            except Exception:
-                pass
-
-        print("=" * 88 + "\n")
 
     def save_lora_adapter(self, output_dir: str) -> bool:
         if not self.lora_enabled:
@@ -525,30 +327,6 @@ class HFCaptionModel(nn.Module):
         updated["use_safetensors"] = False
         return updated
 
-    def _load_auto_model(self, load_from: str, model_kwargs: dict):
-        try:
-            return self._from_pretrained_with_attn_fallback(
-                AutoModelForVision2Seq, load_from, model_kwargs
-            )
-        except Exception:
-            try:
-                return self._from_pretrained_with_attn_fallback(
-                    AutoModelForVision2Seq,
-                    load_from,
-                    self._with_unsafe_safetensors(model_kwargs),
-                )
-            except Exception:
-                try:
-                    return self._from_pretrained_with_attn_fallback(
-                        AutoModelForCausalLM, load_from, model_kwargs
-                    )
-                except Exception:
-                    return self._from_pretrained_with_attn_fallback(
-                        AutoModelForCausalLM,
-                        load_from,
-                        self._with_unsafe_safetensors(model_kwargs),
-                    )
-
     def _needs_download(self) -> bool:
         return bool(self.local_dir) and not self._local_dir_ready()
 
@@ -581,57 +359,38 @@ class HFCaptionModel(nn.Module):
         modeling_utils.check_torch_load_is_safe = lambda: None
         print("[HF] WARNING: torch.load safety check disabled (ALLOW_UNSAFE_TORCH_LOAD).")
 
-    def _prepare_inputs(self, images: Sequence) -> Tuple[List[int], List]:
-        valid_images_with_indices = [(i, img) for i, img in enumerate(images) if img is not None]
-        if not valid_images_with_indices:
-            return [], []
-        original_indices, valid_images = zip(*valid_images_with_indices)
-        return list(original_indices), list(valid_images)
-
     def _compose_prompt_text(self) -> str:
         if self.system_prompt and self.user_prompt:
             return f"{self.system_prompt}\n{self.user_prompt}"
         return self.user_prompt or self.system_prompt or ""
 
-    def _apply_chat_template(self, messages: List[dict]) -> str:
-        if not hasattr(self.processor, "apply_chat_template"):
-            return ""
-        try:
-            return self.processor.apply_chat_template(
-                messages,
-                tokenize=False,
-                add_generation_prompt=True,
-            )
-        except TypeError:
-            return self.processor.apply_chat_template(messages, tokenize=False)
-
-    def _build_chat_messages(self, image) -> List[dict]:
+    def _build_text_messages(self) -> List[dict]:
         messages: List[dict] = []
         if self.system_prompt:
             messages.append({"role": "system", "content": self.system_prompt})
-        user_content = []
         if self.user_prompt:
-            user_content.append({"type": "text", "text": self.user_prompt})
-        user_content.append({"type": "image", "image": image})
-        messages.append({"role": "user", "content": user_content})
+            messages.append({"role": "user", "content": self.user_prompt})
+        elif self.system_prompt:
+            messages.append({"role": "user", "content": ""})
         return messages
 
-    def _prepare_model_inputs(self, images: List) -> dict:
-        if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
-            texts = [self._apply_chat_template(self._build_chat_messages(image)) for image in images]
-            inputs = self.processor(text=texts, images=images, return_tensors="pt", padding=True)
+    def _prepare_model_inputs(self, count: int) -> dict:
+        if self.use_chat_template and hasattr(self.tokenizer, "apply_chat_template"):
+            messages = [self._build_text_messages() for _ in range(count)]
+            inputs = self.tokenizer.apply_chat_template(
+                messages,
+                tokenize=True,
+                add_generation_prompt=True,
+                return_tensors="pt",
+                padding=True,
+            )
         else:
             prompt_text = self._compose_prompt_text()
-            if prompt_text:
-                texts = [prompt_text for _ in images]
-                inputs = self.processor(text=texts, images=images, return_tensors="pt", padding=True)
-            else:
-                inputs = self.processor(images=images, return_tensors="pt", padding=True)
+            texts = [prompt_text for _ in range(count)]
+            inputs = self.tokenizer(texts, return_tensors="pt", padding=True)
         return inputs.to(self.device)
 
     def _trim_generated_ids(self, generated_ids: torch.Tensor, inputs: dict) -> torch.Tensor:
-        if getattr(self.model.config, "is_encoder_decoder", False):
-            return generated_ids
         input_ids = inputs.get("input_ids") if hasattr(inputs, "get") else None
         if input_ids is None:
             return generated_ids
@@ -644,23 +403,20 @@ class HFCaptionModel(nn.Module):
         images = kwargs[cfg.PARAM.ATT_FEATS]
         beam_size = kwargs.get("BEAM_SIZE", self.generation_kwargs.get("num_beams", 3))
 
-        original_indices, valid_images = self._prepare_inputs(images)
-        dummy_caption = self.placeholder
-
-        if not valid_images:
-            return [dummy_caption for _ in range(len(images))], None
-
-        inputs = self._prepare_model_inputs(valid_images)
+        count = len(images)
+        if count == 0:
+            return [], None
+        inputs = self._prepare_model_inputs(count)
         gen_kwargs = dict(self.generation_kwargs)
         gen_kwargs["num_beams"] = beam_size
 
         generated_ids = self.model.generate(**inputs, **gen_kwargs)
         generated_ids = self._trim_generated_ids(generated_ids, inputs)
-        generated_captions = self.processor.batch_decode(generated_ids, skip_special_tokens=True)
+        generated_captions = self.tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 
-        final_captions = [dummy_caption for _ in range(len(images))]
-        for idx, caption in zip(original_indices, generated_captions):
-            final_captions[idx] = caption.strip() if caption.strip() else dummy_caption
+        final_captions = [self.placeholder for _ in range(count)]
+        for idx, caption in enumerate(generated_captions):
+            final_captions[idx] = caption.strip() if caption.strip() else self.placeholder
 
         return final_captions, None
 

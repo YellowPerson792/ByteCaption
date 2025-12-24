@@ -352,6 +352,8 @@ class Trainer(object):
             or "blip" in model_type
             or "git" in model_type
             or "qwen" in model_type
+            or "mistral" in model_type
+            or "ministral" in model_type
             or "openrouter" in model_type
             or model_type.startswith("gpt")
             or "gpt" in model_type

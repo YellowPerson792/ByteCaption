@@ -37,6 +37,7 @@ from transformers import (
     AutoModelForCausalLM,
     AutoModelForVision2Seq,
     AutoProcessor,
+    AutoTokenizer,
     Trainer,
     TrainingArguments,
     set_seed,
@@ -334,16 +335,28 @@ def _from_pretrained_with_attn_fallback(model_cls, load_from: str, model_kwargs:
         raise
 
 
-def _load_model_and_processor(hf_cfg):
+def _is_text_only_model(model_id: str) -> bool:
+    lowered = str(model_id or "").lower()
+    return "mistral" in lowered or "ministral" in lowered
+
+
+def _load_model_and_processor(hf_cfg, text_only: bool = False):
     model_id = getattr(hf_cfg, "MODEL_ID", "")
     processor_id = getattr(hf_cfg, "PROCESSOR_ID", "") or model_id
     local_dir = getattr(hf_cfg, "LOCAL_DIR", None)
     load_from = local_dir if (local_dir and os.path.isdir(local_dir)) else model_id
     processor_load_from = local_dir if (local_dir and os.path.isdir(local_dir)) else processor_id
-
-    processor = AutoProcessor.from_pretrained(
-        processor_load_from, trust_remote_code=bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False))
-    )
+    if text_only:
+        processor = AutoTokenizer.from_pretrained(
+            processor_load_from, trust_remote_code=bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False))
+        )
+        if processor.pad_token_id is None:
+            processor.pad_token = processor.eos_token or processor.bos_token
+        processor.padding_side = "left"
+    else:
+        processor = AutoProcessor.from_pretrained(
+            processor_load_from, trust_remote_code=bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False))
+        )
 
     model_kwargs = _build_model_kwargs(hf_cfg)
     use_safetensors = bool(getattr(hf_cfg, "SAFE_SERIALIZATION", True))
@@ -351,7 +364,14 @@ def _load_model_and_processor(hf_cfg):
     model_id_lower = str(model_id).lower()
     is_qwen_vl = "qwen" in model_id_lower and "vl" in model_id_lower
 
-    if is_qwen_vl and Qwen3VLForConditionalGeneration is not None:
+    if text_only:
+        try:
+            model = _from_pretrained_with_attn_fallback(AutoModelForCausalLM, load_from, model_kwargs)
+        except OSError:
+            model = _from_pretrained_with_attn_fallback(
+                AutoModelForCausalLM, load_from, {**model_kwargs, "use_safetensors": False}
+            )
+    elif is_qwen_vl and Qwen3VLForConditionalGeneration is not None:
         try:
             model = _from_pretrained_with_attn_fallback(Qwen3VLForConditionalGeneration, load_from, model_kwargs)
         except OSError:
@@ -367,9 +387,13 @@ def _load_model_and_processor(hf_cfg):
                 model = _from_pretrained_with_attn_fallback(AutoModelForCausalLM, load_from, model_kwargs)
 
     if not getattr(model.config, "is_encoder_decoder", False):
-        tokenizer = getattr(processor, "tokenizer", None)
-        if tokenizer is not None and getattr(tokenizer, "padding_side", None) != "left":
-            tokenizer.padding_side = "left"
+        if text_only:
+            if getattr(processor, "padding_side", None) != "left":
+                processor.padding_side = "left"
+        else:
+            tokenizer = getattr(processor, "tokenizer", None)
+            if tokenizer is not None and getattr(tokenizer, "padding_side", None) != "left":
+                tokenizer.padding_side = "left"
 
     if not use_safetensors and hasattr(model, "config"):
         model.config.use_safetensors = False
@@ -445,6 +469,7 @@ class HFTrainerCollator:
         truncation: Optional[bool] = None,
         label_ignore: int = -100,
         seq_per_img: int = 1,
+        text_only: bool = False,
     ) -> None:
         self.processor = processor
         self.config_id = config_id or getattr(processor, "name_or_path", None)
@@ -457,6 +482,7 @@ class HFTrainerCollator:
         self.truncation = bool(truncation) if truncation is not None else False
         self.label_ignore = int(label_ignore)
         self.seq_per_img = max(int(seq_per_img), 1)
+        self.text_only = bool(text_only)
         self._pad_token_id = None
         self._is_encoder_decoder = None
         self._model_type = None
@@ -511,6 +537,18 @@ class HFTrainerCollator:
             messages.append({"role": "assistant", "content": [{"type": "text", "text": caption}]})
         return messages
 
+    def _build_text_messages(self, caption: Optional[str]) -> List[Dict[str, Any]]:
+        messages: List[Dict[str, Any]] = []
+        if self.system_prompt:
+            messages.append({"role": "system", "content": self.system_prompt})
+        if self.user_prompt:
+            messages.append({"role": "user", "content": self.user_prompt})
+        elif self.system_prompt:
+            messages.append({"role": "user", "content": ""})
+        if caption is not None:
+            messages.append({"role": "assistant", "content": caption})
+        return messages
+
     def _resolve_truncation(self) -> Tuple[bool, Optional[int]]:
         truncation = self.truncation
         max_length = self.max_length
@@ -527,6 +565,8 @@ class HFTrainerCollator:
         padding_side = "right"
         if hasattr(self.processor, "tokenizer"):
             padding_side = getattr(self.processor.tokenizer, "padding_side", "right")
+        elif hasattr(self.processor, "padding_side"):
+            padding_side = getattr(self.processor, "padding_side", "right")
         seq_len = labels.size(1)
         full_lens = attention_mask.sum(dim=1).tolist()
         prompt_lens = prompt_mask.sum(dim=1).tolist()
@@ -589,7 +629,77 @@ class HFTrainerCollator:
         mode = self._resolve_mode()
         truncation, max_length = self._resolve_truncation()
 
-        if mode == "vision2seq":
+        if self.text_only:
+            if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
+                full_messages = [self._build_text_messages(cap) for cap in expanded_captions]
+                prompt_messages = [self._build_text_messages(None) for _ in expanded_captions]
+
+                full_inputs_kwargs = {
+                    "tokenize": True,
+                    "add_generation_prompt": False,
+                    "return_tensors": "pt",
+                    "return_dict": True,
+                    "padding": True,
+                    "truncation": truncation,
+                }
+                if truncation and max_length is not None:
+                    full_inputs_kwargs["max_length"] = max_length
+                full_inputs = self._safe_apply_chat_template(full_messages, **full_inputs_kwargs)
+                input_ids = full_inputs.get("input_ids")
+                attention_mask = full_inputs.get("attention_mask")
+                labels = input_ids.clone() if input_ids is not None else None
+                if labels is not None and self._pad_token_id is not None:
+                    labels[labels == self._pad_token_id] = self.label_ignore
+
+                prompt_inputs_kwargs = {
+                    "tokenize": True,
+                    "add_generation_prompt": True,
+                    "return_tensors": "pt",
+                    "return_dict": True,
+                    "padding": True,
+                    "truncation": truncation,
+                }
+                if truncation and max_length is not None:
+                    prompt_inputs_kwargs["max_length"] = max_length
+                prompt_inputs = self._safe_apply_chat_template(prompt_messages, **prompt_inputs_kwargs)
+                prompt_mask = prompt_inputs.get("attention_mask")
+                self._mask_prompt_labels(labels, prompt_mask, attention_mask)
+                inputs = full_inputs
+            else:
+                prompt_texts = [
+                    self._build_chat_text(cap, with_answer=False) for cap in expanded_captions
+                ]
+                full_texts = [
+                    self._build_chat_text(cap, with_answer=True) for cap in expanded_captions
+                ]
+                full_inputs_kwargs = {
+                    "text": full_texts,
+                    "return_tensors": "pt",
+                    "padding": True,
+                    "truncation": truncation,
+                }
+                if truncation and max_length is not None:
+                    full_inputs_kwargs["max_length"] = max_length
+                full_inputs = self._safe_processor_call(**full_inputs_kwargs)
+                input_ids = full_inputs.get("input_ids")
+                attention_mask = full_inputs.get("attention_mask")
+                labels = input_ids.clone() if input_ids is not None else None
+                if labels is not None and self._pad_token_id is not None:
+                    labels[labels == self._pad_token_id] = self.label_ignore
+
+                prompt_inputs_kwargs = {
+                    "text": prompt_texts,
+                    "return_tensors": "pt",
+                    "padding": True,
+                    "truncation": truncation,
+                }
+                if truncation and max_length is not None:
+                    prompt_inputs_kwargs["max_length"] = max_length
+                prompt_inputs = self._safe_processor_call(**prompt_inputs_kwargs)
+                prompt_mask = prompt_inputs.get("attention_mask")
+                self._mask_prompt_labels(labels, prompt_mask, attention_mask)
+                inputs = full_inputs
+        elif mode == "vision2seq":
             inputs_kwargs = {
                 "images": expanded_images,
                 "text": expanded_captions,
@@ -704,6 +814,7 @@ class HFDecodeWrapper:
         user_prompt: str = "",
         placeholder: str = "this is a dummy caption for an undecodable image",
         use_chat_template: bool = False,
+        text_only: bool = False,
     ) -> None:
         self.model = getattr(model, "module", model)
         self.processor = processor
@@ -712,6 +823,7 @@ class HFDecodeWrapper:
         self.user_prompt = user_prompt
         self.placeholder = placeholder
         self.use_chat_template = use_chat_template
+        self.text_only = bool(text_only)
 
     def eval(self):
         self.model.eval()
@@ -736,13 +848,38 @@ class HFDecodeWrapper:
         messages.append({"role": "user", "content": user_content})
         return messages
 
+    def _build_text_messages(self) -> List[Dict[str, Any]]:
+        messages: List[Dict[str, Any]] = []
+        if self.system_prompt:
+            messages.append({"role": "system", "content": self.system_prompt})
+        if self.user_prompt:
+            messages.append({"role": "user", "content": self.user_prompt})
+        elif self.system_prompt:
+            messages.append({"role": "user", "content": ""})
+        return messages
+
     def _compose_prompt_text(self) -> str:
         if self.system_prompt and self.user_prompt:
             return f"{self.system_prompt}\n{self.user_prompt}"
         return self.user_prompt or self.system_prompt or ""
 
     def _prepare_model_inputs(self, images: List[Any]) -> dict:
-        if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
+        if self.text_only:
+            if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
+                messages = [self._build_text_messages() for _ in images]
+                inputs = self.processor.apply_chat_template(
+                    messages,
+                    tokenize=True,
+                    add_generation_prompt=True,
+                    return_dict=True,
+                    return_tensors="pt",
+                    padding=True,
+                )
+            else:
+                prompt_text = self._compose_prompt_text()
+                texts = [prompt_text for _ in images]
+                inputs = self.processor(texts, return_tensors="pt", padding=True)
+        elif self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
             messages = [self._build_chat_messages(image) for image in images]
             inputs = self.processor.apply_chat_template(
                 messages,
@@ -776,12 +913,18 @@ class HFDecodeWrapper:
         images = kwargs[cfg.PARAM.ATT_FEATS]
         beam_size = kwargs.get("BEAM_SIZE", self.generation_kwargs.get("num_beams", 3))
 
-        valid_images_with_indices = [(i, img) for i, img in enumerate(images) if img is not None]
-        if not valid_images_with_indices:
-            return [self.placeholder for _ in range(len(images))], None
-
-        original_indices, valid_images = zip(*valid_images_with_indices)
-        inputs = self._prepare_model_inputs(list(valid_images))
+        if self.text_only:
+            count = len(images)
+            if count == 0:
+                return [], None
+            inputs = self._prepare_model_inputs(list(images))
+            original_indices = list(range(count))
+        else:
+            valid_images_with_indices = [(i, img) for i, img in enumerate(images) if img is not None]
+            if not valid_images_with_indices:
+                return [self.placeholder for _ in range(len(images))], None
+            original_indices, valid_images = zip(*valid_images_with_indices)
+            inputs = self._prepare_model_inputs(list(valid_images))
         gen_kwargs = dict(self.generation_kwargs)
         gen_kwargs["num_beams"] = beam_size
 
@@ -811,6 +954,7 @@ class CaptionTrainer(Trainer):
         user_prompt: str = "",
         placeholder: str = "this is a dummy caption for an undecodable image",
         use_chat_template: bool = False,
+        text_only: bool = False,
         eval_interval_epochs: int = 1,
         save_adapter_only: bool = False,
         best_metric: Optional[str] = None,
@@ -825,6 +969,7 @@ class CaptionTrainer(Trainer):
         self.user_prompt = user_prompt
         self.placeholder = placeholder
         self.use_chat_template = use_chat_template
+        self.text_only = bool(text_only)
         self.eval_interval_epochs = max(int(eval_interval_epochs), 1)
         self.save_adapter_only = save_adapter_only
         self.best_metric = best_metric
@@ -882,6 +1027,7 @@ class CaptionTrainer(Trainer):
             user_prompt=self.user_prompt,
             placeholder=self.placeholder,
             use_chat_template=self.use_chat_template,
+            text_only=self.text_only,
         )
         metrics = self.caption_evaler(wrapper, self.eval_name)
         prefixed = {f"{metric_key_prefix}_{k}": v for k, v in metrics.items()}
@@ -1043,10 +1189,16 @@ def main():
     set_seed(int(getattr(cfg, "SEED", 42)))
 
     hf_cfg = cfg.MODEL.HF
+    model_id_lower = str(getattr(hf_cfg, "MODEL_ID", "")).lower()
+    use_hf_defaults = bool(args.use_hf_defaults)
+    if not use_hf_defaults and ("qwen" in model_id_lower and "vl" in model_id_lower):
+        use_hf_defaults = True
+
     if not str(getattr(hf_cfg, "TORCH_DTYPE", "") or "").strip():
         if torch.cuda.is_available() and torch.cuda.is_bf16_supported():
             hf_cfg.TORCH_DTYPE = "bfloat16"
-    model, processor = _load_model_and_processor(hf_cfg)
+    text_only = _is_text_only_model(getattr(hf_cfg, "MODEL_ID", ""))
+    model, processor = _load_model_and_processor(hf_cfg, text_only=text_only)
     model, lora_enabled = _apply_lora(model, hf_cfg)
 
     if torch.cuda.is_available():
@@ -1139,17 +1291,13 @@ def main():
         truncation=train_truncation,
         label_ignore=int(getattr(hf_cfg, "TRAIN_LABEL_IGNORE", -100)),
         seq_per_img=int(getattr(cfg.DATA_LOADER, "SEQ_PER_IMG", 1)),
+        text_only=text_only,
     )
 
     _maybe_disable_slow_metrics(args.best_metric, args.keep_full_metrics)
 
     output_dir = args.output_dir or str(folder / "snapshot" / "hf_trainer")
     os.makedirs(output_dir, exist_ok=True)
-
-    model_id_lower = str(getattr(hf_cfg, "MODEL_ID", "")).lower()
-    use_hf_defaults = bool(args.use_hf_defaults)
-    if not args.use_hf_defaults and ("qwen" in model_id_lower and "vl" in model_id_lower):
-        use_hf_defaults = True
 
     def _resolve_train_value(arg_value, cfg_value):
         if arg_value is not None:
@@ -1257,6 +1405,7 @@ def main():
         user_prompt=infer_user,
         placeholder=placeholder,
         use_chat_template=bool(getattr(hf_cfg, "USE_CHAT_TEMPLATE", False)),
+        text_only=text_only,
         eval_interval_epochs=int(cfg.SOLVER.TEST_INTERVAL) if eval_steps is None else 1,
         save_adapter_only=bool(getattr(hf_cfg.LORA, "ENABLED", False)) and not bool(getattr(hf_cfg.LORA, "SAVE_FULL_MODEL", True)),
         best_metric=args.best_metric,

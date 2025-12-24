@@ -463,7 +463,14 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
     force_openrouter = _os.getenv("FORCE_OPENROUTER", "").lower() in ("1", "true", "yes")
     model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
     is_openrouter = "openrouter" in model_type or model_type.startswith("gpt") or "gpt" in model_type
-    is_hf = model_type.startswith("hf") or "blip" in model_type or "git" in model_type or "qwen" in model_type
+    is_hf = (
+        model_type.startswith("hf")
+        or "blip" in model_type
+        or "git" in model_type
+        or "qwen" in model_type
+        or "mistral" in model_type
+        or "ministral" in model_type
+    )
     use_clean_hf = is_hf and not force_blip and not force_openrouter
     level = str(getattr(cfg.CORRUPTION, "BYTE_STREAM_LEVEL", "S0")).upper()
     if level not in {"S0", "M0"}:
