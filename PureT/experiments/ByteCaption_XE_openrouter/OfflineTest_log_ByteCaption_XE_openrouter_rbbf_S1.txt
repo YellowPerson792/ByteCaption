@@ -13,3 +13,6 @@
 [WARNING: 2025-12-20 22:49:54,801] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
 [WARNING: 2025-12-20 22:50:03,194] OpenRouter request failed after retries: [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1010)
 [ERROR: 2025-12-20 22:50:12,374] OpenRouter API error 403: {"error": {"message": "openai/gpt-5.1-20251113 requires moderation on OpenAI. Your input was flagged for \"violence/graphic\". No credits were charged.", "code": 403, "metadata": {"reasons": ["violenc
+[INFO: 2025-12-24 12:28:52,518] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-24 12:28:55,255] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Could not process image\"},\"request_
+[ERROR: 2025-12-24 12:30:26,945] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"messages.0.content.1.image.source.bas

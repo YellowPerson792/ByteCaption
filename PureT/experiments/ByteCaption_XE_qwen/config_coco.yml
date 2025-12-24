@@ -14,7 +14,7 @@ DATA_LOADER:
 
 ############################ EVAL BATCH ############################
 TEST:
-  BATCH_SIZE: 20
+  BATCH_SIZE: 10
 
 ############################ MODEL (HuggingFace) ############################
 MODEL:
@@ -24,6 +24,7 @@ MODEL:
     PROCESSOR_ID: 'Qwen/Qwen3-VL-8B-Instruct'
     LOCAL_DIR: './Qwen3-VL-8B-Instruct'
     TRUST_REMOTE_CODE: True
+    TORCH_DTYPE: 'bf16'
     LOW_CPU_MEM_USAGE: True
     ATTN_IMPLEMENTATION: 'flash_attention_2'
     PROMPT_SOURCE: 'openrouter'

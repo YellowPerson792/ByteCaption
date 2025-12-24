@@ -5,21 +5,22 @@ PureT/experiments/ByteCaption_XE
 
 Example:
 python tools/run_batch_corruption_eval.py \
---models PureT/experiments/ByteCaption_XE \
---corrupt-types rbbf rbsl \
---corrupt-levels S0 S1 S2 S3 S4 S5 \
+--models PureT/experiments/ByteCaption_XE_qwen \
+--corrupt-types rbbf \
+--corrupt-levels S1 S2 S3 S4 S5 \
 --save-captions 500 \
---test-samples 250
+--test-samples 0
     
 python tools/run_batch_corruption_eval.py \
 --models PureT/experiments/ByteCaption_XE_openrouter \
---corrupt-types rbsl \
---corrupt-levels S5 \
+--corrupt-types rbbf \
+--corrupt-levels S1 \
 --save-captions 500 \
 --test-samples 0
 """
 
 import argparse
+import gc
 import json
 import logging
 import os
@@ -30,6 +31,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import matplotlib.pyplot as plt
+import torch
 from tqdm import tqdm
 
 # Project paths
@@ -55,6 +57,14 @@ def reset_logger_handlers():
             h.close()
         except Exception:
             pass
+
+
+def cleanup_torch():
+    """Best-effort CUDA cleanup between runs to avoid OOM in long batches."""
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.ipc_collect()
 
 
 def load_config(model_folder: Path):
@@ -138,15 +148,26 @@ def run_single_eval(
         disable_wandb=True,
         dataset=dataset,
     )
-    tester = Tester(args)
-    metrics = tester.test_evaler(tester.model, f"{corrupt_type}_{normalized_level}")
-    # Attach the corruption params for traceability
-    preset_level = jpeg_corruption.normalize_level(normalized_level)
-    corruption_params = jpeg_corruption.JPEG_CORRUPTION_PRESETS.get(
-        corrupt_type, {}
-    ).get(preset_level, {})
-    metrics["corruption_params"] = corruption_params
-    return metrics
+    tester = None
+    try:
+        tester = Tester(args)
+        metrics = tester.test_evaler(tester.model, f"{corrupt_type}_{normalized_level}")
+        # Attach the corruption params for traceability
+        preset_level = jpeg_corruption.normalize_level(normalized_level)
+        corruption_params = jpeg_corruption.JPEG_CORRUPTION_PRESETS.get(
+            corrupt_type, {}
+        ).get(preset_level, {})
+        metrics["corruption_params"] = corruption_params
+        return metrics
+    finally:
+        if tester is not None:
+            try:
+                if hasattr(tester, "model"):
+                    tester.model = None
+            except Exception:
+                pass
+        tester = None
+        cleanup_torch()
 
 
 def load_caption_samples(
