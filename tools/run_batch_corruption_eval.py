@@ -77,6 +77,25 @@ def load_config(model_folder: Path):
     return config_path
 
 
+def sanitize_model_name(name: str) -> str:
+    """Make model names filesystem-friendly."""
+    if not name:
+        return ""
+    return name.replace("/", "-").strip()
+
+
+def resolve_model_name(model_folder: Path) -> str:
+    """Use provider-specific model names when possible."""
+    load_config(model_folder)
+    model_type = str(getattr(cfg.MODEL, "TYPE", "")).upper()
+    if model_type == "OPENROUTER":
+        model_id = getattr(cfg.MODEL.OPENROUTER, "MODEL_ID", "")
+        model_id = sanitize_model_name(str(model_id))
+        if model_id:
+            return f"ByteCaption_XE_{model_id}"
+    return model_folder.name
+
+
 def resolve_reference_annfile(dataset: str) -> Optional[Path]:
     dataset = (dataset or "").lower()
     if dataset == "coco":
@@ -289,7 +308,7 @@ def main():
     with tqdm(total=total_runs, desc="Batch eval", unit="run") as pbar:
         for model_folder_str in args.models:
             model_folder = Path(model_folder_str)
-            model_name = model_folder.name
+            model_name = resolve_model_name(model_folder)
             reference_map = None
             id_key = "image_id"
             if args.save_captions > 0:
