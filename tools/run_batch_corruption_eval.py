@@ -6,8 +6,8 @@ PureT/experiments/ByteCaption_XE
 Example:
 python tools/run_batch_corruption_eval.py \
 --models PureT/experiments/ByteCaption_XE_qwen \
---corrupt-types rbsl \
---corrupt-levels S3 S4 S5 \
+--corrupt-types rbbf \
+--corrupt-levels S4 S5 \
 --save-captions 500 \
 --test-samples 0
     
