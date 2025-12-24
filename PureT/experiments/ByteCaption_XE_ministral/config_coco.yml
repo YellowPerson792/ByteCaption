@@ -1,0 +1,48 @@
+SEED: 1234
+
+############################ DATA ############################
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+  PERSISTENT_WORKERS: True
+  PREFETCH_FACTOR: 4
+  TRAIN_ID: './PureT/data/coco_karpathy/train_ids.json'
+  VAL_ID: './PureT/data/coco_karpathy/validation_ids.json'
+  TEST_ID: './PureT/data/coco_karpathy/test_ids.json'
+  TEST_4W_ID: './PureT/data/coco_karpathy/test_ids.json'
+  MAX_FEAT: -1
+
+############################ EVAL BATCH ############################
+TEST:
+  BATCH_SIZE: 1
+
+############################ MODEL (HuggingFace) ############################
+MODEL:
+  TYPE: 'MINISTRAL'
+  HF:
+    MODEL_ID: 'mistralai/Ministral-3-8B-Instruct-2512'
+    PROCESSOR_ID: 'mistralai/Ministral-3-8B-Instruct-2512'
+    LOCAL_DIR: '/root/autodl-fs/Ministral-3-8B-Instruct-2512'
+    TRUST_REMOTE_CODE: True
+    LOW_CPU_MEM_USAGE: True
+    PROMPT_SOURCE: 'openrouter'
+    USE_CHAT_TEMPLATE: True
+    GENERATION:
+      MAX_NEW_TOKENS: 30
+      NUM_BEAMS: 5
+
+  OPENROUTER:
+    SYSTEM_PROMPT: 'You are a captioning model.'
+    USER_PROMPT: 'Generate a short COCO-style caption (5-12 words). Output only the caption.'
+    PLACEHOLDER: 'this is a dummy caption for an undecodable image'
+
+############################ EVALUATION ############################
+SCORER:
+  TYPES: ['Bleu_1', 'Bleu_2', 'Bleu_3', 'Bleu_4', 'ROUGE_L', 'CIDEr', 'METEOR', 'SPICE']
+  WEIGHTS: [0.1, 0.1, 0.1, 0.2, 0.1, 0.3, 0.1, 0.1]
+
+INFERENCE:
+  VAL_ANNFILE: './PureT/data/coco_karpathy/captions_validation.json'
+  TEST_ANNFILE: './PureT/data/coco_karpathy/captions_test.json'
+  VOCAB: './PureT/data/coco_karpathy/coco_vocabulary.txt'
+  EVAL: 'CocoHFEvaluer'

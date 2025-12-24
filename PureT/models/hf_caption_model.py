@@ -1,4 +1,5 @@
 import os
+import textwrap
 from contextlib import contextmanager
 from typing import List, Optional, Sequence, Tuple
 
@@ -67,15 +68,36 @@ class HFCaptionModel(nn.Module):
         self.trust_remote_code = trust_remote_code if trust_remote_code is not None else (hf_cfg.TRUST_REMOTE_CODE if hf_cfg else False)
         self.use_safetensors = use_safetensors if use_safetensors is not None else (hf_cfg.SAFE_SERIALIZATION if hf_cfg else True)
         self.torch_dtype = self._resolve_torch_dtype(getattr(hf_cfg, "TORCH_DTYPE", "") if hf_cfg else "")
+        if self.torch_dtype is None and torch.cuda.is_available():
+            if torch.cuda.is_bf16_supported():
+                self.torch_dtype = torch.bfloat16
+            else:
+                self.torch_dtype = torch.float16
         self.low_cpu_mem_usage = bool(getattr(hf_cfg, "LOW_CPU_MEM_USAGE", False)) if hf_cfg else False
         self.prompt_source, self.system_prompt, self.user_prompt, self.placeholder = self._resolve_prompt_settings(hf_cfg)
         self.use_chat_template = bool(getattr(hf_cfg, "USE_CHAT_TEMPLATE", False)) if hf_cfg else False
+        self.attn_implementation = self._resolve_attn_implementation(hf_cfg)
         gen_cfg = hf_cfg.GENERATION if hf_cfg and hasattr(hf_cfg, "GENERATION") else None
         self.generation_kwargs = generation_kwargs or self._resolve_generation_kwargs(gen_cfg)
         mirror = getattr(hf_cfg, "MIRROR", None) if hf_cfg else None
         mirror = mirror or None
         disable_proxy = bool(getattr(hf_cfg, "DISABLE_PROXY", False)) if hf_cfg else False
         allow_unsafe = bool(getattr(hf_cfg, "ALLOW_UNSAFE_TORCH_LOAD", False)) if hf_cfg else False
+        self.trainable = bool(getattr(hf_cfg, "TRAINABLE", False)) if hf_cfg else False
+        self.lora_cfg = getattr(hf_cfg, "LORA", None) if hf_cfg else None
+        self.lora_enabled = bool(getattr(self.lora_cfg, "ENABLED", False)) if self.lora_cfg else False
+
+        # Debug: visualize actual model inputs during training.
+        # Enable via env vars (preferred for quick debugging):
+        #   BYTECAPTION_DEBUG_INPUTS=1
+        #   BYTECAPTION_DEBUG_INPUTS_ONCE=1 (default)
+        #   BYTECAPTION_DEBUG_INPUTS_EVERY=0 (default: only once)
+        #   BYTECAPTION_DEBUG_INPUTS_MAX_TOKENS=256
+        self.debug_print_inputs = bool(int(os.environ.get("BYTECAPTION_DEBUG_INPUTS", "0") or "0"))
+        self.debug_print_inputs_once = bool(int(os.environ.get("BYTECAPTION_DEBUG_INPUTS_ONCE", "1") or "1"))
+        self.debug_print_inputs_every = int(os.environ.get("BYTECAPTION_DEBUG_INPUTS_EVERY", "0") or "0")
+        self.debug_print_inputs_max_tokens = int(os.environ.get("BYTECAPTION_DEBUG_INPUTS_MAX_TOKENS", "256") or "256")
+        self._debug_printed_steps = 0
 
         # Decide device
         cfg_device = hf_cfg.DEVICE if hf_cfg and hasattr(hf_cfg, "DEVICE") else None
@@ -95,14 +117,16 @@ class HFCaptionModel(nn.Module):
                     load_from, trust_remote_code=self.trust_remote_code
                 )
                 try:
-                    self.model = BlipForConditionalGeneration.from_pretrained(
+                    self.model = self._from_pretrained_with_attn_fallback(
+                        BlipForConditionalGeneration,
                         load_from,
-                        **model_kwargs,
+                        model_kwargs,
                     )
                 except OSError:
-                    self.model = BlipForConditionalGeneration.from_pretrained(
+                    self.model = self._from_pretrained_with_attn_fallback(
+                        BlipForConditionalGeneration,
                         load_from,
-                        **self._with_unsafe_safetensors(model_kwargs),
+                        self._with_unsafe_safetensors(model_kwargs),
                     )
             else:
                 self.processor = AutoProcessor.from_pretrained(
@@ -110,18 +134,275 @@ class HFCaptionModel(nn.Module):
                 )
                 self.model = self._load_auto_model(load_from, model_kwargs)
 
+        if hf_cfg and bool(getattr(hf_cfg, "GRADIENT_CHECKPOINTING", False)):
+            if hasattr(self.model, "gradient_checkpointing_enable"):
+                self.model.gradient_checkpointing_enable()
+
         if not self.placeholder:
             self.placeholder = "this is a dummy caption for an undecodable image"
         if not self.use_chat_template and (self.system_prompt or self.user_prompt):
             if hasattr(self.processor, "apply_chat_template"):
                 self.use_chat_template = True
 
+        if not getattr(self.model.config, "is_encoder_decoder", False):
+            tokenizer = getattr(self.processor, "tokenizer", None)
+            if tokenizer is not None and getattr(tokenizer, "padding_side", None) != "left":
+                tokenizer.padding_side = "left"
+
+        if self.lora_enabled:
+            self._apply_lora()
+            self.trainable = True
+
         self.model.to(self.device)
-        self.model.eval()
+        if self.trainable:
+            self.model.train()
+        else:
+            self.model.eval()
 
     def forward(self, *args, **kwargs):
-        # Not used during evaluation; placeholder to satisfy nn.Module API
-        raise NotImplementedError("HFCaptionModel is inference-only in this pipeline.")
+        if not self.trainable:
+            raise NotImplementedError("HFCaptionModel is inference-only in this pipeline.")
+
+        input_ids = kwargs.get(cfg.PARAM.INPUT_SENT)
+        labels = kwargs.get(cfg.PARAM.TARGET_SENT)
+        attention_mask = kwargs.get(cfg.PARAM.ATT_FEATS_MASK)
+        att_feats = kwargs.get(cfg.PARAM.ATT_FEATS)
+
+        model_inputs = {}
+        is_encoder_decoder = bool(getattr(self.model.config, "is_encoder_decoder", False))
+        label_ignore = int(getattr(getattr(cfg.MODEL, "HF", None), "TRAIN_LABEL_IGNORE", -1))
+        pass_labels = labels is not None and label_ignore == -100
+        if not is_encoder_decoder:
+            if input_ids is not None:
+                model_inputs["input_ids"] = input_ids
+            if attention_mask is not None:
+                model_inputs["attention_mask"] = attention_mask
+        else:
+            if input_ids is not None and not pass_labels:
+                model_inputs["decoder_input_ids"] = input_ids
+        if pass_labels:
+            model_inputs["labels"] = labels
+        if isinstance(att_feats, dict):
+            model_inputs.update(att_feats)
+        elif att_feats is not None:
+            model_inputs["pixel_values"] = att_feats
+
+        if self._should_debug_print_inputs():
+            self._debug_print_model_inputs(model_inputs)
+
+        outputs = self.model(**model_inputs)
+        logits = outputs.logits if hasattr(outputs, "logits") else outputs[0]
+        if str(cfg.LOSSES.XE_TYPE).lower() == "crossentropy":
+            return torch.log_softmax(logits, dim=-1)
+        return logits
+
+    def _should_debug_print_inputs(self) -> bool:
+        if not self.debug_print_inputs:
+            return False
+        if self.debug_print_inputs_every > 0:
+            # Print on step 0, every N calls.
+            return (self._debug_printed_steps % self.debug_print_inputs_every) == 0
+        if self.debug_print_inputs_once:
+            return self._debug_printed_steps == 0
+        return False
+
+    def _decode_preview(self, input_ids: torch.Tensor) -> str:
+        if input_ids is None:
+            return ""
+        tokenizer = getattr(self.processor, "tokenizer", None)
+        try:
+            ids_cpu = input_ids.detach().to("cpu")
+            ids_1 = ids_cpu[0]
+            # Hard truncate preview length to avoid giant prints.
+            if ids_1.numel() > self.debug_print_inputs_max_tokens:
+                ids_1 = ids_1[: self.debug_print_inputs_max_tokens]
+            if tokenizer is not None and hasattr(tokenizer, "decode"):
+                return tokenizer.decode(ids_1.tolist(), skip_special_tokens=False)
+            if hasattr(self.processor, "decode"):
+                return self.processor.decode(ids_1.tolist(), skip_special_tokens=False)
+        except Exception:
+            return ""
+        return ""
+
+    def _decode_id_list(self, token_ids: List[int]) -> str:
+        if not token_ids:
+            return ""
+        tokenizer = getattr(self.processor, "tokenizer", None)
+        try:
+            if tokenizer is not None and hasattr(tokenizer, "decode"):
+                return tokenizer.decode(token_ids, skip_special_tokens=False)
+            if hasattr(self.processor, "decode"):
+                return self.processor.decode(token_ids, skip_special_tokens=False)
+        except Exception:
+            return ""
+        return ""
+
+    def _tensor_brief(self, value: torch.Tensor) -> str:
+        if not isinstance(value, torch.Tensor):
+            return str(type(value))
+        parts = [f"shape={tuple(value.shape)}", f"dtype={value.dtype}"]
+        if value.device is not None:
+            parts.append(f"device={value.device}")
+        try:
+            v = value.detach()
+            if v.numel() > 0 and v.is_floating_point():
+                v_cpu = v.to("cpu")
+                parts.append(f"min={float(v_cpu.min()):.4g}")
+                parts.append(f"max={float(v_cpu.max()):.4g}")
+                parts.append(f"mean={float(v_cpu.mean()):.4g}")
+            elif v.numel() > 0:
+                v_cpu = v.to("cpu")
+                parts.append(f"min={int(v_cpu.min())}")
+                parts.append(f"max={int(v_cpu.max())}")
+        except Exception:
+            pass
+        return ", ".join(parts)
+
+    def _debug_print_model_inputs(self, model_inputs: dict) -> None:
+        # Guard against repeated noisy prints.
+        self._debug_printed_steps += 1
+
+        print("\n" + "=" * 88)
+        print("[ByteCaption][DEBUG] HF model_inputs (actual tensors fed into model)")
+        print("- Keys:")
+        for key in sorted(model_inputs.keys()):
+            value = model_inputs[key]
+            if isinstance(value, torch.Tensor):
+                print(f"  - {key}: {self._tensor_brief(value)}")
+            else:
+                print(f"  - {key}: {type(value)}")
+
+        input_ids = model_inputs.get("input_ids")
+        attention_mask = model_inputs.get("attention_mask")
+        labels = model_inputs.get("labels")
+
+        # Qwen-VL style: these grids indicate how many visual tokens the model expects.
+        image_grid_thw = model_inputs.get("image_grid_thw")
+        video_grid_thw = model_inputs.get("video_grid_thw")
+        if isinstance(image_grid_thw, torch.Tensor):
+            try:
+                g = image_grid_thw.detach().to("cpu")
+                if g.ndim == 2 and g.shape[1] == 3:
+                    t, h, w = [int(x) for x in g[0].tolist()]
+                    print(f"- image_grid_thw[0]: (t,h,w)=({t},{h},{w}), grid_tokens=t*h*w={t*h*w}")
+            except Exception:
+                pass
+        if isinstance(video_grid_thw, torch.Tensor):
+            try:
+                g = video_grid_thw.detach().to("cpu")
+                if g.ndim == 2 and g.shape[1] == 3:
+                    t, h, w = [int(x) for x in g[0].tolist()]
+                    print(f"- video_grid_thw[0]: (t,h,w)=({t},{h},{w}), grid_tokens=t*h*w={t*h*w}")
+            except Exception:
+                pass
+
+        if isinstance(input_ids, torch.Tensor):
+            preview = self._decode_preview(input_ids)
+            if preview:
+                preview = preview.replace("\r", "")
+                preview = textwrap.shorten(preview, width=2000, placeholder=" ...")
+                print("- Decoded input_ids[0] preview:")
+                print(textwrap.indent(preview, prefix="  "))
+
+        if isinstance(labels, torch.Tensor):
+            try:
+                labels_cpu = labels.detach().to("cpu")
+                ignore = -100
+                ignored = int((labels_cpu == ignore).sum().item())
+                total = int(labels_cpu.numel())
+                print(f"- labels: ignore_id={ignore}, ignored={ignored}/{total}")
+            except Exception:
+                pass
+
+            # Decode the supervised caption region from labels[0] (tokens where label != -100).
+            try:
+                row = labels.detach().to("cpu")[0]
+                ignore = -100
+                # Keep only supervised token ids; drop ignore and any negative ids.
+                supervised_ids = [int(x) for x in row.tolist() if int(x) != ignore and int(x) >= 0]
+                if supervised_ids:
+                    # Also truncate for preview.
+                    if len(supervised_ids) > self.debug_print_inputs_max_tokens:
+                        supervised_ids = supervised_ids[: self.debug_print_inputs_max_tokens]
+                    caption_preview = self._decode_id_list(supervised_ids)
+                    if caption_preview:
+                        caption_preview = caption_preview.replace("\r", "")
+                        caption_preview = textwrap.shorten(caption_preview, width=2000, placeholder=" ...")
+                        print("- Supervised caption (decoded from labels[0] where labels!=-100):")
+                        print(textwrap.indent(caption_preview, prefix="  "))
+            except Exception:
+                pass
+
+        if isinstance(attention_mask, torch.Tensor):
+            try:
+                am_cpu = attention_mask.detach().to("cpu")
+                lens = am_cpu.sum(dim=1).tolist() if am_cpu.ndim == 2 else []
+                if lens:
+                    print(f"- attention_mask: seq_lens={lens[:8]}{'...' if len(lens) > 8 else ''}")
+            except Exception:
+                pass
+
+        print("=" * 88 + "\n")
+
+    def save_lora_adapter(self, output_dir: str) -> bool:
+        if not self.lora_enabled:
+            return False
+        try:
+            from peft import PeftModel
+        except Exception:
+            return False
+        if not isinstance(self.model, PeftModel):
+            return False
+        os.makedirs(output_dir, exist_ok=True)
+        self.model.save_pretrained(output_dir)
+        return True
+
+    def load_lora_adapter(self, adapter_dir: str) -> bool:
+        try:
+            from peft import PeftModel
+        except Exception:
+            return False
+        if not os.path.isdir(adapter_dir):
+            return False
+        try:
+            self.model = PeftModel.from_pretrained(self.model, adapter_dir)
+            self.model.to(self.device)
+            return True
+        except Exception:
+            return False
+
+    def _apply_lora(self) -> None:
+        try:
+            from peft import LoraConfig, get_peft_model, TaskType
+        except Exception as exc:
+            print(f"[HF] LoRA disabled: peft unavailable ({exc})")
+            self.lora_enabled = False
+            return
+        lora_cfg = self.lora_cfg
+        if lora_cfg is None:
+            self.lora_enabled = False
+            return
+        task_name = str(getattr(lora_cfg, "TASK_TYPE", "CAUSAL_LM")).upper()
+        task_type = getattr(TaskType, task_name, TaskType.CAUSAL_LM)
+        target_modules = list(getattr(lora_cfg, "TARGET_MODULES", []) or [])
+        modules_to_save = list(getattr(lora_cfg, "MODULES_TO_SAVE", []) or [])
+        lora_config = LoraConfig(
+            r=int(getattr(lora_cfg, "R", 8)),
+            lora_alpha=int(getattr(lora_cfg, "ALPHA", 16)),
+            lora_dropout=float(getattr(lora_cfg, "DROPOUT", 0.05)),
+            bias=str(getattr(lora_cfg, "BIAS", "none")),
+            task_type=task_type,
+            target_modules=target_modules or None,
+            modules_to_save=modules_to_save or None,
+        )
+        try:
+            self.model = get_peft_model(self.model, lora_config)
+        except ValueError as exc:
+            print(f"[HF] LoRA target modules not found; disabling LoRA. ({exc})")
+            self.lora_enabled = False
+            return
+        if hasattr(self.model, "print_trainable_parameters"):
+            self.model.print_trainable_parameters()
 
     def _local_dir_ready(self) -> bool:
         if not self.local_dir or not os.path.isdir(self.local_dir):
@@ -193,6 +474,39 @@ class HFCaptionModel(nn.Module):
             return dtype_value
         return None
 
+    def _resolve_attn_implementation(self, hf_cfg) -> str:
+        if not hf_cfg:
+            return ""
+        value = getattr(hf_cfg, "ATTN_IMPLEMENTATION", "")
+        return str(value).strip() if value is not None else ""
+
+    def _strip_attn_implementation(self, model_kwargs: dict) -> dict:
+        if "attn_implementation" not in model_kwargs:
+            return model_kwargs
+        updated = dict(model_kwargs)
+        updated.pop("attn_implementation", None)
+        return updated
+
+    def _should_retry_without_attn_implementation(self, exc: Exception) -> bool:
+        if not self.attn_implementation:
+            return False
+        msg = str(exc).lower()
+        return (
+            "attn_implementation" in msg
+            or "flash_attention" in msg
+            or "flashattention" in msg
+            or "flash attention" in msg
+        )
+
+    def _from_pretrained_with_attn_fallback(self, model_cls, load_from: str, model_kwargs: dict):
+        try:
+            return model_cls.from_pretrained(load_from, **model_kwargs)
+        except Exception as exc:
+            if self._should_retry_without_attn_implementation(exc):
+                print("[HF] attn_implementation unsupported; retrying without it.")
+                return model_cls.from_pretrained(load_from, **self._strip_attn_implementation(model_kwargs))
+            raise
+
     def _build_model_kwargs(self) -> dict:
         model_kwargs = {
             "trust_remote_code": self.trust_remote_code,
@@ -202,6 +516,8 @@ class HFCaptionModel(nn.Module):
             model_kwargs["torch_dtype"] = self.torch_dtype
         if self.low_cpu_mem_usage:
             model_kwargs["low_cpu_mem_usage"] = True
+        if self.attn_implementation:
+            model_kwargs["attn_implementation"] = self.attn_implementation
         return model_kwargs
 
     def _with_unsafe_safetensors(self, model_kwargs: dict) -> dict:
@@ -211,15 +527,27 @@ class HFCaptionModel(nn.Module):
 
     def _load_auto_model(self, load_from: str, model_kwargs: dict):
         try:
-            return AutoModelForVision2Seq.from_pretrained(load_from, **model_kwargs)
+            return self._from_pretrained_with_attn_fallback(
+                AutoModelForVision2Seq, load_from, model_kwargs
+            )
         except Exception:
             try:
-                return AutoModelForVision2Seq.from_pretrained(load_from, **self._with_unsafe_safetensors(model_kwargs))
+                return self._from_pretrained_with_attn_fallback(
+                    AutoModelForVision2Seq,
+                    load_from,
+                    self._with_unsafe_safetensors(model_kwargs),
+                )
             except Exception:
                 try:
-                    return AutoModelForCausalLM.from_pretrained(load_from, **model_kwargs)
+                    return self._from_pretrained_with_attn_fallback(
+                        AutoModelForCausalLM, load_from, model_kwargs
+                    )
                 except Exception:
-                    return AutoModelForCausalLM.from_pretrained(load_from, **self._with_unsafe_safetensors(model_kwargs))
+                    return self._from_pretrained_with_attn_fallback(
+                        AutoModelForCausalLM,
+                        load_from,
+                        self._with_unsafe_safetensors(model_kwargs),
+                    )
 
     def _needs_download(self) -> bool:
         return bool(self.local_dir) and not self._local_dir_ready()
@@ -291,14 +619,14 @@ class HFCaptionModel(nn.Module):
     def _prepare_model_inputs(self, images: List) -> dict:
         if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
             texts = [self._apply_chat_template(self._build_chat_messages(image)) for image in images]
-            inputs = self.processor(text=texts, images=images, return_tensors="pt")
+            inputs = self.processor(text=texts, images=images, return_tensors="pt", padding=True)
         else:
             prompt_text = self._compose_prompt_text()
             if prompt_text:
                 texts = [prompt_text for _ in images]
-                inputs = self.processor(text=texts, images=images, return_tensors="pt")
+                inputs = self.processor(text=texts, images=images, return_tensors="pt", padding=True)
             else:
-                inputs = self.processor(images=images, return_tensors="pt")
+                inputs = self.processor(images=images, return_tensors="pt", padding=True)
         return inputs.to(self.device)
 
     def _trim_generated_ids(self, generated_ids: torch.Tensor, inputs: dict) -> torch.Tensor:

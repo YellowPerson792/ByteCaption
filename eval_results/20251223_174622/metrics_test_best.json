@@ -1,0 +1,49 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_qwen",
+  "model_name": "ByteCaption_XE_qwen",
+  "model_type": "QWEN",
+  "corrupt_type": [
+    "rbbf"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "bit_error_rate": 0.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.07142857142602044,
+    "Bleu_2": 1.6574838602680175e-09,
+    "Bleu_3": 4.855445959729903e-12,
+    "Bleu_4": 2.685753642682484e-13,
+    "ROUGE_L": 0.09208250166333998,
+    "CIDEr": 0.0065075462485153154,
+    "METEOR": 0.05508108235891241,
+    "SPICE": 0.03333333333333333,
+    "XE_Loss": null,
+    "Undecodable_Count": 1,
+    "Undecodable_Ratio": 0.5,
+    "Total_Samples": 2,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "Poodle dog dog dog dog dog dog dog dog dog dog dog dog dog dog dog dog dog dog",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20251223_174622",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20251223_174622/captions_test_best.json",
+  "captions_count": 2
+}

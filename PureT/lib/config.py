@@ -58,6 +58,10 @@ __C.DATA_LOADER.NUM_WORKERS = 4
 
 __C.DATA_LOADER.PIN_MEMORY = True
 
+__C.DATA_LOADER.PERSISTENT_WORKERS = True
+
+__C.DATA_LOADER.PREFETCH_FACTOR = 2
+
 __C.DATA_LOADER.DROP_LAST = True
 
 __C.DATA_LOADER.SHUFFLE = True
@@ -236,12 +240,31 @@ __C.MODEL.HF.MIRROR = ''  # Optional HF mirror endpoint, e.g. https://hf-mirror.
 __C.MODEL.HF.DISABLE_PROXY = False  # Disable HTTP(S) proxy during HF downloads
 __C.MODEL.HF.ALLOW_UNSAFE_TORCH_LOAD = False  # Allow .bin loading with torch<2.6 (security risk)
 __C.MODEL.HF.TORCH_DTYPE = ''  # '', 'auto', 'float16', 'bfloat16'
+__C.MODEL.HF.ATTN_IMPLEMENTATION = ''  # '', 'flash_attention_2' (if supported)
 __C.MODEL.HF.LOW_CPU_MEM_USAGE = False
+__C.MODEL.HF.GRADIENT_CHECKPOINTING = False
 __C.MODEL.HF.PROMPT_SOURCE = ''  # '', 'openrouter', 'hf'
 __C.MODEL.HF.SYSTEM_PROMPT = ''
 __C.MODEL.HF.USER_PROMPT = ''
 __C.MODEL.HF.PLACEHOLDER = 'this is a dummy caption for an undecodable image'
 __C.MODEL.HF.USE_CHAT_TEMPLATE = False
+__C.MODEL.HF.TRAINABLE = False  # Enable HF training path (e.g., LoRA finetuning)
+__C.MODEL.HF.TRAIN_MODE = 'auto'  # auto/vision2seq/chat
+__C.MODEL.HF.TRAIN_SYSTEM_PROMPT = ''
+__C.MODEL.HF.TRAIN_USER_PROMPT = ''
+__C.MODEL.HF.TRAIN_MAX_LENGTH = 128
+__C.MODEL.HF.TRAIN_TRUNCATION = True
+__C.MODEL.HF.TRAIN_LABEL_IGNORE = -100
+__C.MODEL.HF.LORA = edict()
+__C.MODEL.HF.LORA.ENABLED = False
+__C.MODEL.HF.LORA.R = 8
+__C.MODEL.HF.LORA.ALPHA = 16
+__C.MODEL.HF.LORA.DROPOUT = 0.05
+__C.MODEL.HF.LORA.BIAS = 'none'
+__C.MODEL.HF.LORA.TASK_TYPE = 'CAUSAL_LM'
+__C.MODEL.HF.LORA.TARGET_MODULES = ['q_proj', 'k_proj', 'v_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj']
+__C.MODEL.HF.LORA.MODULES_TO_SAVE = []
+__C.MODEL.HF.LORA.SAVE_FULL_MODEL = False
 __C.MODEL.HF.GENERATION = edict()
 __C.MODEL.HF.GENERATION.MAX_LENGTH = 50
 __C.MODEL.HF.GENERATION.MAX_NEW_TOKENS = -1
@@ -459,7 +482,7 @@ __C.MEAN = [0.485, 0.456, 0.406]
 # Image std
 __C.STD = [0.229, 0.224, 0.225]
 
-__C.SEED = -1.0
+__C.SEED = -1
 
 __C.TEMP_DIR = './data/temp'
 
