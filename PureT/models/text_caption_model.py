@@ -5,6 +5,7 @@ from typing import List, Optional, Sequence, Tuple
 import torch
 import torch.nn as nn
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers.tokenization_utils_base import BatchEncoding
 
 from lib.config import cfg
 
@@ -35,6 +36,119 @@ def _hf_env(mirror: Optional[str], disable_proxy: bool):
                 os.environ.pop(key, None)
             else:
                 os.environ[key] = value
+
+
+class _TekkenTokenizerWrapper:
+    def __init__(self, tokenizer, model_dir: Optional[str] = None) -> None:
+        self._tokenizer = tokenizer
+        self._model_dir = model_dir
+        self.pad_token_id = int(getattr(tokenizer, "pad_id", 0))
+        self.eos_token_id = int(getattr(tokenizer, "eos_id", 0))
+        self.bos_token_id = int(getattr(tokenizer, "bos_id", 0))
+        self.unk_token_id = int(getattr(tokenizer, "unk_id", 0))
+        self.pad_token = "<pad>"
+        self.eos_token = "</s>"
+        self.bos_token = "<s>"
+        self.padding_side = "left"
+        self.add_bos_token = True
+        self.add_eos_token = True
+        self.tokenizer = self
+
+    def __call__(self, text=None, *args, **kwargs):
+        if text is None and args:
+            text = args[0]
+        texts = [text] if isinstance(text, str) else list(text or [])
+        padding = bool(kwargs.get("padding", False))
+        truncation = bool(kwargs.get("truncation", False))
+        max_length = kwargs.get("max_length")
+        return_tensors = kwargs.get("return_tensors", None)
+        add_special_tokens = kwargs.get("add_special_tokens", True)
+        bos = bool(add_special_tokens and self.add_bos_token)
+        eos = bool(add_special_tokens and self.add_eos_token)
+
+        encoded = []
+        for item in texts:
+            item = item if item is not None else ""
+            ids = self._tokenizer.encode(str(item), bos=bos, eos=eos)
+            if truncation and max_length:
+                ids = ids[-int(max_length) :] if self.padding_side == "left" else ids[: int(max_length)]
+            encoded.append(ids)
+
+        if not encoded:
+            encoded = [[]]
+
+        if padding:
+            max_len = max(len(ids) for ids in encoded)
+            if truncation and max_length:
+                max_len = min(max_len, int(max_length))
+            input_ids = []
+            attention_mask = []
+            for ids in encoded:
+                if truncation and max_length and len(ids) > max_len:
+                    ids = ids[-max_len:] if self.padding_side == "left" else ids[:max_len]
+                pad_len = max_len - len(ids)
+                if self.padding_side == "left":
+                    padded = [self.pad_token_id] * pad_len + ids
+                    mask = [0] * pad_len + [1] * len(ids)
+                else:
+                    padded = ids + [self.pad_token_id] * pad_len
+                    mask = [1] * len(ids) + [0] * pad_len
+                input_ids.append(padded)
+                attention_mask.append(mask)
+        else:
+            input_ids = encoded
+            attention_mask = [[1] * len(ids) for ids in encoded]
+
+        if return_tensors == "pt":
+            data = {
+                "input_ids": torch.tensor(input_ids, dtype=torch.long),
+                "attention_mask": torch.tensor(attention_mask, dtype=torch.long),
+            }
+            return BatchEncoding(data)
+
+        return {"input_ids": input_ids, "attention_mask": attention_mask}
+
+    def batch_decode(self, sequences, skip_special_tokens: bool = True) -> List[str]:
+        try:
+            from mistral_common.tokens.tokenizers.base import SpecialTokenPolicy
+        except Exception:
+            SpecialTokenPolicy = None
+
+        if torch.is_tensor(sequences):
+            sequences = sequences.tolist()
+        decoded = []
+        for seq in sequences:
+            if skip_special_tokens and SpecialTokenPolicy is not None:
+                text = self._tokenizer.decode(seq, special_token_policy=SpecialTokenPolicy.IGNORE)
+            elif skip_special_tokens:
+                ids = [i for i in seq if i not in (self.pad_token_id, self.eos_token_id, self.bos_token_id)]
+                text = self._tokenizer.decode(ids)
+            else:
+                text = self._tokenizer.decode(seq)
+            decoded.append(text)
+        return decoded
+
+    def save_pretrained(self, save_directory: str) -> None:
+        if not save_directory:
+            return
+        os.makedirs(save_directory, exist_ok=True)
+        if not self._model_dir:
+            return
+        for fname in (
+            "tokenizer.json",
+            "tokenizer_config.json",
+            "special_tokens_map.json",
+            "tekken.json",
+            "chat_template.jinja",
+        ):
+            src = os.path.join(self._model_dir, fname)
+            if os.path.exists(src):
+                try:
+                    import shutil
+
+                    shutil.copy2(src, os.path.join(save_directory, fname))
+                except Exception:
+                    pass
 
 
 class HFTextCaptionModel(nn.Module):
@@ -87,9 +201,7 @@ class HFTextCaptionModel(nn.Module):
                 self._download_snapshot()
             load_from = self.local_dir if self._local_dir_ready() else self.model_id
             model_kwargs = self._build_model_kwargs()
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                load_from, trust_remote_code=self.trust_remote_code
-            )
+            self.tokenizer = self._load_text_tokenizer(load_from)
             if self.tokenizer.pad_token_id is None:
                 self.tokenizer.pad_token = self.tokenizer.eos_token or self.tokenizer.bos_token
             self.tokenizer.padding_side = "left"
@@ -205,6 +317,31 @@ class HFTextCaptionModel(nn.Module):
             return
         if hasattr(self.model, "print_trainable_parameters"):
             self.model.print_trainable_parameters()
+
+    def _resolve_tekken_path(self, load_from: str) -> Optional[str]:
+        if load_from and os.path.isdir(load_from):
+            candidate = os.path.join(load_from, "tekken.json")
+            if os.path.exists(candidate):
+                return candidate
+        return None
+
+    def _load_text_tokenizer(self, load_from: str):
+        try:
+            return AutoTokenizer.from_pretrained(load_from, trust_remote_code=self.trust_remote_code)
+        except ValueError as exc:
+            msg = str(exc)
+            if "Tokenizer class" not in msg:
+                raise
+            tekken_path = self._resolve_tekken_path(load_from)
+            if not tekken_path:
+                raise
+            try:
+                from mistral_common.tokens.tokenizers.tekken import Tekkenizer
+            except Exception as inner_exc:
+                raise RuntimeError(f"Tekken tokenizer unavailable: {inner_exc}") from exc
+            print("[HF] Falling back to Tekken tokenizer for Ministral.")
+            tokenizer = Tekkenizer.from_file(tekken_path)
+            return _TekkenTokenizerWrapper(tokenizer, model_dir=load_from)
 
     def _local_dir_ready(self) -> bool:
         if not self.local_dir or not os.path.isdir(self.local_dir):

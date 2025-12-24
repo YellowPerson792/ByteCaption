@@ -14,7 +14,7 @@ DATA_LOADER:
 
 ############################ EVAL BATCH ############################
 TEST:
-  BATCH_SIZE: 1
+  BATCH_SIZE: 10
 
 ############################ MODEL (HuggingFace) ############################
 MODEL:
@@ -22,9 +22,11 @@ MODEL:
   HF:
     MODEL_ID: 'mistralai/Ministral-3-8B-Instruct-2512'
     PROCESSOR_ID: 'mistralai/Ministral-3-8B-Instruct-2512'
-    LOCAL_DIR: '/root/autodl-fs/Ministral-3-8B-Instruct-2512'
+    LOCAL_DIR: '/autodl-fs/data/mistralai_Ministral-3-8B-Instruct-2512'
     TRUST_REMOTE_CODE: True
+    TORCH_DTYPE: 'bf16'
     LOW_CPU_MEM_USAGE: True
+    ATTN_IMPLEMENTATION: 'flash_attention_2'
     PROMPT_SOURCE: 'openrouter'
     USE_CHAT_TEMPLATE: True
     GENERATION:
@@ -32,8 +34,8 @@ MODEL:
       NUM_BEAMS: 5
 
   OPENROUTER:
-    SYSTEM_PROMPT: 'You are a captioning model.'
-    USER_PROMPT: 'Generate a short COCO-style caption (5-12 words). Output only the caption.'
+    SYSTEM_PROMPT: 'You are a vision captioning model.'
+    USER_PROMPT: 'You are given a possibly corrupted JPEG image. Output a short COCO-style caption. Use 5-12 words. Output only the caption with no extra text.'
     PLACEHOLDER: 'this is a dummy caption for an undecodable image'
 
 ############################ EVALUATION ############################
