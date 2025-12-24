@@ -766,6 +766,10 @@ class HFTrainerCollator:
         model_type = (self._model_type or "").lower()
         return "mistral3" in model_type
 
+    def _is_internvl(self) -> bool:
+        model_type = (self._model_type or "").lower()
+        return "internvl" in model_type
+
     def _build_chat_text(self, caption: str, with_answer: bool) -> str:
         prompt = ""
         if self.system_prompt:
@@ -971,7 +975,9 @@ class HFTrainerCollator:
             if labels is not None and self._pad_token_id is not None:
                 labels[labels == self._pad_token_id] = self.label_ignore
         else:
-            if self.use_chat_template and hasattr(self.processor, "apply_chat_template") and (self._is_qwen3_vl() or self._is_mistral3()):
+            if self.use_chat_template and hasattr(self.processor, "apply_chat_template") and (
+                self._is_qwen3_vl() or self._is_mistral3() or self._is_internvl()
+            ):
                 full_messages = [
                     self._build_chat_messages(img, cap)
                     for img, cap in zip(expanded_images, expanded_captions)
