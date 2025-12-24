@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""Ministral-3-8B-Instruct training launcher (HF Trainer).
+"""Ministral-8B-Instruct-2410 training launcher (HF Trainer).
 
-This wrapper mirrors the Qwen3-VL training defaults but targets the
-Ministral-3-8B-Instruct-2512 weights. Any CLI args you pass will override
+This wrapper mirrors the Ministral-3 defaults but targets
+mistralai/Ministral-8B-Instruct-2410. Any CLI args you pass will override
 the defaults set here.
 
-Example (CLI overrides, aligned with Qwen3-VL header style):
-    python tools/train_ministral_hf_trainer.py \
-        --folder PureT/experiments/ByteCaption_XE_ministral \
+Example:
+    python tools/train_ministral8_hf_trainer.py \
+        --folder PureT/experiments/ByteCaption_XE_ministral8 \
         --dataset coco \
-        --model_id mistralai/Ministral-3-8B-Instruct-2512 \
-        --processor_id mistralai/Ministral-3-8B-Instruct-2512 \
-        --local_dir Ministral-3-8B-Instruct-2512 \
+        --model_id mistralai/Ministral-8B-Instruct-2410 \
+        --processor_id mistralai/Ministral-8B-Instruct-2410 \
+        --local_dir ./Ministral-8B-Instruct-2410 \
         --train_samples 0 \
         --val_samples 200 \
-        --eval_steps 5 \
+        --eval_steps 200 \
         --best_metric SPICE \
         --early_stop_patience 4 \
         --max_epoch 2 \
@@ -37,11 +37,7 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
-from typing import Iterable, List
-
-"""
-python tools/run_batch_corruption_eval.py --models PureT/experiments/ByteCaption_XE_ministral --corrupt-types rbbf --corrupt-levels S1 S2 S3 S4 S5 --test-samples 0
-"""
+from typing import List
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TRAIN_SCRIPT = PROJECT_ROOT / "tools" / "train_hf_trainer.py"
@@ -64,11 +60,11 @@ def _append_default(cmd: List[str], argv: List[str], flag: str, value) -> None:
 def _build_command(argv: List[str]) -> List[str]:
     cmd = [sys.executable, str(TRAIN_SCRIPT)]
 
-    _append_default(cmd, argv, "--folder", "PureT/experiments/ByteCaption_XE_ministral")
+    _append_default(cmd, argv, "--folder", "PureT/experiments/ByteCaption_XE_ministral8")
     _append_default(cmd, argv, "--dataset", "coco")
-    _append_default(cmd, argv, "--model_id", "mistralai/Ministral-3-8B-Instruct-2512")
-    _append_default(cmd, argv, "--processor_id", "mistralai/Ministral-3-8B-Instruct-2512")
-    _append_default(cmd, argv, "--local_dir", "/autodl-fs/data/mistralai_Ministral-3-8B-Instruct-2512")
+    _append_default(cmd, argv, "--model_id", "mistralai/Ministral-8B-Instruct-2410")
+    _append_default(cmd, argv, "--processor_id", "mistralai/Ministral-8B-Instruct-2410")
+    _append_default(cmd, argv, "--local_dir", "./Ministral-8B-Instruct-2410")
     _append_default(cmd, argv, "--train_samples", 0)
     _append_default(cmd, argv, "--val_samples", 200)
     _append_default(cmd, argv, "--eval_steps", 200)
@@ -100,7 +96,7 @@ def _build_command(argv: List[str]) -> List[str]:
 def main() -> None:
     argv = sys.argv[1:]
     cmd = _build_command(argv)
-    print("[Ministral] Launch:", " ".join(cmd))
+    print("[Ministral8] Launch:", " ".join(cmd))
     subprocess.run(cmd, check=True)
 
 

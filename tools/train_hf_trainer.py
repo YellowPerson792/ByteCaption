@@ -531,6 +531,25 @@ def _load_text_tokenizer(load_from: str, trust_remote_code: bool):
         return _TekkenTokenizerWrapper(tokenizer, model_dir=load_from)
 
 
+def _should_retry_processor_with_slow_tokenizer(exc: Exception) -> bool:
+    msg = str(exc).lower()
+    return "start_image_token" in msg or "qwen2tokenizerfast" in msg
+
+
+def _load_processor_with_fallback(load_from: str, trust_remote_code: bool):
+    try:
+        return AutoProcessor.from_pretrained(load_from, trust_remote_code=trust_remote_code)
+    except Exception as exc:
+        if _should_retry_processor_with_slow_tokenizer(exc):
+            print("[HF] Processor init failed; retrying with use_fast=False.")
+            return AutoProcessor.from_pretrained(
+                load_from,
+                trust_remote_code=trust_remote_code,
+                use_fast=False,
+            )
+        raise
+
+
 def _maybe_disable_fp8_quantization(config) -> bool:
     if not hasattr(config, "quantization_config"):
         return False
@@ -588,7 +607,7 @@ def _load_model_and_processor(hf_cfg, text_only: bool = False):
             processor.pad_token = processor.eos_token or processor.bos_token
         processor.padding_side = "left"
     else:
-        processor = AutoProcessor.from_pretrained(
+        processor = _load_processor_with_fallback(
             processor_load_from, trust_remote_code=trust_remote_code
         )
 
@@ -769,6 +788,10 @@ class HFTrainerCollator:
     def _is_internvl(self) -> bool:
         model_type = (self._model_type or "").lower()
         return "internvl" in model_type
+
+    def _is_glm(self) -> bool:
+        model_type = (self._model_type or "").lower()
+        return "glm" in model_type
 
     def _build_chat_text(self, caption: str, with_answer: bool) -> str:
         prompt = ""
@@ -976,7 +999,7 @@ class HFTrainerCollator:
                 labels[labels == self._pad_token_id] = self.label_ignore
         else:
             if self.use_chat_template and hasattr(self.processor, "apply_chat_template") and (
-                self._is_qwen3_vl() or self._is_mistral3() or self._is_internvl()
+                self._is_qwen3_vl() or self._is_mistral3() or self._is_internvl() or self._is_glm()
             ):
                 full_messages = [
                     self._build_chat_messages(img, cap)
