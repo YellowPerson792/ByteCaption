@@ -1,12 +1,5 @@
 LOGGER_NAME: 'log'
-SEED: 1234.
-
-############################ TRAIN ############################
-TRAIN:
-  BATCH_SIZE: 10
-  #################### REINFORCEMENT ####################
-  REINFORCEMENT:
-    START: 9999
+SEED: 1234
 
 ############################ TEST ############################
 TEST:
@@ -16,20 +9,10 @@ TEST:
 DATA_LOADER:
   NUM_WORKERS: 0
   SHUFFLE: False
-  TRAIN_GV_FEAT: ''
-  TRAIN_ATT_FEATS: ''
-  VAL_GV_FEAT: ''
-  VAL_ATT_FEATS: ''
-  TEST_GV_FEAT: ''
-  TEST_ATT_FEATS: ''
   TRAIN_ID: './PureT/data/coco_karpathy/train_ids.json'
   VAL_ID: './PureT/data/coco_karpathy/validation_ids.json'
   TEST_ID: './PureT/data/coco_karpathy/test_ids.json'
-  TEST_4W_ID: './PureT/data/coco_karpathy/test_ids.json'
-  INPUT_SEQ_PATH: ''
-  TARGET_SEQ_PATH: ''
   SEQ_PER_IMG: 5
-  MAX_FEAT: -1
 
 ############################ CORRUPTION ############################
 CORRUPTION:
@@ -43,8 +26,9 @@ MODEL:
     # MODEL_ID: 'google/gemini-2.5-flash'
     # MODEL_ID: 'openai/gpt-5.1'
     # MODEL_ID: 'qwen/qwen3-vl-32b-instruct'
-    MODEL_ID: 'x-ai/grok-4'
+    # MODEL_ID: 'x-ai/grok-4'
     # MODEL_ID: 'mistralai/mistral-large-2512'
+    MODEL_ID: 'anthropic/claude-haiku-4.5'
     API_BASE: 'https://openrouter.ai/api/v1/chat/completions'
     API_KEY: ''
     API_KEY_PATH: 'openrouter_api'
@@ -53,10 +37,10 @@ MODEL:
     PROXY: 'http://127.0.0.1:7897'
     # PROXY: ''
     TIMEOUT: 15
-    MAX_TOKENS: 32
+    MAX_TOKENS: 64
     TEMPERATURE: 0.0
     TOP_P: 1.0
-    MAX_WORKERS: 60
+    MAX_WORKERS: 20
     BATCH_SIZE: 0
     SYSTEM_PROMPT: 'You are a vision captioning model.'
     USER_PROMPT: 'You are given a possibly corrupted JPEG image. Output a short COCO-style caption. Use 5-12 words. Output only the caption with no extra text.'
@@ -70,86 +54,6 @@ MODEL:
       BACKOFF_MAX: 6.0
       ON_EMPTY_RESPONSE: false
       ON_TRUNCATED: false
-
-  SEQ_LEN: 17
-  VOCAB_SIZE: 9487
-  WORD_EMBED_DIM: 512
-  WORD_EMBED_ACT: 'CELU'
-  WORD_EMBED_NORM: True
-  DROPOUT_WORD_EMBED: 0.1
-  GVFEAT_DIM: 1
-  GVFEAT_EMBED_DIM: -1
-  GVFEAT_EMBED_ACT: 'NONE'
-  DROPOUT_GV_EMBED: 0.0
-  ATT_FEATS_DIM: 192
-  ATT_FEATS_EMBED_DIM: 512
-  ATT_FEATS_EMBED_ACT: 'CELU'
-  DROPOUT_ATT_EMBED: 0.1
-  ATT_FEATS_NORM: False
-  ATT_HIDDEN_SIZE: -1
-  ATT_HIDDEN_DROP: 0.0
-  ATT_ACT: 'TANH'
-  RNN_SIZE: 512
-  DROPOUT_LM: 0.1
-
-  BOTTOM_UP:
-    DROPOUT_FIRST_INPUT: 0.0
-    DROPOUT_SEC_INPUT: 0.0
-
-  BILINEAR:
-    DIM: 512
-    ENCODE_ATT_MID_DIM: [64, 32, 64]
-    DECODE_ATT_MID_DIM: [64, 32, 64]
-    ENCODE_ATT_MID_DROPOUT: 0.1
-    DECODE_ATT_MID_DROPOUT: 0.1
-    ATT_DIM: 512
-    ACT: 'CELU'
-    ENCODE_DROPOUT: 0.1
-    DECODE_DROPOUT: 0.1
-    ENCODE_LAYERS: 3
-    DECODE_LAYERS: 3
-    TYPE: 'LowRank'
-    ATTTYPE: 'SCAtt'
-    HEAD: 8
-    ENCODE_FF_DROPOUT: 0.1
-    DECODE_FF_DROPOUT: 0.1
-    ELU_ALPHA: 1.3
-    BIFEAT_EMB_ACT: 'RELU'
-    ENCODE_BIFEAT_EMB_DROPOUT: 0.1
-    DECODE_BIFEAT_EMB_DROPOUT: 0.1
-
-############################ SOLVER ############################
-SOLVER:
-  BASE_LR: 0.00005
-  TYPE: 'ADAM'
-  MAX_EPOCH: 10
-  MAX_ITER: -1
-  GRAD_CLIP: 0.1
-  GRAD_CLIP_TYPE: 'Clamp'
-  WEIGHT_DECAY: 0.0000
-  WEIGHT_DECAY_BIAS: 0.0
-  BIAS_LR_FACTOR: 1
-  DISPLAY: 20
-  TEST_INTERVAL: 1
-  SNAPSHOT_ITERS: 1
-  MAX_CHECKPOINTS: 2
-
-  SGD:
-    MOMENTUM: 0.9
-  ADAM:
-    BETAS: [0.9, 0.98]
-    EPS: 1.0e-9
-  LR_POLICY:
-    TYPE: 'Linear'
-    START_FACTOR: 1.0
-    END_FACTOR: 0.0
-    STEP_TYPE: 'Iter'
-
-############################ LOSSES ############################
-LOSSES:
-  XE_TYPE: 'LabelSmoothing'
-  LABELSMOOTHING: 0.1
-  RL_TYPE: 'RewardCriterion'
 
 ############################ SCORER ############################
 SCORER:

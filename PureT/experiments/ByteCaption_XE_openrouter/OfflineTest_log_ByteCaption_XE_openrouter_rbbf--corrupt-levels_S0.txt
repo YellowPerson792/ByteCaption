@@ -60,3 +60,10 @@
 [ERROR: 2025-12-23 15:56:46,280] OpenRouter API error choice_error: {"error": {"message": "Network connection lost.", "code": 502, "metadata": {"provider_name": "OpenAI"}}}
 [INFO: 2025-12-23 16:16:17,004] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
 [INFO: 2025-12-23 16:20:12,181] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[INFO: 2025-12-23 22:07:37,894] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-23 22:07:44,771] OpenRouter API error truncated_output: {"finish_reason": "length", "native_finish_reason": "length", "max_tokens": 32}
+[INFO: 2025-12-23 22:09:21,855] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-23 22:09:30,243] OpenRouter API error truncated_output: {"finish_reason": "length", "native_finish_reason": "length", "max_tokens": 32}
+[INFO: 2025-12-23 22:10:55,493] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-23 22:10:58,003] OpenRouter API error truncated_output: {"finish_reason": "length", "native_finish_reason": "length", "max_tokens": 64}
+[INFO: 2025-12-23 22:37:34,890] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
