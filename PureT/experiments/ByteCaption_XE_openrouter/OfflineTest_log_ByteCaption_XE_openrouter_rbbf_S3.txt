@@ -3,3 +3,9 @@
 [ERROR: 2025-12-20 22:31:20,525] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
 [INFO: 2025-12-20 23:04:58,660] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
 [ERROR: 2025-12-20 23:04:59,655] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\n  \"error\": {\n    \"message\": \"The image data you provided does not represent a valid image. Please check your
+[INFO: 2025-12-23 23:25:42,930] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-23 23:25:44,015] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\"code\":\"Client specified an invalid argument\",\"error\":\"Invalid request content: Failed to decode image buffer
+[INFO: 2025-12-23 23:33:54,810] OPENROUTER model uses HF weights. Skipping local checkpoint loading.
+[ERROR: 2025-12-23 23:33:56,634] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Could not process image\"},\"request_
+[ERROR: 2025-12-23 23:37:15,295] OpenRouter API error api_error: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Could not process image\"},\"request_
+[ERROR: 2025-12-23 23:40:26,619] OpenRouter API error 400: {"error": {"message": "Provider returned error", "code": 400, "metadata": {"raw": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"messages.0.content.1.image.source.bas
