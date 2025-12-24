@@ -220,6 +220,24 @@ def _close_spice_server():
 atexit.register(_close_spice_server)
 
 
+def _safe_unlink(path, retries=5, delay=0.1):
+    """Best-effort file removal (Windows can hold temp files briefly)."""
+    if not path:
+        return
+    for attempt in range(retries + 1):
+        try:
+            os.remove(path)
+            return
+        except FileNotFoundError:
+            return
+        except PermissionError:
+            if attempt >= retries:
+                return
+            time.sleep(delay)
+        except Exception:
+            return
+
+
 def _get_spice_server(cwd, cache_dir):
     global _SPICE_SERVER
     use_server = _env_flag("SPICE_SERVER")
@@ -367,8 +385,8 @@ class Spice:
         # Read and process results
         with open(out_file.name) as data_file:    
           results = json.load(data_file)
-        os.remove(in_file.name)
-        os.remove(out_file.name)
+        _safe_unlink(in_file.name)
+        _safe_unlink(out_file.name)
         # Some environments prune empty cache directories; keep it persistent.
         self._ensure_cache_dir()
 
