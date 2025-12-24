@@ -314,6 +314,23 @@ def blip_collate_val(batch: Sequence[Tuple[Any, ...]]):
         for corrupted_bytes, marker in corrupted_variants:
             try:
                 reconstructed_img = Image.open(io.BytesIO(corrupted_bytes)).convert("RGB")
+                
+                # 检查宽高比，避免 Qwen 模型的宽高比限制问题（最大 200）
+                width, height = reconstructed_img.size
+                if width > 0 and height > 0:
+                    aspect_ratio = max(width, height) / min(width, height)
+                    max_aspect_ratio = float(os.environ.get("BC_MAX_ASPECT_RATIO", "150"))
+                    
+                    if aspect_ratio > max_aspect_ratio:
+                        # 调整图像尺寸以满足宽高比要求
+                        if width > height:
+                            new_width = int(height * max_aspect_ratio)
+                            new_height = height
+                        else:
+                            new_width = width
+                            new_height = int(width * max_aspect_ratio)
+                        reconstructed_img = reconstructed_img.resize((new_width, new_height), Image.LANCZOS)
+                
                 blip_image_tensors.append(reconstructed_img)
 
                 # --- START: 添加小样本保存逻辑 ---
@@ -338,8 +355,13 @@ def blip_collate_val(batch: Sequence[Tuple[Any, ...]]):
                     successful_corruption_samples_saved += 1
                 # --- END: 添加小样本保存逻辑 ---
 
-            except Exception:
+            except Exception as e:
                 # 解码失败，用 None 作为占位符
+                # 记录错误类型用于调试
+                error_msg = str(e)
+                if "aspect ratio" in error_msg.lower() or "max_aspect_ratio" in error_msg.lower():
+                    # 宽高比问题已被调整逻辑处理，这里不应该触发
+                    pass
                 blip_image_tensors.append(None)
 
     # 3. 同步元数据，使其数量与增强后的图像数量匹配

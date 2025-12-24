@@ -38,12 +38,17 @@ class Meteor:
         # immediately, leading to BrokenPipeError in compute_score.
         self.meteor_cmd = ['java', '-Xmx2G', '-jar', METEOR_JAR,
                 '-', '-', '-stdio', '-l', 'en', '-norm']
-        self.meteor_p = subprocess.Popen(self.meteor_cmd, \
-                cwd=os.path.dirname(os.path.abspath(__file__)), \
-                stdin=subprocess.PIPE, \
-                stdout=subprocess.PIPE, \
+        self.meteor_p = subprocess.Popen(
+                self.meteor_cmd,
+                cwd=os.path.dirname(os.path.abspath(__file__)),
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                env=self.env, universal_newlines=True, bufsize=1)
+                env=self.env,
+                universal_newlines=True,
+                encoding="utf-8",
+                bufsize=1
+        )
         # Used to guarantee thread safety
         self.lock = threading.Lock()
 

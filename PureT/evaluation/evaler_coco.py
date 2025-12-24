@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import tqdm
 import json
+import gc
 import evaluation
 import losses
 import lib.utils as utils
@@ -135,7 +136,7 @@ class CocoEvaler(object):
 
         with torch.no_grad():
             pbar = tqdm.tqdm(self.eval_loader, desc=f"Evaluating {rname} ({cfg.MODEL.TYPE})", leave=False)
-            for _, data_batch in enumerate(pbar):
+            for batch_idx, data_batch in enumerate(pbar):
                 indices, gv_feat, data, att_mask = data_batch
                 
                 # --- 执行可靠的ID查找 ---
@@ -179,7 +180,10 @@ class CocoEvaler(object):
                     sents = decoded_output
                 else:
                     # 如果是 ByteFormer 返回的 Tensor
-                    sents = utils.decode_sequence(self.vocab, decoded_output.data)
+                    # 立即转到 CPU 并释放 GPU 张量
+                    decoded_output_cpu = decoded_output.cpu()
+                    sents = utils.decode_sequence(self.vocab, decoded_output_cpu.data)
+                    del decoded_output, decoded_output_cpu
 
                 # 尝试构建输入/目标序列以计算XE loss（仅当启用且数据集支持时）
                 batch_loss = None
@@ -236,6 +240,9 @@ class CocoEvaler(object):
                                     loss_count += bs
                                 except Exception:
                                     pass
+                            
+                            # 立即释放这些临时张量
+                            del input_seq, target_seq, logit
                     except Exception as e:
                         # 仅在第一个批次打印详细错误信息用于调试
                         if len(results) == 0:  # 第一个批次
@@ -308,6 +315,32 @@ class CocoEvaler(object):
                         
                     global_idx += 1
                 # --- 修复结束 ---
+                
+                # 【关键优化】每个批次后立即清理 GPU 内存
+                # 删除不再需要的张量引用
+                if is_byteformer:
+                    # ByteFormer 的 att_feats 是 GPU 张量，需要删除
+                    del att_feats
+                    if att_mask is not None:
+                        del att_mask
+                # gv_feat 总是 GPU 张量
+                del gv_feat
+                if batch_loss is not None:
+                    del batch_loss
+                
+                # 每 10 个批次强制清理一次缓存，防止显存累积
+                if batch_idx % 10 == 0 and torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+
+        # 评估循环结束，最终清理 GPU 内存
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
+        gc.collect()
+        
+        # 清理 xe_criterion
+        if xe_criterion is not None:
+            del xe_criterion
 
         # Evaluate (capture stdout to avoid duplicate printing)
         import sys

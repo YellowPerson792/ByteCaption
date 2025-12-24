@@ -3,7 +3,7 @@ SEED: 1234
 
 ############################ TEST ############################
 TEST:
-  BATCH_SIZE: 60
+  BATCH_SIZE: 20
 
 ############################ DATA_LOADER ############################
 DATA_LOADER:
@@ -40,7 +40,7 @@ MODEL:
     MAX_TOKENS: 64
     TEMPERATURE: 0.0
     TOP_P: 1.0
-    MAX_WORKERS: 60
+    MAX_WORKERS: 20
     BATCH_SIZE: 0
     SYSTEM_PROMPT: 'You are a vision captioning model.'
     USER_PROMPT: 'You are given a possibly corrupted JPEG image. Output a short COCO-style caption. Use 5-12 words. Output only the caption with no extra text.'

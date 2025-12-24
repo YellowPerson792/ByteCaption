@@ -10,7 +10,9 @@ from pathlib import Path
 from typing import Optional
 
 """
-python "tools\test_openrouter_api.py" --image "PureT\data\coco_karpathy\test_sample_500\00000_id42.jpg"
+python "tools\test_openrouter_api.py" \
+    --image "PureT\data\coco_karpathy\test_sample_500\00000_id42.jpg" \
+    --model 'anthropic/claude-haiku-4.5'
 """
 
 def _resolve_key(args: argparse.Namespace) -> str:

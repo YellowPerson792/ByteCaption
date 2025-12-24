@@ -14,7 +14,7 @@ DATA_LOADER:
 
 ############################ EVAL BATCH ############################
 TEST:
-  BATCH_SIZE: 10
+  BATCH_SIZE: 15
 
 ############################ MODEL (HuggingFace) ############################
 MODEL:
