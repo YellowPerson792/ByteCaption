@@ -7,7 +7,7 @@ Example:
 python tools/run_batch_corruption_eval.py \
 --models PureT/experiments/ByteCaption_XE_qwen \
 --corrupt-types rbsl \
---corrupt-levels S2 S3 \
+--corrupt-levels S3 S4 S5 \
 --save-captions 500 \
 --test-samples 0
     
@@ -16,7 +16,7 @@ python tools/run_batch_corruption_eval.py \
 --corrupt-types rbbf \
 --corrupt-levels S1 \
 --save-captions 500 \
---test-samples 0
+--test-samples 
 """
 
 import argparse
@@ -271,7 +271,7 @@ def parse_args():
     )
     parser.add_argument("--corrupt-types", nargs="+", default=["rbbf", "rbsl", "metadata_loss"])
     parser.add_argument("--corrupt-levels", nargs="+", default=["S0", "S1", "S2", "S3", "S4", "S5"])
-    parser.add_argument("--test-samples", type=int, default=80, help="Number of test samples (0 = all)")
+    parser.add_argument("--test-samples", type=int, default=0, help="Number of test samples (0 = all)")
     parser.add_argument("--val-samples", type=int, default=None, help="(Alias) Number of test samples (0 = all)")
     parser.add_argument("--dataset", type=str, default="coco", choices=["coco", "flickr8k"])
     parser.add_argument("--resume", type=int, default=-1, help="Checkpoint to load (-1 = best)")
