@@ -129,9 +129,7 @@ class HFCaptionModel(nn.Module):
                         self._with_unsafe_safetensors(model_kwargs),
                     )
             else:
-                self.processor = AutoProcessor.from_pretrained(
-                    load_from, trust_remote_code=self.trust_remote_code
-                )
+                self.processor = self._load_processor_with_fallback(load_from)
                 self.model = self._load_auto_model(load_from, model_kwargs)
 
         if hf_cfg and bool(getattr(hf_cfg, "GRADIENT_CHECKPOINTING", False)):
@@ -236,6 +234,25 @@ class HFCaptionModel(nn.Module):
         except Exception:
             return ""
         return ""
+
+    def _should_retry_processor_with_slow_tokenizer(self, exc: Exception) -> bool:
+        msg = str(exc).lower()
+        return "start_image_token" in msg or "qwen2tokenizerfast" in msg
+
+    def _load_processor_with_fallback(self, load_from: str):
+        try:
+            return AutoProcessor.from_pretrained(
+                load_from, trust_remote_code=self.trust_remote_code
+            )
+        except Exception as exc:
+            if self._should_retry_processor_with_slow_tokenizer(exc):
+                print("[HF] Processor init failed; retrying with use_fast=False.")
+                return AutoProcessor.from_pretrained(
+                    load_from,
+                    trust_remote_code=self.trust_remote_code,
+                    use_fast=False,
+                )
+            raise
 
     def _tensor_brief(self, value: torch.Tensor) -> str:
         if not isinstance(value, torch.Tensor):
