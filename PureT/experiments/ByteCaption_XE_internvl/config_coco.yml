@@ -20,15 +20,15 @@ TEST:
 MODEL:
   TYPE: 'INTERNVL'
   HF:
-    MODEL_ID: 'OpenGVLab/InternVL3_5-8B'
-    PROCESSOR_ID: 'OpenGVLab/InternVL3_5-8B'
-    LOCAL_DIR: './InternVL3_5-8B'
+    MODEL_ID: 'InternVL3_5-8B-HF/OpenGVLab/InternVL3_5-8B-HF'
+    PROCESSOR_ID: 'InternVL3_5-8B-HF/OpenGVLab/InternVL3_5-8B-HF'
+    LOCAL_DIR: 'InternVL3_5-8B-HF/OpenGVLab/InternVL3_5-8B-HF'
     TRUST_REMOTE_CODE: True
     TORCH_DTYPE: 'bf16'
     LOW_CPU_MEM_USAGE: True
     ATTN_IMPLEMENTATION: 'flash_attention_2'
     MIRROR: 'https://hf-mirror.com'
-    DISABLE_PROXY: True
+    DISABLE_PROXY: False
     PROMPT_SOURCE: 'openrouter'
     USE_CHAT_TEMPLATE: False
     GENERATION:

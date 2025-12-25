@@ -104,6 +104,8 @@ class CocoDataset(data.Dataset):
 
         # Build image_ids list for compatibility
         ids_from_json = None
+        print(f"[DEBUG CocoDataset] image_ids_path={image_ids_path}")
+        print(f"[DEBUG CocoDataset] Path exists: {os.path.exists(image_ids_path) if image_ids_path else 'Path is None'}")
         if image_ids_path and os.path.exists(image_ids_path):
             with open(image_ids_path, 'r', encoding='utf-8') as f:
                 txt = f.read().strip()
@@ -111,14 +113,26 @@ class CocoDataset(data.Dataset):
                     obj = json.loads(txt)
                     if isinstance(obj, dict) and len(obj) > 0:
                         ids_from_json = list(obj.keys())
+                        print(f"[DEBUG CocoDataset] Successfully loaded {len(ids_from_json)} IDs from JSON")
 
         if ids_from_json is None:
-            self.image_ids = [str(i) for i in range(len(self.ds))]
+            # 使用顺序 ID：转换为整数以便与评估器匹配
+            self.image_ids = [i for i in range(len(self.ds))]
             print(f"Using sequential image IDs: 0 to {len(self.ds)-1}")
         else:
             max_n = min(len(ids_from_json), len(self.ds))
-            self.image_ids = ids_from_json[:max_n]
+            # 尝试将 IDs 转换为整数，以便与评估器中的 id_to_captions 键匹配
+            converted_ids = []
+            for id_str in ids_from_json[:max_n]:
+                try:
+                    converted_ids.append(int(id_str))
+                except (ValueError, TypeError):
+                    # 如果转换失败，保持原始形式
+                    converted_ids.append(id_str)
+            self.image_ids = converted_ids
             print(f"Loaded {len(self.image_ids)} image IDs from JSON file")
+            if len(self.image_ids) > 0:
+                print(f"First 5 image IDs: {self.image_ids[:5]}")
 
         # Optional sequence pkls; if unavailable, auto-build sequences from HF captions
         self.auto_seq: bool = False
