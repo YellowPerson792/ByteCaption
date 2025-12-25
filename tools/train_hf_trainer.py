@@ -27,7 +27,32 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
         --lora_alpha 32 \
         --lora_dropout 0.05 \
         --lora_target_modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj \
-        --attn_implementation flash_attention_2 
+        --attn_implementation flash_attention_2 \
+        --disable_wandb
+        
+    python tools/train_hf_trainer.py \
+        --folder PureT/experiments/ByteCaption_XE_qwen \
+        --dataset coco \
+        --model_id InternVL3_5-8B-HF/OpenGVLab/InternVL3_5-8B-HF \
+        --processor_id InternVL3_5-8B-HF/OpenGVLab/InternVL3_5-8B-HF \
+        --local_dir InternVL3_5-8B-HF/OpenGVLab/InternVL3_5-8B-HF \
+        --train_samples 0 \
+        --val_samples 200 \
+        --eval_steps 200 \
+        --best_metric SPICE \
+        --early_stop_patience 4 \
+        --max_epoch 2 \
+        --batch_size 1 \
+        --grad_accum_steps 8 \
+        --num_workers 8 \
+        --train_max_length 512 \
+        --train_truncation 1 \
+        --lora_r 16 \
+        --lora_alpha 32 \
+        --lora_dropout 0.05 \
+        --lora_target_modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj \
+        --attn_implementation flash_attention_2 \
+        --disable_wandb
 """
 
 import torch
@@ -408,9 +433,14 @@ def _load_model_and_processor(hf_cfg):
 
     model_id_lower = str(model_id).lower()
     is_qwen_vl = "qwen" in model_id_lower and "vl" in model_id_lower
+    is_internvl = "internvl" in model_id_lower
 
     if is_qwen_vl and Qwen3VLForConditionalGeneration is not None:
         model = _load_with_safetensor_retry(Qwen3VLForConditionalGeneration)
+    elif is_internvl:
+        # InternVL requires AutoModelForImageTextToText (not AutoModelForVision2Seq)
+        from transformers import AutoModelForImageTextToText
+        model = _load_with_safetensor_retry(AutoModelForImageTextToText)
     else:
         model_config = AutoConfig.from_pretrained(
             load_from,
