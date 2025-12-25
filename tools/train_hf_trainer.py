@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
         --processor_id Qwen/Qwen3-VL-8B-Instruct \
         --local_dir ./Qwen3-VL-8B-Instruct \
         --train_samples 0 \
-        --val_samples 200 \
-        --eval_steps 200 \
+        --val_samples 10 \
+        --eval_steps 5 \
         --best_metric SPICE \
         --early_stop_patience 4 \
         --max_epoch 2 \
@@ -869,7 +869,6 @@ class HFDecodeWrapper:
         user_prompt: str = "",
         placeholder: str = "this is a dummy caption for an undecodable image",
         use_chat_template: bool = False,
-        text_only: bool = False,
     ) -> None:
         self.model = getattr(model, "module", model)
         self.processor = processor
@@ -878,7 +877,6 @@ class HFDecodeWrapper:
         self.user_prompt = user_prompt
         self.placeholder = placeholder
         self.use_chat_template = use_chat_template
-        self.text_only = bool(text_only)
 
     def eval(self):
         self.model.eval()
@@ -919,22 +917,22 @@ class HFDecodeWrapper:
         return self.user_prompt or self.system_prompt or ""
 
     def _prepare_model_inputs(self, images: List[Any]) -> dict:
-        if self.text_only:
-            if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
-                messages = [self._build_text_messages() for _ in images]
-                inputs = self.processor.apply_chat_template(
-                    messages,
-                    tokenize=True,
-                    add_generation_prompt=True,
-                    return_dict=True,
-                    return_tensors="pt",
-                    padding=True,
-                )
-            else:
-                prompt_text = self._compose_prompt_text()
-                texts = [prompt_text for _ in images]
-                inputs = self.processor(texts, return_tensors="pt", padding=True)
-        elif self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
+        if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
+            messages = [self._build_text_messages() for _ in images]
+            inputs = self.processor.apply_chat_template(
+                messages,
+                tokenize=True,
+                add_generation_prompt=True,
+                return_dict=True,
+                return_tensors="pt",
+                padding=True,
+            )
+        else:
+            prompt_text = self._compose_prompt_text()
+            texts = [prompt_text for _ in images]
+            inputs = self.processor(texts, return_tensors="pt", padding=True)
+            
+        if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
             messages = [self._build_chat_messages(image) for image in images]
             inputs = self.processor.apply_chat_template(
                 messages,
@@ -976,18 +974,12 @@ class HFDecodeWrapper:
         images = kwargs[cfg.PARAM.ATT_FEATS]
         beam_size = kwargs.get("BEAM_SIZE", self.generation_kwargs.get("num_beams", 3))
 
-        if self.text_only:
-            count = len(images)
-            if count == 0:
-                return [], None
-            inputs = self._prepare_model_inputs(list(images))
-            original_indices = list(range(count))
-        else:
-            valid_images_with_indices = [(i, img) for i, img in enumerate(images) if img is not None]
-            if not valid_images_with_indices:
-                return [self.placeholder for _ in range(len(images))], None
-            original_indices, valid_images = zip(*valid_images_with_indices)
-            inputs = self._prepare_model_inputs(list(valid_images))
+        valid_images_with_indices = [(i, img) for i, img in enumerate(images) if img is not None]
+        if not valid_images_with_indices:
+            return [self.placeholder for _ in range(len(images))], None
+        original_indices, valid_images = zip(*valid_images_with_indices)
+        inputs = self._prepare_model_inputs(list(valid_images))
+        
         gen_kwargs = dict(self.generation_kwargs)
         gen_kwargs["num_beams"] = beam_size
 
@@ -1092,7 +1084,6 @@ class CaptionTrainer(Trainer):
             user_prompt=self.user_prompt,
             placeholder=self.placeholder,
             use_chat_template=self.use_chat_template,
-            text_only=self.text_only,
         )
         metrics = self.caption_evaler(wrapper, self.eval_name)
         prefixed = {f"{metric_key_prefix}_{k}": v for k, v in metrics.items()}
