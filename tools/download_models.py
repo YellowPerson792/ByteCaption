@@ -10,8 +10,8 @@ import os
 def download_internvl():
     """下载模型"""
     
-    model_id = "ZhipuAI/GLM-4.6V-Flash"
-    local_dir = "./GLM-4.6V-Flash"
+    model_id = "OpenGVLab/InternVL3_5-8B-HF"
+    local_dir = "./InternVL3_5-8B-HF"
     
     print(f"开始从 ModelScope 下载模型: {model_id}")
     print(f"保存路径: {local_dir}")

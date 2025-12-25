@@ -23,6 +23,8 @@
     "<box>",
     "</box>"
   ],
+  "context_image_token": "<IMG_CONTEXT>",
+  "end_image_token": "</img>",
   "eos_token": {
     "content": "<|im_end|>",
     "lstrip": false,
@@ -36,5 +38,7 @@
     "normalized": false,
     "rstrip": false,
     "single_word": false
-  }
+  },
+  "start_image_token": "<img>",
+  "video_token": "<video>"
 }
