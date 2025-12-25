@@ -490,6 +490,8 @@ def load_val(image_ids_path, gv_feat_path: str = '', att_feats_folder=None, max_
         or "blip" in model_type
         or "git" in model_type
         or "qwen" in model_type
+        or "internvl" in model_type
+        or "glm" in model_type
         or "mistral" in model_type
         or "ministral" in model_type
     )

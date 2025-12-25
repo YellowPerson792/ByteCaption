@@ -1,0 +1,146 @@
+{
+  "best_global_step": 10,
+  "best_metric": 0.23851697057532129,
+  "best_model_checkpoint": "PureT/experiments/ByteCaption_XE_internvl/snapshot/hf_lora/checkpoint-10",
+  "epoch": 0.0007061710522831393,
+  "eval_steps": 5,
+  "global_step": 10,
+  "is_hyper_param_search": false,
+  "is_local_process_zero": true,
+  "is_world_process_zero": true,
+  "log_history": [
+    {
+      "epoch": 7.061710522831393e-05,
+      "grad_norm": 6.164029121398926,
+      "learning_rate": 0.0005,
+      "loss": 3.4691,
+      "step": 1
+    },
+    {
+      "epoch": 0.00035308552614156966,
+      "eval_Bleu_1": 0.7813182311112058,
+      "eval_Bleu_2": 0.6315437028387061,
+      "eval_Bleu_3": 0.4734831745385511,
+      "eval_Bleu_4": 0.33319239586673294,
+      "eval_CIDEr": 1.3223100016931804,
+      "eval_METEOR": 0.26580260630285524,
+      "eval_ROUGE_L": 0.5802685211673542,
+      "eval_SPICE": 0.2099963481360776,
+      "eval_Sample_Preview": [
+        {
+          "augmentation_idx": 0,
+          "generated": "A living room with a television and a dining room.",
+          "image_id": 1,
+          "reference": "A woman stands in the dining area at the table."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A brown bear is laying down on the grass.",
+          "image_id": 2,
+          "reference": "A big burly grizzly bear is show with grass in the background."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A young boy crouching down with a baseball glove.",
+          "image_id": 3,
+          "reference": "A young boy getting ready to catch a baseball in a grass field."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A hamburger with a bun and a bun wrapper.",
+          "image_id": 4,
+          "reference": "A chicken sandwich in a wrapper near a cell phone."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A bathroom with a mirror, sink, and a TV.",
+          "image_id": 5,
+          "reference": "a bathroom wih a big mirror and a tv attached in the corner"
+        }
+      ],
+      "eval_Total_Samples": 50,
+      "eval_Undecodable_Count": 0,
+      "eval_Undecodable_Ratio": 0.0,
+      "eval_XE_Loss": null,
+      "step": 5
+    },
+    {
+      "epoch": 0.0007061710522831393,
+      "eval_Bleu_1": 0.7988165680457617,
+      "eval_Bleu_2": 0.6215292454319368,
+      "eval_Bleu_3": 0.4484191087702712,
+      "eval_Bleu_4": 0.3209285485543966,
+      "eval_CIDEr": 1.4077362167232998,
+      "eval_METEOR": 0.2939465355139141,
+      "eval_ROUGE_L": 0.5839002614769973,
+      "eval_SPICE": 0.23851697057532129,
+      "eval_Sample_Preview": [
+        {
+          "augmentation_idx": 0,
+          "generated": "A living room with a television, dining room, and kitchen.",
+          "image_id": 1,
+          "reference": "A woman stands in the dining area at the table."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A brown bear laying down on the grass.",
+          "image_id": 2,
+          "reference": "A big burly grizzly bear is show with grass in the background."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A young boy playing baseball on a grass field.",
+          "image_id": 3,
+          "reference": "A young boy getting ready to catch a baseball in a grass field."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A sandwich with a bun and a white napkin.",
+          "image_id": 4,
+          "reference": "A chicken sandwich in a wrapper near a cell phone."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A bathroom with a double sink vanity and a mirror.",
+          "image_id": 5,
+          "reference": "a bathroom wih a big mirror and a tv attached in the corner"
+        }
+      ],
+      "eval_Total_Samples": 50,
+      "eval_Undecodable_Count": 0,
+      "eval_Undecodable_Ratio": 0.0,
+      "eval_XE_Loss": null,
+      "step": 10
+    }
+  ],
+  "logging_steps": 20,
+  "max_steps": 14161,
+  "num_input_tokens_seen": 0,
+  "num_train_epochs": 1,
+  "save_steps": 5,
+  "stateful_callbacks": {
+    "EarlyStoppingCallback": {
+      "args": {
+        "early_stopping_patience": 4,
+        "early_stopping_threshold": 0.0
+      },
+      "attributes": {
+        "early_stopping_patience_counter": 0
+      }
+    },
+    "TrainerControl": {
+      "args": {
+        "should_epoch_stop": false,
+        "should_evaluate": false,
+        "should_log": false,
+        "should_save": true,
+        "should_training_stop": false
+      },
+      "attributes": {}
+    }
+  },
+  "total_flos": 9274777420308480.0,
+  "train_batch_size": 1,
+  "trial_name": null,
+  "trial_params": null
+}

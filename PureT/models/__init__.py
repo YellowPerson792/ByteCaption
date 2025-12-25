@@ -3,6 +3,7 @@ from models.pure_transformer import PureT_Base
 from models.pure_transformer import PureT_Base_22K
 from models.pure_byteformer import PureT_byteformer
 from .hf_caption_model import HFCaptionModel
+from .hf_vl_caption_model import HFVLCaptionModel
 from .openrouter_caption_model import OpenRouterCaptionModel
 
 __factory = {
@@ -16,6 +17,11 @@ __factory = {
     'HF': HFCaptionModel,
     'GIT': HFCaptionModel,
     'HF_GIT': HFCaptionModel,
+    'QWEN': HFVLCaptionModel,
+    'INTERNVL': HFVLCaptionModel,
+    'GLM': HFVLCaptionModel,
+    'MINISTRAL': HFVLCaptionModel,
+    'MISTRAL': HFVLCaptionModel,
     'OPENROUTER': OpenRouterCaptionModel,
 }
 
