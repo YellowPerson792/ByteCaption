@@ -282,6 +282,14 @@
       "rstrip": false,
       "single_word": false,
       "special": true
+    },
+    "151678": {
+      "content": "<video>",
+      "lstrip": false,
+      "normalized": false,
+      "rstrip": false,
+      "single_word": false,
+      "special": true
     }
   },
   "additional_special_tokens": [
@@ -310,13 +318,22 @@
   ],
   "bos_token": null,
   "clean_up_tokenization_spaces": false,
+  "context_image_token": "<IMG_CONTEXT>",
+  "end_image_token": "</img>",
   "eos_token": "<|im_end|>",
   "errors": "replace",
-  "extra_special_tokens": {},
-  "model_max_length": 14588,
+  "extra_special_tokens": {
+    "context_image_token": "<IMG_CONTEXT>",
+    "end_image_token": "</img>",
+    "start_image_token": "<img>",
+    "video_token": "<video>"
+  },
+  "model_max_length": 40960,
   "pad_token": "<|endoftext|>",
   "processor_class": "InternVLProcessor",
   "split_special_tokens": false,
+  "start_image_token": "<img>",
   "tokenizer_class": "Qwen2Tokenizer",
-  "unk_token": null
+  "unk_token": null,
+  "video_token": "<video>"
 }

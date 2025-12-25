@@ -27,8 +27,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
         --lora_alpha 32 \
         --lora_dropout 0.05 \
         --lora_target_modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj \
-        --attn_implementation flash_attention_2 \
-        --use_hf_defaults 
+        --attn_implementation flash_attention_2 
 """
 
 import torch
@@ -56,39 +55,8 @@ from PureT.datasets_.flickr8k_dataset_hf import Flickr8kDataset  # noqa: E402
 from PureT.evaluation.evaler_coco import CocoEvaler  # noqa: E402
 from PureT.evaluation.evaler_flickr8k import Flickr8kEvaler  # noqa: E402
 
-try:
-    from transformers import Qwen3VLForConditionalGeneration  # type: ignore
-except Exception:  # pragma: no cover - optional import
-    Qwen3VLForConditionalGeneration = None
-try:
-    from transformers import Mistral3Config, Mistral3ForConditionalGeneration  # type: ignore
-except Exception:  # pragma: no cover - optional import
-    Mistral3Config = None
-    Mistral3ForConditionalGeneration = None
-try:
-    from transformers import Ministral3Config, Ministral3ForCausalLM  # type: ignore
-except Exception:  # pragma: no cover - optional import
-    Ministral3Config = None
-    Ministral3ForCausalLM = None
-
-
-def _patch_autocast_enabled():
-    original = torch.is_autocast_enabled
-    try:
-        original("cuda")
-        return
-    except TypeError:
-        pass
-    except Exception:
-        return
-
-    def _wrapper(device_type=None):
-        return original()
-
-    torch.is_autocast_enabled = _wrapper
-
-
-_patch_autocast_enabled()
+from transformers import Qwen3VLForConditionalGeneration  # type: ignore
+from transformers import Mistral3Config, Mistral3ForConditionalGeneration 
 
 
 def parse_args():
@@ -99,8 +67,8 @@ def parse_args():
     parser.add_argument("--train_samples", type=int, default=0)
     parser.add_argument("--val_samples", type=int, default=50)
     parser.add_argument("--eval_steps", type=int, default=None)
-    parser.add_argument("--log_steps", type=int, default=None)
-    parser.add_argument("--early_stop_patience", type=int, default=3)
+    parser.add_argument("--log_steps", type=int, default=20)
+    parser.add_argument("--early_stop_patience", type=int, default=4)
     parser.add_argument("--best_metric", type=str, default="SPICE")
     parser.add_argument("--keep_full_metrics", action="store_true")
     parser.add_argument("--wandb_project", type=str, default="ByteCaption")
@@ -113,8 +81,8 @@ def parse_args():
     parser.add_argument("--train_mode", type=str, default=None, choices=["auto", "vision2seq", "chat"])
     parser.add_argument("--train_system_prompt", type=str, default=None)
     parser.add_argument("--train_user_prompt", type=str, default=None)
-    parser.add_argument("--train_max_length", type=int, default=None)
-    parser.add_argument("--train_truncation", type=int, default=None, choices=[0, 1])
+    parser.add_argument("--train_max_length", type=int, default=512)
+    parser.add_argument("--train_truncation", type=int, default=0, choices=[0, 1])
 
     parser.add_argument("--lora_r", type=int, default=None)
     parser.add_argument("--lora_alpha", type=int, default=None)
@@ -130,11 +98,6 @@ def parse_args():
     parser.add_argument("--num_workers", type=int, default=None)
     parser.add_argument("--pin_memory", type=int, default=None, choices=[0, 1])
     parser.add_argument("--prefetch_factor", type=int, default=None)
-
-    parser.add_argument("--skip_corruption_eval", action="store_true")
-    parser.add_argument("--corrupt_types", nargs="+", default=None)
-    parser.add_argument("--corrupt_levels", nargs="+", default=None)
-    parser.add_argument("--test_samples", type=int, default=0)
     parser.add_argument("--max_epoch", type=int, default=None)
     parser.add_argument("--test_interval", type=int, default=None)
     parser.add_argument("--base_lr", type=float, default=None)
@@ -147,8 +110,6 @@ def parse_args():
     parser.add_argument("--output_dir", type=str, default=None)
     parser.add_argument("--max_steps", type=int, default=None)
     parser.add_argument("--save_steps", type=int, default=None)
-    parser.add_argument("--debug_batch", action="store_true", help="Debug first batch before training")
-    parser.add_argument("--use_hf_defaults", action="store_true")
     return parser.parse_args()
 
 
@@ -364,190 +325,42 @@ def _from_pretrained_with_attn_fallback(model_cls, load_from: str, model_kwargs:
             return model_cls.from_pretrained(load_from, **_strip_attn_implementation(model_kwargs))
         raise
 
-
-def _is_text_only_model(model_id: str, local_dir: Optional[str] = None, trust_remote_code: bool = False) -> bool:
-    local_exists = bool(local_dir and os.path.isdir(local_dir))
-    load_from = local_dir if local_exists else model_id
-    config = None
-    if load_from:
-        try:
-            config = AutoConfig.from_pretrained(
-                load_from,
-                trust_remote_code=trust_remote_code,
-                local_files_only=local_exists,
-            )
-        except Exception:
-            config = None
-
-    if config is not None:
-        if getattr(config, "vision_config", None) is not None:
-            return False
-        if getattr(config, "image_token_index", None) is not None:
-            return False
-        if Mistral3Config is not None and isinstance(config, Mistral3Config):
-            return False
-
-    lowered = str(model_id or "").lower()
-    return "mistral" in lowered or "ministral" in lowered
-
-
-def _resolve_tekken_path(load_from: str) -> Optional[str]:
-    if load_from and os.path.isdir(load_from):
-        candidate = os.path.join(load_from, "tekken.json")
-        if os.path.exists(candidate):
-            return candidate
-    return None
-
-
-class _TekkenTokenizerWrapper:
-    def __init__(self, tokenizer, model_dir: Optional[str] = None) -> None:
-        self._tokenizer = tokenizer
-        self._model_dir = model_dir
-        self.pad_token_id = int(getattr(tokenizer, "pad_id", 0))
-        self.eos_token_id = int(getattr(tokenizer, "eos_id", 0))
-        self.bos_token_id = int(getattr(tokenizer, "bos_id", 0))
-        self.unk_token_id = int(getattr(tokenizer, "unk_id", 0))
-        self.pad_token = "<pad>"
-        self.eos_token = "</s>"
-        self.bos_token = "<s>"
-        self.padding_side = "left"
-        self.add_bos_token = True
-        self.add_eos_token = True
-        self.tokenizer = self
-
-    def __call__(self, text=None, *args, **kwargs):
-        if text is None and args:
-            text = args[0]
-        texts = [text] if isinstance(text, str) else list(text or [])
-        padding = bool(kwargs.get("padding", False))
-        truncation = bool(kwargs.get("truncation", False))
-        max_length = kwargs.get("max_length")
-        return_tensors = kwargs.get("return_tensors", None)
-        add_special_tokens = kwargs.get("add_special_tokens", True)
-        bos = bool(add_special_tokens and self.add_bos_token)
-        eos = bool(add_special_tokens and self.add_eos_token)
-
-        encoded = []
-        for item in texts:
-            item = item if item is not None else ""
-            ids = self._tokenizer.encode(str(item), bos=bos, eos=eos)
-            if truncation and max_length:
-                ids = ids[-int(max_length) :] if self.padding_side == "left" else ids[: int(max_length)]
-            encoded.append(ids)
-
-        if not encoded:
-            encoded = [[]]
-
-        if padding:
-            max_len = max(len(ids) for ids in encoded)
-            if truncation and max_length:
-                max_len = min(max_len, int(max_length))
-            input_ids = []
-            attention_mask = []
-            for ids in encoded:
-                if truncation and max_length and len(ids) > max_len:
-                    ids = ids[-max_len:] if self.padding_side == "left" else ids[:max_len]
-                pad_len = max_len - len(ids)
-                if self.padding_side == "left":
-                    padded = [self.pad_token_id] * pad_len + ids
-                    mask = [0] * pad_len + [1] * len(ids)
-                else:
-                    padded = ids + [self.pad_token_id] * pad_len
-                    mask = [1] * len(ids) + [0] * pad_len
-                input_ids.append(padded)
-                attention_mask.append(mask)
-        else:
-            input_ids = encoded
-            attention_mask = [[1] * len(ids) for ids in encoded]
-
-        if return_tensors == "pt":
-            data = {
-                "input_ids": torch.tensor(input_ids, dtype=torch.long),
-                "attention_mask": torch.tensor(attention_mask, dtype=torch.long),
-            }
-            return BatchEncoding(data)
-
-        return {"input_ids": input_ids, "attention_mask": attention_mask}
-
-    def batch_decode(self, sequences, skip_special_tokens: bool = True) -> List[str]:
-        try:
-            from mistral_common.tokens.tokenizers.base import SpecialTokenPolicy
-        except Exception:
-            SpecialTokenPolicy = None
-
-        if torch.is_tensor(sequences):
-            sequences = sequences.tolist()
-        decoded = []
-        for seq in sequences:
-            if skip_special_tokens and SpecialTokenPolicy is not None:
-                text = self._tokenizer.decode(seq, special_token_policy=SpecialTokenPolicy.IGNORE)
-            elif skip_special_tokens:
-                ids = [i for i in seq if i not in (self.pad_token_id, self.eos_token_id, self.bos_token_id)]
-                text = self._tokenizer.decode(ids)
-            else:
-                text = self._tokenizer.decode(seq)
-            decoded.append(text)
-        return decoded
-
-    def save_pretrained(self, save_directory: str) -> None:
-        if not save_directory:
-            return
-        os.makedirs(save_directory, exist_ok=True)
-        if not self._model_dir:
-            return
-        for fname in (
-            "tokenizer.json",
-            "tokenizer_config.json",
-            "special_tokens_map.json",
-            "tekken.json",
-            "chat_template.jinja",
-        ):
-            src = os.path.join(self._model_dir, fname)
-            if os.path.exists(src):
-                try:
-                    import shutil
-
-                    shutil.copy2(src, os.path.join(save_directory, fname))
-                except Exception:
-                    pass
-
-
-def _load_text_tokenizer(load_from: str, trust_remote_code: bool):
+def _load_processor(load_from: str, trust_remote_code: bool):
     try:
-        return AutoTokenizer.from_pretrained(load_from, trust_remote_code=trust_remote_code)
-    except ValueError as exc:
-        msg = str(exc)
-        if "Tokenizer class" not in msg:
-            raise
-        tekken_path = _resolve_tekken_path(load_from)
-        if not tekken_path:
-            raise
-        try:
-            from mistral_common.tokens.tokenizers.tekken import Tekkenizer
-        except Exception as inner_exc:  # pragma: no cover - optional dependency
-            raise RuntimeError(f"Tekken tokenizer unavailable: {inner_exc}") from exc
-        print("[HF] Falling back to Tekken tokenizer for Ministral.")
-        tokenizer = Tekkenizer.from_file(tekken_path)
-        return _TekkenTokenizerWrapper(tokenizer, model_dir=load_from)
-
-
-def _should_retry_processor_with_slow_tokenizer(exc: Exception) -> bool:
-    msg = str(exc).lower()
-    return "start_image_token" in msg or "qwen2tokenizerfast" in msg
-
-
-def _load_processor_with_fallback(load_from: str, trust_remote_code: bool):
-    try:
-        return AutoProcessor.from_pretrained(load_from, trust_remote_code=trust_remote_code)
-    except Exception as exc:
-        if _should_retry_processor_with_slow_tokenizer(exc):
-            print("[HF] Processor init failed; retrying with use_fast=False.")
+        processor = AutoProcessor.from_pretrained(
+            load_from, 
+            trust_remote_code=trust_remote_code,
+            fix_mistral_regex=True
+        )
+        return processor
+    except (TypeError, AttributeError) as exc:
+        # Handle missing image tokens for InternVL
+        if "start_image_token" in str(exc) or "Qwen2TokenizerFast" in str(exc):
+            from transformers import AutoTokenizer, AutoImageProcessor
+            tokenizer = AutoTokenizer.from_pretrained(load_from, trust_remote_code=trust_remote_code)
+            image_processor = AutoImageProcessor.from_pretrained(load_from, trust_remote_code=trust_remote_code)
+            
+            # Add missing image token attributes for InternVL
+            if not hasattr(tokenizer, 'start_image_token'):
+                tokenizer.start_image_token = "<img>"
+                tokenizer.end_image_token = "</img>"
+                tokenizer.context_image_token = "<IMG_CONTEXT>"
+                tokenizer.video_token = "<video>"
+                # Get or create token IDs
+                if "<img>" not in tokenizer.get_vocab():
+                    tokenizer.add_tokens(["<img>", "</img>", "<IMG_CONTEXT>", "<video>"])
+                tokenizer.start_image_token_id = tokenizer.convert_tokens_to_ids("<img>")
+                tokenizer.end_image_token_id = tokenizer.convert_tokens_to_ids("</img>")
+                tokenizer.context_image_token_id = tokenizer.convert_tokens_to_ids("<IMG_CONTEXT>")
+            
             return AutoProcessor.from_pretrained(
                 load_from,
-                trust_remote_code=trust_remote_code,
-                use_fast=False,
+                tokenizer=tokenizer,
+                image_processor=image_processor,
+                trust_remote_code=trust_remote_code
             )
-        raise
+        # Fallback without fix_mistral_regex if that was the issue
+        return AutoProcessor.from_pretrained(load_from, trust_remote_code=trust_remote_code)
 
 
 def _maybe_disable_fp8_quantization(config) -> bool:
@@ -569,47 +382,26 @@ def _maybe_disable_fp8_quantization(config) -> bool:
     return True
 
 
-def _resolve_text_model_cls(load_from: str, trust_remote_code: bool):
-    try:
-        config = AutoConfig.from_pretrained(load_from, trust_remote_code=trust_remote_code)
-    except Exception:
-        return AutoModelForCausalLM, None
+def _load_model_and_processor(hf_cfg):
+    def _load_with_safetensor_retry(model_cls, allow_retry: bool = True):
+        try:
+            return _from_pretrained_with_attn_fallback(model_cls, load_from, model_kwargs)
+        except OSError:
+            if allow_retry and model_kwargs.get("use_safetensors", True):
+                fallback_kwargs = dict(model_kwargs)
+                fallback_kwargs["use_safetensors"] = False
+                return _from_pretrained_with_attn_fallback(model_cls, load_from, fallback_kwargs)
+            raise
 
-    if sys.version_info >= (3, 12):
-        if _maybe_disable_fp8_quantization(config):
-            print("[HF] Disabling FP8 quantization for Python 3.12 compatibility.")
-
-    if Mistral3Config is not None and isinstance(config, Mistral3Config):
-        if Mistral3ForConditionalGeneration is not None:
-            print("[HF] Using Mistral3ForConditionalGeneration for Mistral3 config.")
-            return Mistral3ForConditionalGeneration, config
-    if Ministral3Config is not None and isinstance(config, Ministral3Config):
-        if Ministral3ForCausalLM is not None:
-            print("[HF] Using Ministral3ForCausalLM for Ministral3 config.")
-            return Ministral3ForCausalLM, config
-
-    return AutoModelForCausalLM, config
-
-
-def _load_model_and_processor(hf_cfg, text_only: bool = False):
     model_id = getattr(hf_cfg, "MODEL_ID", "")
     processor_id = getattr(hf_cfg, "PROCESSOR_ID", "") or model_id
     local_dir = getattr(hf_cfg, "LOCAL_DIR", None)
     load_from = local_dir if (local_dir and os.path.isdir(local_dir)) else model_id
     processor_load_from = local_dir if (local_dir and os.path.isdir(local_dir)) else processor_id
     trust_remote_code = bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False))
-    if text_only:
-        processor = _load_text_tokenizer(
-            processor_load_from,
-            trust_remote_code=trust_remote_code,
-        )
-        if processor.pad_token_id is None:
-            processor.pad_token = processor.eos_token or processor.bos_token
-        processor.padding_side = "left"
-    else:
-        processor = _load_processor_with_fallback(
-            processor_load_from, trust_remote_code=trust_remote_code
-        )
+    processor = _load_processor(
+        processor_load_from, trust_remote_code=trust_remote_code
+    )
 
     model_kwargs = _build_model_kwargs(hf_cfg)
     use_safetensors = bool(getattr(hf_cfg, "SAFE_SERIALIZATION", True))
@@ -617,53 +409,28 @@ def _load_model_and_processor(hf_cfg, text_only: bool = False):
     model_id_lower = str(model_id).lower()
     is_qwen_vl = "qwen" in model_id_lower and "vl" in model_id_lower
 
-    if text_only:
-        model_cls, model_config = _resolve_text_model_cls(load_from, trust_remote_code)
-        if model_config is not None:
-            model_kwargs["config"] = model_config
-        try:
-            model = _from_pretrained_with_attn_fallback(model_cls, load_from, model_kwargs)
-        except OSError:
-            model = _from_pretrained_with_attn_fallback(
-                model_cls, load_from, {**model_kwargs, "use_safetensors": False}
-            )
-    elif is_qwen_vl and Qwen3VLForConditionalGeneration is not None:
-        try:
-            model = _from_pretrained_with_attn_fallback(Qwen3VLForConditionalGeneration, load_from, model_kwargs)
-        except OSError:
-            model_kwargs["use_safetensors"] = False
-            model = _from_pretrained_with_attn_fallback(Qwen3VLForConditionalGeneration, load_from, model_kwargs)
+    if is_qwen_vl and Qwen3VLForConditionalGeneration is not None:
+        model = _load_with_safetensor_retry(Qwen3VLForConditionalGeneration)
     else:
-        model_config = None
-        try:
-            model_config = AutoConfig.from_pretrained(
-                load_from,
-                trust_remote_code=trust_remote_code,
-                local_files_only=bool(local_dir and os.path.isdir(local_dir)),
-            )
-        except Exception:
-            model_config = None
+        model_config = AutoConfig.from_pretrained(
+            load_from,
+            trust_remote_code=trust_remote_code,
+            local_files_only=bool(local_dir and os.path.isdir(local_dir)),
+        ) if load_from else None
         if model_config is not None and sys.version_info >= (3, 12):
             if _maybe_disable_fp8_quantization(model_config):
                 print("[HF] Disabling FP8 quantization for Python 3.12 compatibility.")
         if model_config is not None:
             model_kwargs["config"] = model_config
         try:
-            model = _from_pretrained_with_attn_fallback(AutoModelForVision2Seq, load_from, model_kwargs)
+            model = _load_with_safetensor_retry(AutoModelForVision2Seq)
         except Exception:
-            try:
-                model = _from_pretrained_with_attn_fallback(AutoModelForVision2Seq, load_from, {**model_kwargs, "use_safetensors": False})
-            except Exception:
-                model = _from_pretrained_with_attn_fallback(AutoModelForCausalLM, load_from, model_kwargs)
+            model = _load_with_safetensor_retry(AutoModelForCausalLM, allow_retry=False)
 
     if not getattr(model.config, "is_encoder_decoder", False):
-        if text_only:
-            if getattr(processor, "padding_side", None) != "left":
-                processor.padding_side = "left"
-        else:
-            tokenizer = getattr(processor, "tokenizer", None)
-            if tokenizer is not None and getattr(tokenizer, "padding_side", None) != "left":
-                tokenizer.padding_side = "left"
+        tokenizer = getattr(processor, "tokenizer", None)
+        if tokenizer is not None and getattr(tokenizer, "padding_side", None) != "left":
+            tokenizer.padding_side = "left"
 
     if not use_safetensors and hasattr(model, "config"):
         model.config.use_safetensors = False
@@ -739,7 +506,6 @@ class HFTrainerCollator:
         truncation: Optional[bool] = None,
         label_ignore: int = -100,
         seq_per_img: int = 1,
-        text_only: bool = False,
     ) -> None:
         self.processor = processor
         self.config_id = config_id or getattr(processor, "name_or_path", None)
@@ -752,7 +518,6 @@ class HFTrainerCollator:
         self.truncation = bool(truncation) if truncation is not None else False
         self.label_ignore = int(label_ignore)
         self.seq_per_img = max(int(seq_per_img), 1)
-        self.text_only = bool(text_only)
         self._pad_token_id = None
         self._is_encoder_decoder = None
         self._model_type = None
@@ -802,19 +567,31 @@ class HFTrainerCollator:
                 prompt = f"{prompt}\n{self.user_prompt.strip()}"
             else:
                 prompt = self.user_prompt.strip()
+        
+        # For InternVL, add image placeholder
+        if self._is_internvl():
+            if prompt:
+                prompt = f"<image>\n{prompt}"
+            else:
+                prompt = "<image>"
+        
         if with_answer:
             return f"{prompt}\n{caption}" if prompt else caption
         return prompt
 
     def _build_chat_messages(self, image: Any, caption: Optional[str]) -> List[Dict[str, Any]]:
         messages: List[Dict[str, Any]] = []
+        # InternVL processor expects content as string for system/assistant, list for user with images
         if self.system_prompt:
             messages.append({"role": "system", "content": [{"type": "text", "text": self.system_prompt}]})
+        
+        # User message must have content as list with image
         user_content: List[Dict[str, Any]] = []
         if self.user_prompt:
             user_content.append({"type": "text", "text": self.user_prompt})
         user_content.append({"type": "image", "image": image})
         messages.append({"role": "user", "content": user_content})
+        
         if caption is not None:
             messages.append({"role": "assistant", "content": [{"type": "text", "text": caption}]})
         return messages
@@ -911,77 +688,41 @@ class HFTrainerCollator:
         mode = self._resolve_mode()
         truncation, max_length = self._resolve_truncation()
 
-        if self.text_only:
-            if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
-                full_messages = [self._build_text_messages(cap) for cap in expanded_captions]
-                prompt_messages = [self._build_text_messages(None) for _ in expanded_captions]
+        prompt_texts = [
+            self._build_chat_text(cap, with_answer=False) for cap in expanded_captions
+        ]
+        full_texts = [
+            self._build_chat_text(cap, with_answer=True) for cap in expanded_captions
+        ]
+        full_inputs_kwargs = {
+            "text": full_texts,
+            "return_tensors": "pt",
+            "padding": True,
+            "truncation": truncation,
+        }
+        if truncation and max_length is not None:
+            full_inputs_kwargs["max_length"] = max_length
+        full_inputs = self._safe_processor_call(**full_inputs_kwargs)
+        input_ids = full_inputs.get("input_ids")
+        attention_mask = full_inputs.get("attention_mask")
+        labels = input_ids.clone() if input_ids is not None else None
+        if labels is not None and self._pad_token_id is not None:
+            labels[labels == self._pad_token_id] = self.label_ignore
 
-                full_inputs_kwargs = {
-                    "tokenize": True,
-                    "add_generation_prompt": False,
-                    "return_tensors": "pt",
-                    "return_dict": True,
-                    "padding": True,
-                    "truncation": truncation,
-                }
-                if truncation and max_length is not None:
-                    full_inputs_kwargs["max_length"] = max_length
-                full_inputs = self._safe_apply_chat_template(full_messages, **full_inputs_kwargs)
-                input_ids = full_inputs.get("input_ids")
-                attention_mask = full_inputs.get("attention_mask")
-                labels = input_ids.clone() if input_ids is not None else None
-                if labels is not None and self._pad_token_id is not None:
-                    labels[labels == self._pad_token_id] = self.label_ignore
-
-                prompt_inputs_kwargs = {
-                    "tokenize": True,
-                    "add_generation_prompt": True,
-                    "return_tensors": "pt",
-                    "return_dict": True,
-                    "padding": True,
-                    "truncation": truncation,
-                }
-                if truncation and max_length is not None:
-                    prompt_inputs_kwargs["max_length"] = max_length
-                prompt_inputs = self._safe_apply_chat_template(prompt_messages, **prompt_inputs_kwargs)
-                prompt_mask = prompt_inputs.get("attention_mask")
-                self._mask_prompt_labels(labels, prompt_mask, attention_mask)
-                inputs = full_inputs
-            else:
-                prompt_texts = [
-                    self._build_chat_text(cap, with_answer=False) for cap in expanded_captions
-                ]
-                full_texts = [
-                    self._build_chat_text(cap, with_answer=True) for cap in expanded_captions
-                ]
-                full_inputs_kwargs = {
-                    "text": full_texts,
-                    "return_tensors": "pt",
-                    "padding": True,
-                    "truncation": truncation,
-                }
-                if truncation and max_length is not None:
-                    full_inputs_kwargs["max_length"] = max_length
-                full_inputs = self._safe_processor_call(**full_inputs_kwargs)
-                input_ids = full_inputs.get("input_ids")
-                attention_mask = full_inputs.get("attention_mask")
-                labels = input_ids.clone() if input_ids is not None else None
-                if labels is not None and self._pad_token_id is not None:
-                    labels[labels == self._pad_token_id] = self.label_ignore
-
-                prompt_inputs_kwargs = {
-                    "text": prompt_texts,
-                    "return_tensors": "pt",
-                    "padding": True,
-                    "truncation": truncation,
-                }
-                if truncation and max_length is not None:
-                    prompt_inputs_kwargs["max_length"] = max_length
-                prompt_inputs = self._safe_processor_call(**prompt_inputs_kwargs)
-                prompt_mask = prompt_inputs.get("attention_mask")
-                self._mask_prompt_labels(labels, prompt_mask, attention_mask)
-                inputs = full_inputs
-        elif mode == "vision2seq":
+        prompt_inputs_kwargs = {
+            "text": prompt_texts,
+            "return_tensors": "pt",
+            "padding": True,
+            "truncation": truncation,
+        }
+        if truncation and max_length is not None:
+            prompt_inputs_kwargs["max_length"] = max_length
+        prompt_inputs = self._safe_processor_call(**prompt_inputs_kwargs)
+        prompt_mask = prompt_inputs.get("attention_mask")
+        self._mask_prompt_labels(labels, prompt_mask, attention_mask)
+        inputs = full_inputs
+        
+        if mode == "vision2seq":
             inputs_kwargs = {
                 "images": expanded_images,
                 "text": expanded_captions,
@@ -1246,7 +987,6 @@ class CaptionTrainer(Trainer):
         user_prompt: str = "",
         placeholder: str = "this is a dummy caption for an undecodable image",
         use_chat_template: bool = False,
-        text_only: bool = False,
         eval_interval_epochs: int = 1,
         save_adapter_only: bool = False,
         best_metric: Optional[str] = None,
@@ -1269,7 +1009,6 @@ class CaptionTrainer(Trainer):
         self.user_prompt = user_prompt
         self.placeholder = placeholder
         self.use_chat_template = use_chat_template
-        self.text_only = bool(text_only)
         self.eval_interval_epochs = max(int(eval_interval_epochs), 1)
         self.save_adapter_only = save_adapter_only
         self.best_metric = best_metric
@@ -1297,11 +1036,7 @@ class CaptionTrainer(Trainer):
         value = metrics[metric_key]
         if value is None:
             return
-        improved = False
-        if self._best_metric_value is None:
-            improved = True
-        else:
-            improved = value > self._best_metric_value
+        improved = self._best_metric_value is None or value > self._best_metric_value
         if improved:
             self._best_metric_value = value
             root_dir = cfg.ROOT_DIR or self.args.output_dir
@@ -1337,146 +1072,6 @@ class CaptionTrainer(Trainer):
         return prefixed
 
 
-def _maybe_disable_slow_metrics(best_metric: str, keep_full_metrics: bool):
-    if keep_full_metrics:
-        return
-    if str(best_metric).upper() in {"METEOR", "SPICE"}:
-        return
-    slow_metrics = {"METEOR", "SPICE"}
-    paired = list(zip(list(cfg.SCORER.TYPES), list(cfg.SCORER.WEIGHTS)))
-    filtered = [(m, w) for m, w in paired if m not in slow_metrics]
-    removed = [m for m, _ in paired if m in slow_metrics]
-    if filtered and len(filtered) != len(paired):
-        cfg.SCORER.TYPES = [m for m, _ in filtered]
-        cfg.SCORER.WEIGHTS = [w for _, w in filtered]
-        print(f"[SCORER] Disabled slow metrics for training: removed {removed}, keeping {cfg.SCORER.TYPES}")
-
-
-def _debug_batch(collator, train_set, processor, model):
-    """调试第一个 batch，打印关键信息以定位 loss 异常问题"""
-    print("\n" + "="*80)
-    print("DEBUG BATCH - 诊断 loss 异常问题")
-    print("="*80)
-    
-    # 获取第一个 batch
-    batch_data = [train_set[i] for i in range(min(2, len(train_set)))]
-    batch = collator(batch_data)
-    
-    # 1. 检查 pad_token_id
-    pad_token_id = getattr(processor, 'pad_token_id', None)
-    if pad_token_id is None and hasattr(processor, 'tokenizer'):
-        pad_token_id = getattr(processor.tokenizer, 'pad_token_id', None)
-    print(f"\n1. Pad Token ID: {pad_token_id}")
-    
-    if hasattr(processor, 'tokenizer'):
-        print(f"   - Tokenizer pad_token: {processor.tokenizer.pad_token}")
-        print(f"   - Tokenizer eos_token: {processor.tokenizer.eos_token}")
-        print(f"   - Tokenizer eos_token_id: {processor.tokenizer.eos_token_id}")
-        print(f"   - Tokenizer padding_side: {processor.tokenizer.padding_side}")
-    
-    # 2. 检查 input_ids 和 labels
-    input_ids = batch.get('input_ids')
-    labels = batch.get('labels')
-    attention_mask = batch.get('attention_mask')
-    
-    if input_ids is not None:
-        print(f"\n2. Batch Shape:")
-        print(f"   - input_ids: {input_ids.shape}")
-        print(f"   - labels: {labels.shape if labels is not None else 'None'}")
-        print(f"   - attention_mask: {attention_mask.shape if attention_mask is not None else 'None'}")
-        
-        # 3. 检查 labels 中 -100 的比例
-        if labels is not None:
-            total_tokens = labels.numel()
-            ignored_tokens = (labels == -100).sum().item()
-            valid_tokens = total_tokens - ignored_tokens
-            print(f"\n3. Labels 统计:")
-            print(f"   - Total tokens: {total_tokens}")
-            print(f"   - Ignored tokens (-100): {ignored_tokens} ({ignored_tokens/total_tokens*100:.1f}%)")
-            print(f"   - Valid tokens (非-100): {valid_tokens} ({valid_tokens/total_tokens*100:.1f}%)")
-            
-            if valid_tokens / total_tokens < 0.05:
-                print(f"   ⚠️  警告: 只有 {valid_tokens/total_tokens*100:.1f}% 的 token 参与训练，这太少了！")
-            elif valid_tokens / total_tokens > 0.5:
-                print(f"   ⚠️  警告: {valid_tokens/total_tokens*100:.1f}% 的 token 参与训练，可能 padding 没被 mask！")
-            
-            # 4. 检查 padding 是否被正确 mask
-            if pad_token_id is not None:
-                pad_in_input = (input_ids == pad_token_id).sum().item()
-                pad_in_labels = (labels == pad_token_id).sum().item()
-                print(f"\n4. Padding 检查 (pad_token_id={pad_token_id}):")
-                print(f"   - input_ids 中的 padding: {pad_in_input}")
-                print(f"   - labels 中的 padding: {pad_in_labels}")
-                if pad_in_labels > 0:
-                    print(f"   ❌ 错误: labels 中还有 {pad_in_labels} 个 padding token 没被 mask 成 -100！")
-                else:
-                    print(f"   ✓ 正确: padding 已被 mask")
-            
-            # 5. Decode 第一个样本的 labels
-            if hasattr(processor, 'tokenizer'):
-                print(f"\n5. 第一个样本的 labels decode:")
-                first_labels = labels[0]
-                valid_label_ids = first_labels[first_labels != -100].tolist()
-                if valid_label_ids:
-                    decoded = processor.tokenizer.decode(valid_label_ids, skip_special_tokens=False)
-                    print(f"   Valid tokens ({len(valid_label_ids)}): {valid_label_ids[:20]}...")
-                    print(f"   Decoded text: '{decoded}'")
-                else:
-                    print(f"   ❌ 错误: 第一个样本没有任何有效的 training tokens！")
-                
-                # 对比完整的 input_ids
-                first_input = input_ids[0]
-                decoded_input = processor.tokenizer.decode(first_input, skip_special_tokens=False)
-                print(f"\n   完整 input_ids decode: '{decoded_input[:200]}...'")
-    
-    # 6. 用模型计算实际 loss
-    if labels is not None:
-        try:
-            model.eval()
-            with torch.no_grad():
-                batch_gpu = {k: v.to(model.device) if torch.is_tensor(v) else v for k, v in batch.items()}
-                outputs = model(**batch_gpu)
-                loss = outputs.loss
-                print(f"\n6. 模型计算的 loss: {loss.item():.4f}")
-                if loss.item() > 10:
-                    print(f"   ❌ Loss 异常高 ({loss.item():.4f})，很可能存在配置问题！")
-                elif loss.item() > 5:
-                    print(f"   ⚠️  Loss 较高 ({loss.item():.4f})，需要检查")
-                else:
-                    print(f"   ✓ Loss 在正常范围")
-        except Exception as e:
-            print(f"\n6. 计算 loss 失败: {e}")
-    
-    print("\n" + "="*80)
-    print("调试完成。如果发现问题，请根据上述信息调整配置。")
-    print("="*80 + "\n")
-    
-    import sys
-    sys.exit(0)
-
-
-def _run_corruption_eval(args):
-    if args.skip_corruption_eval:
-        return
-    corrupt_types = args.corrupt_types or ["rbbf", "rbsl", "metadata_loss"]
-    corrupt_levels = args.corrupt_levels or ["S0", "S1", "S2", "S3", "S4", "S5"]
-    cmd = [
-        sys.executable,
-        str(PROJECT_ROOT / "tools" / "run_batch_corruption_eval.py"),
-        "--models",
-        str(Path(args.folder)),
-        "--corrupt-types",
-        *corrupt_types,
-        "--corrupt-levels",
-        *corrupt_levels,
-        "--test-samples",
-        str(args.test_samples),
-        "--dataset",
-        args.dataset,
-    ]
-    os.system(" ".join(cmd))
-
-
 def main():
     args = parse_args()
     folder = Path(args.folder)
@@ -1489,20 +1084,11 @@ def main():
     set_seed(int(getattr(cfg, "SEED", 42)))
 
     hf_cfg = cfg.MODEL.HF
-    model_id_lower = str(getattr(hf_cfg, "MODEL_ID", "")).lower()
-    use_hf_defaults = bool(args.use_hf_defaults)
-    if not use_hf_defaults and ("qwen" in model_id_lower and "vl" in model_id_lower):
-        use_hf_defaults = True
-
     if not str(getattr(hf_cfg, "TORCH_DTYPE", "") or "").strip():
         if torch.cuda.is_available() and torch.cuda.is_bf16_supported():
             hf_cfg.TORCH_DTYPE = "bfloat16"
-    text_only = _is_text_only_model(
-        getattr(hf_cfg, "MODEL_ID", ""),
-        local_dir=getattr(hf_cfg, "LOCAL_DIR", None),
-        trust_remote_code=bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False)),
-    )
-    model, processor = _load_model_and_processor(hf_cfg, text_only=text_only)
+            
+    model, processor = _load_model_and_processor(hf_cfg)
     model, lora_enabled = _apply_lora(model, hf_cfg)
 
     if torch.cuda.is_available():
@@ -1571,17 +1157,8 @@ def main():
     else:
         processor_config_id = str(getattr(hf_cfg, "PROCESSOR_ID", "") or getattr(hf_cfg, "MODEL_ID", ""))
 
-    train_max_length = None
-    if args.train_max_length is not None:
-        train_max_length = int(args.train_max_length)
-    elif not use_hf_defaults:
-        train_max_length = int(getattr(hf_cfg, "TRAIN_MAX_LENGTH", 128) or 128)
-
-    train_truncation = None
-    if args.train_truncation is not None:
-        train_truncation = bool(args.train_truncation)
-    elif not use_hf_defaults:
-        train_truncation = bool(getattr(hf_cfg, "TRAIN_TRUNCATION", True))
+    train_max_length = int(args.train_max_length) if args.train_max_length is not None else None
+    train_truncation = bool(args.train_truncation) if args.train_truncation is not None else None
 
     collator = HFTrainerCollator(
         processor=processor,
@@ -1595,23 +1172,16 @@ def main():
         truncation=train_truncation,
         label_ignore=int(getattr(hf_cfg, "TRAIN_LABEL_IGNORE", -100)),
         seq_per_img=int(getattr(cfg.DATA_LOADER, "SEQ_PER_IMG", 1)),
-        text_only=text_only,
     )
-
-    _maybe_disable_slow_metrics(args.best_metric, args.keep_full_metrics)
 
     output_dir = args.output_dir or str(folder / "snapshot" / "hf_trainer")
     os.makedirs(output_dir, exist_ok=True)
 
-    def _resolve_train_value(arg_value, cfg_value):
-        if arg_value is not None:
-            return arg_value
-        if use_hf_defaults:
-            return None
-        return cfg_value
+    def _resolve_train_value(arg_value, _cfg_value):
+        return arg_value
 
     label_smoothing = 0.0
-    if not use_hf_defaults and str(getattr(cfg.LOSSES, "XE_TYPE", "")).lower() == "labelsmoothing":
+    if str(getattr(cfg.LOSSES, "XE_TYPE", "")).lower() == "labelsmoothing":
         label_smoothing = float(getattr(cfg.LOSSES, "LABELSMOOTHING", 0.0))
 
     eval_steps = args.eval_steps if args.eval_steps and args.eval_steps > 0 else None
@@ -1648,10 +1218,14 @@ def main():
         "fp16": use_fp16,
         "bf16": use_bf16,
         "dataloader_num_workers": int(getattr(cfg.DATA_LOADER, "NUM_WORKERS", 0)),
-        "dataloader_prefetch_factor": int(getattr(cfg.DATA_LOADER, "PREFETCH_FACTOR", 2)),
         "dataloader_pin_memory": bool(getattr(cfg.DATA_LOADER, "PIN_MEMORY", False)),
-        "dataloader_persistent_workers": bool(getattr(cfg.DATA_LOADER, "PERSISTENT_WORKERS", True)),
     }
+    
+    # Only set prefetch_factor and persistent_workers if num_workers > 0
+    num_workers = int(getattr(cfg.DATA_LOADER, "NUM_WORKERS", 0))
+    if num_workers > 0:
+        training_kwargs["dataloader_prefetch_factor"] = int(getattr(cfg.DATA_LOADER, "PREFETCH_FACTOR", 2))
+        training_kwargs["dataloader_persistent_workers"] = bool(getattr(cfg.DATA_LOADER, "PERSISTENT_WORKERS", True))
 
     if args.grad_accum_steps is not None:
         training_kwargs["gradient_accumulation_steps"] = int(args.grad_accum_steps)
@@ -1676,23 +1250,18 @@ def main():
     if num_train_epochs is not None:
         training_kwargs["num_train_epochs"] = float(num_train_epochs)
 
-    if not use_hf_defaults:
-        training_kwargs["lr_scheduler_type"] = "linear"
-        training_kwargs["warmup_steps"] = 0
-        training_kwargs["optim"] = "adamw_torch"
-        training_kwargs["adam_beta1"] = float(getattr(cfg.SOLVER.ADAM, "BETAS", [0.9, 0.999])[0])
-        training_kwargs["adam_beta2"] = float(getattr(cfg.SOLVER.ADAM, "BETAS", [0.9, 0.999])[1])
-        training_kwargs["adam_epsilon"] = float(getattr(cfg.SOLVER.ADAM, "EPS", 1e-8))
-        training_kwargs["max_grad_norm"] = float(getattr(cfg.SOLVER, "GRAD_CLIP", 0.0))
-        training_kwargs["weight_decay"] = float(getattr(cfg.SOLVER, "WEIGHT_DECAY", 0.0))
+    training_kwargs["lr_scheduler_type"] = "linear"
+    training_kwargs["warmup_steps"] = 0
+    training_kwargs["optim"] = "adamw_torch"
+    training_kwargs["adam_beta1"] = float(getattr(cfg.SOLVER.ADAM, "BETAS", [0.9, 0.999])[0])
+    training_kwargs["adam_beta2"] = float(getattr(cfg.SOLVER.ADAM, "BETAS", [0.9, 0.999])[1])
+    training_kwargs["adam_epsilon"] = float(getattr(cfg.SOLVER.ADAM, "EPS", 1e-8))
+    training_kwargs["max_grad_norm"] = float(getattr(cfg.SOLVER, "GRAD_CLIP", 0.0))
+    training_kwargs["weight_decay"] = float(getattr(cfg.SOLVER, "WEIGHT_DECAY", 0.0))
 
     training_args = TrainingArguments(**training_kwargs)
 
     generation_kwargs = _build_generation_kwargs(hf_cfg)
-
-    # Debug batch if requested
-    if args.debug_batch:
-        _debug_batch(collator, train_set, processor, model)
 
     trainer = CaptionTrainer(
         model=model,
@@ -1709,7 +1278,6 @@ def main():
         user_prompt=infer_user,
         placeholder=placeholder,
         use_chat_template=bool(getattr(hf_cfg, "USE_CHAT_TEMPLATE", False)),
-        text_only=text_only,
         eval_interval_epochs=int(cfg.SOLVER.TEST_INTERVAL) if eval_steps is None else 1,
         save_adapter_only=bool(getattr(hf_cfg.LORA, "ENABLED", False)) and not bool(getattr(hf_cfg.LORA, "SAVE_FULL_MODEL", True)),
         best_metric=args.best_metric,
@@ -1735,8 +1303,6 @@ def main():
         final_dir = os.path.join(root_dir, "snapshot", "final_lora")
         os.makedirs(final_dir, exist_ok=True)
         trainer.save_model(final_dir)
-
-    _run_corruption_eval(args)
 
 
 if __name__ == "__main__":
