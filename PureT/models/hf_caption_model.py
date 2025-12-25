@@ -5,13 +5,7 @@ from typing import List, Optional, Sequence, Tuple
 
 import torch
 import torch.nn as nn
-from transformers import (
-    AutoProcessor,
-    AutoModelForCausalLM,
-    AutoModelForVision2Seq,
-    BlipForConditionalGeneration,
-    BlipProcessor,
-)
+from transformers import AutoProcessor, BlipForConditionalGeneration, BlipProcessor, GitForCausalLM, GitProcessor
 
 from lib.config import cfg
 
@@ -46,7 +40,7 @@ def _hf_env(mirror: Optional[str], disable_proxy: bool):
 
 class HFCaptionModel(nn.Module):
     """
-    Generic HuggingFace vision captioning wrapper (BLIP-compatible).
+    HuggingFace captioning wrapper simplified for BLIP and GIT models.
     Accepts a list of PIL images (with optional None placeholders) via cfg.PARAM.ATT_FEATS.
     """
 
@@ -75,8 +69,7 @@ class HFCaptionModel(nn.Module):
                 self.torch_dtype = torch.float16
         self.low_cpu_mem_usage = bool(getattr(hf_cfg, "LOW_CPU_MEM_USAGE", False)) if hf_cfg else False
         self.prompt_source, self.system_prompt, self.user_prompt, self.placeholder = self._resolve_prompt_settings(hf_cfg)
-        self.use_chat_template = bool(getattr(hf_cfg, "USE_CHAT_TEMPLATE", False)) if hf_cfg else False
-        self.attn_implementation = self._resolve_attn_implementation(hf_cfg)
+        self.attn_implementation = ""
         gen_cfg = hf_cfg.GENERATION if hf_cfg and hasattr(hf_cfg, "GENERATION") else None
         self.generation_kwargs = generation_kwargs or self._resolve_generation_kwargs(gen_cfg)
         mirror = getattr(hf_cfg, "MIRROR", None) if hf_cfg else None
@@ -111,8 +104,9 @@ class HFCaptionModel(nn.Module):
             load_from = self.local_dir if self._local_dir_ready() else self.model_id
             model_kwargs = self._build_model_kwargs()
 
-            # Prefer BLIP-specific classes when the model id looks like BLIP for better compatibility
-            if "blip" in self.model_id.lower():
+            model_id_lower = self.model_id.lower()
+            if "blip" in model_id_lower:
+                self.model_kind = "blip"
                 self.processor = BlipProcessor.from_pretrained(
                     load_from, trust_remote_code=self.trust_remote_code
                 )
@@ -128,9 +122,22 @@ class HFCaptionModel(nn.Module):
                         load_from,
                         self._with_unsafe_safetensors(model_kwargs),
                     )
+            elif "git" in model_id_lower:
+                self.model_kind = "git"
+                try:
+                    self.processor = GitProcessor.from_pretrained(
+                        load_from, trust_remote_code=self.trust_remote_code
+                    )
+                except Exception:
+                    self.processor = self._load_processor_with_fallback(load_from)
+                try:
+                    self.model = GitForCausalLM.from_pretrained(load_from, **model_kwargs)
+                except OSError:
+                    self.model = GitForCausalLM.from_pretrained(
+                        load_from, **self._with_unsafe_safetensors(model_kwargs)
+                    )
             else:
-                self.processor = self._load_processor_with_fallback(load_from)
-                self.model = self._load_auto_model(load_from, model_kwargs)
+                raise ValueError("Unsupported model_id: only BLIP or GIT are supported in this simplified wrapper.")
 
         if hf_cfg and bool(getattr(hf_cfg, "GRADIENT_CHECKPOINTING", False)):
             if hasattr(self.model, "gradient_checkpointing_enable"):
@@ -138,10 +145,6 @@ class HFCaptionModel(nn.Module):
 
         if not self.placeholder:
             self.placeholder = "this is a dummy caption for an undecodable image"
-        if not self.use_chat_template and (self.system_prompt or self.user_prompt):
-            if hasattr(self.processor, "apply_chat_template"):
-                self.use_chat_template = True
-
         if not getattr(self.model.config, "is_encoder_decoder", False):
             tokenizer = getattr(self.processor, "tokenizer", None)
             if tokenizer is not None and getattr(tokenizer, "padding_side", None) != "left":
@@ -292,26 +295,6 @@ class HFCaptionModel(nn.Module):
         input_ids = model_inputs.get("input_ids")
         attention_mask = model_inputs.get("attention_mask")
         labels = model_inputs.get("labels")
-
-        # Qwen-VL style: these grids indicate how many visual tokens the model expects.
-        image_grid_thw = model_inputs.get("image_grid_thw")
-        video_grid_thw = model_inputs.get("video_grid_thw")
-        if isinstance(image_grid_thw, torch.Tensor):
-            try:
-                g = image_grid_thw.detach().to("cpu")
-                if g.ndim == 2 and g.shape[1] == 3:
-                    t, h, w = [int(x) for x in g[0].tolist()]
-                    print(f"- image_grid_thw[0]: (t,h,w)=({t},{h},{w}), grid_tokens=t*h*w={t*h*w}")
-            except Exception:
-                pass
-        if isinstance(video_grid_thw, torch.Tensor):
-            try:
-                g = video_grid_thw.detach().to("cpu")
-                if g.ndim == 2 and g.shape[1] == 3:
-                    t, h, w = [int(x) for x in g[0].tolist()]
-                    print(f"- video_grid_thw[0]: (t,h,w)=({t},{h},{w}), grid_tokens=t*h*w={t*h*w}")
-            except Exception:
-                pass
 
         if isinstance(input_ids, torch.Tensor):
             preview = self._decode_preview(input_ids)
@@ -491,38 +474,8 @@ class HFCaptionModel(nn.Module):
             return dtype_value
         return None
 
-    def _resolve_attn_implementation(self, hf_cfg) -> str:
-        if not hf_cfg:
-            return ""
-        value = getattr(hf_cfg, "ATTN_IMPLEMENTATION", "")
-        return str(value).strip() if value is not None else ""
-
-    def _strip_attn_implementation(self, model_kwargs: dict) -> dict:
-        if "attn_implementation" not in model_kwargs:
-            return model_kwargs
-        updated = dict(model_kwargs)
-        updated.pop("attn_implementation", None)
-        return updated
-
-    def _should_retry_without_attn_implementation(self, exc: Exception) -> bool:
-        if not self.attn_implementation:
-            return False
-        msg = str(exc).lower()
-        return (
-            "attn_implementation" in msg
-            or "flash_attention" in msg
-            or "flashattention" in msg
-            or "flash attention" in msg
-        )
-
     def _from_pretrained_with_attn_fallback(self, model_cls, load_from: str, model_kwargs: dict):
-        try:
-            return model_cls.from_pretrained(load_from, **model_kwargs)
-        except Exception as exc:
-            if self._should_retry_without_attn_implementation(exc):
-                print("[HF] attn_implementation unsupported; retrying without it.")
-                return model_cls.from_pretrained(load_from, **self._strip_attn_implementation(model_kwargs))
-            raise
+        return model_cls.from_pretrained(load_from, **model_kwargs)
 
     def _build_model_kwargs(self) -> dict:
         model_kwargs = {
@@ -533,38 +486,12 @@ class HFCaptionModel(nn.Module):
             model_kwargs["torch_dtype"] = self.torch_dtype
         if self.low_cpu_mem_usage:
             model_kwargs["low_cpu_mem_usage"] = True
-        if self.attn_implementation:
-            model_kwargs["attn_implementation"] = self.attn_implementation
         return model_kwargs
 
     def _with_unsafe_safetensors(self, model_kwargs: dict) -> dict:
         updated = dict(model_kwargs)
         updated["use_safetensors"] = False
         return updated
-
-    def _load_auto_model(self, load_from: str, model_kwargs: dict):
-        try:
-            return self._from_pretrained_with_attn_fallback(
-                AutoModelForVision2Seq, load_from, model_kwargs
-            )
-        except Exception:
-            try:
-                return self._from_pretrained_with_attn_fallback(
-                    AutoModelForVision2Seq,
-                    load_from,
-                    self._with_unsafe_safetensors(model_kwargs),
-                )
-            except Exception:
-                try:
-                    return self._from_pretrained_with_attn_fallback(
-                        AutoModelForCausalLM, load_from, model_kwargs
-                    )
-                except Exception:
-                    return self._from_pretrained_with_attn_fallback(
-                        AutoModelForCausalLM,
-                        load_from,
-                        self._with_unsafe_safetensors(model_kwargs),
-                    )
 
     def _needs_download(self) -> bool:
         return bool(self.local_dir) and not self._local_dir_ready()
@@ -610,40 +537,15 @@ class HFCaptionModel(nn.Module):
             return f"{self.system_prompt}\n{self.user_prompt}"
         return self.user_prompt or self.system_prompt or ""
 
-    def _apply_chat_template(self, messages: List[dict]) -> str:
-        if not hasattr(self.processor, "apply_chat_template"):
-            return ""
-        try:
-            return self.processor.apply_chat_template(
-                messages,
-                tokenize=False,
-                add_generation_prompt=True,
-            )
-        except TypeError:
-            return self.processor.apply_chat_template(messages, tokenize=False)
-
-    def _build_chat_messages(self, image) -> List[dict]:
-        messages: List[dict] = []
-        if self.system_prompt:
-            messages.append({"role": "system", "content": self.system_prompt})
-        user_content = []
-        if self.user_prompt:
-            user_content.append({"type": "text", "text": self.user_prompt})
-        user_content.append({"type": "image", "image": image})
-        messages.append({"role": "user", "content": user_content})
-        return messages
-
     def _prepare_model_inputs(self, images: List) -> dict:
-        if self.use_chat_template and hasattr(self.processor, "apply_chat_template"):
-            texts = [self._apply_chat_template(self._build_chat_messages(image)) for image in images]
+        prompt_text = self._compose_prompt_text()
+        if not prompt_text and getattr(self, "model_kind", "") == "git":
+            prompt_text = "a photo of"
+        if prompt_text:
+            texts = [prompt_text for _ in images]
             inputs = self.processor(text=texts, images=images, return_tensors="pt", padding=True)
         else:
-            prompt_text = self._compose_prompt_text()
-            if prompt_text:
-                texts = [prompt_text for _ in images]
-                inputs = self.processor(text=texts, images=images, return_tensors="pt", padding=True)
-            else:
-                inputs = self.processor(images=images, return_tensors="pt", padding=True)
+            inputs = self.processor(images=images, return_tensors="pt", padding=True)
         return inputs.to(self.device)
 
     def _trim_generated_ids(self, generated_ids: torch.Tensor, inputs: dict) -> torch.Tensor:

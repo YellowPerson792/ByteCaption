@@ -231,6 +231,7 @@
   "eos_token": "<|im_end|>",
   "errors": "replace",
   "extra_special_tokens": {},
+  "fix_mistral_regex": true,
   "model_max_length": 262144,
   "pad_token": "<|endoftext|>",
   "processor_class": "Qwen3VLProcessor",
