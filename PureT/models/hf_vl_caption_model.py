@@ -6,16 +6,15 @@ from typing import List, Optional, Sequence, Tuple
 
 import torch
 import torch.nn as nn
-from transformers import AutoModel, AutoModelForCausalLM, AutoProcessor
-
-try:
-    from transformers import AutoModelForVision2Seq
-except Exception:  # pragma: no cover
-    AutoModelForVision2Seq = None
-try:
-    from transformers import InternVLForConditionalGeneration
-except Exception:  # pragma: no cover
-    InternVLForConditionalGeneration = None
+from transformers import (
+    AutoModel, 
+    AutoModelForCausalLM, 
+    AutoProcessor,
+    AutoModelForVision2Seq,
+    InternVLForConditionalGeneration,
+    Glm4vForConditionalGeneration
+)
+from peft import PeftModel
 
 from lib.config import cfg
 
@@ -124,9 +123,39 @@ class HFVLCaptionModel(nn.Module):
 
         self.model.to(self.device)
         self.model.eval()
+        
+        # Detect if this is a GLM model for special handling
+        self.is_glm_model = self._detect_glm_model()
 
     def forward(self, *args, **kwargs):
         raise NotImplementedError("HFVLCaptionModel is inference-only in this pipeline.")
+
+    def load_lora_adapter(self, adapter_dir: str) -> bool:
+        """Load PEFT LoRA adapter for the model during evaluation."""
+        
+        if not os.path.isdir(adapter_dir):
+            return False
+        try:
+            # Wrap model with PEFT for loading adapter
+            peft_model = PeftModel.from_pretrained(self.model, adapter_dir)
+            # Merge the adapter into the model for inference
+            self.model = peft_model.merge_and_unload()
+            return True
+        except Exception as exc:
+            print(f"[GLM] Failed to load LoRA adapter: {exc}")
+            return False
+
+    def _truncate_to_first_sentence(self, text: str) -> str:
+        """Keep only the first sentence."""
+        import re
+        if not text:
+            return text
+        # Split by sentence terminators and get first non-empty sentence
+        for seg in re.split(r'[.!?]', text):
+            seg = seg.strip()
+            if seg:
+                return seg
+        return text
 
     def decode_beam(self, **kwargs):
         images = kwargs[cfg.PARAM.ATT_FEATS]
@@ -148,6 +177,9 @@ class HFVLCaptionModel(nn.Module):
         final_captions = [dummy_caption for _ in range(len(images))]
         for idx, caption in zip(original_indices, captions):
             cleaned = caption.strip()
+            # Only truncate to first sentence for GLM models
+            if self.is_glm_model:
+                cleaned = self._truncate_to_first_sentence(cleaned)
             final_captions[idx] = cleaned if cleaned else dummy_caption
         return final_captions, None
 
@@ -180,12 +212,22 @@ class HFVLCaptionModel(nn.Module):
 
         model = None
         lowered = str(load_from).lower()
-        if "internvl" in lowered and InternVLForConditionalGeneration is not None:
+        # Try GLM with dedicated Glm4vForConditionalGeneration class first
+        if "glm" in lowered and Glm4vForConditionalGeneration is not None:
+            model = self._safe_from_pretrained(Glm4vForConditionalGeneration, load_from, model_kwargs)
+        # Try Qwen with CausalLM
+        if model is None and "qwen" in lowered:
+            model = self._safe_from_pretrained(AutoModelForCausalLM, load_from, model_kwargs)
+        # Then try InternVL
+        if model is None and "internvl" in lowered and InternVLForConditionalGeneration is not None:
             model = self._safe_from_pretrained(InternVLForConditionalGeneration, load_from, model_kwargs)
+        # Then try Vision2Seq
         if model is None and AutoModelForVision2Seq is not None:
             model = self._safe_from_pretrained(AutoModelForVision2Seq, load_from, model_kwargs)
+        # Fallback to CausalLM for unknown models
         if model is None:
             model = self._safe_from_pretrained(AutoModelForCausalLM, load_from, model_kwargs)
+        # Last resort: AutoModel (may not have generate)
         if model is None:
             model = self._safe_from_pretrained(AutoModel, load_from, model_kwargs)
         if model is None:
@@ -203,6 +245,11 @@ class HFVLCaptionModel(nn.Module):
             return None
         except Exception:
             return None
+
+    def _detect_glm_model(self) -> bool:
+        """Check if loaded model is a GLM model."""
+        model_id_lower = f"{self.model_id or ''} {self.local_dir or ''}".lower()
+        return "glm" in model_id_lower
 
     def _resolve_attn_impl(self) -> Optional[str]:
         attn_impl = (self.attn_implementation or "").strip()
@@ -239,11 +286,25 @@ class HFVLCaptionModel(nn.Module):
             user_content.append({"type": "text", "text": self.user_prompt})
         messages.append({"role": "user", "content": user_content})
         try:
-            return self.processor.apply_chat_template(
+            return self._safe_apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True
             )
         except Exception:
             return None
+
+    def _safe_apply_chat_template(self, conversation, **kwargs):
+        """Apply chat template with model-specific parameters (e.g., GLM disable thinking)."""
+        # For GLM models, disable thinking to avoid meta-thought outputs
+        if self.is_glm_model:
+            kwargs.setdefault("enable_thinking", False)
+        try:
+            return self.processor.apply_chat_template(conversation, **kwargs)
+        except Exception as exc:
+            # Retry without problematic parameters if needed
+            if "enable_thinking" in str(exc):
+                kwargs.pop("enable_thinking", None)
+                return self.processor.apply_chat_template(conversation, **kwargs)
+            raise
 
     def _prepare_model_inputs(self, images: List) -> dict:
         prompt = None

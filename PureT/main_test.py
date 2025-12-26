@@ -42,6 +42,7 @@ from scorer.flickr8k_scorer import Flickr8kScorer
 from scorer.scorer import Scorer 
 from lib.config import cfg, cfg_from_file
 from corenet.data.transforms import jpeg_corruption
+import re
 
 try:
     import wandb
@@ -52,7 +53,7 @@ except ImportError:
 """
 Example:
 python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 10 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE --test_samples 10 --resume -1 --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_glm --test_samples 200 --resume -1 --disable_wandb
 """
 
 def _project_root() -> str:
@@ -97,6 +98,18 @@ def _build_reference_map(ann_path: str):
             pass
         ref_map.setdefault(image_id, []).append(caption)
     return ref_map
+
+def _postprocess_caption(text: str) -> str:
+    """Keep only the first sentence."""
+    if not text:
+        return text
+    
+    # Split by sentence terminators and get first non-empty sentence
+    for seg in re.split(r'[.!?]', text):
+        seg = seg.strip()
+        if seg:
+            return seg
+    return text
 
 class Tester(object):
     def __init__(self, args):
@@ -685,6 +698,9 @@ if __name__ == '__main__':
                             continue
                         image_id = item.get(id_key)
                         generated = item.get(cap_key)
+                        # Post-process caption: deduplicate and keep only first sentence
+                        if isinstance(generated, str):
+                            generated = _postprocess_caption(generated)
                         lookup_id = image_id
                         try:
                             lookup_id = int(image_id)

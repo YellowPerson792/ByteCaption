@@ -38,7 +38,8 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import types
 import re
 
-import torch
+from transformers import AutoProcessor, Glm4vForConditionalGeneration
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -459,17 +460,10 @@ def _load_model_and_processor(hf_cfg):
     )
     trust_remote_code = bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False))
 
-    from transformers import AutoProcessor
-
     processor = AutoProcessor.from_pretrained(processor_load_from, trust_remote_code=trust_remote_code)
 
     model_kwargs = _build_model_kwargs(hf_cfg)
     use_safetensors = bool(getattr(hf_cfg, "SAFE_SERIALIZATION", True))
-
-    try:
-        from transformers import Glm4vForConditionalGeneration
-    except Exception as exc:  # pragma: no cover
-        raise ImportError(f"Glm4vForConditionalGeneration not available: {exc}") from exc
 
     model = _load_with_safetensor_retry(Glm4vForConditionalGeneration)
 

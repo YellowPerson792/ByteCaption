@@ -10,8 +10,8 @@ import os
 def download_internvl():
     """下载模型"""
     
-    model_id = "OpenGVLab/InternVL3_5-8B-HF"
-    local_dir = "./InternVL3_5-8B-HF"
+    model_id = "mistralai/Ministral-3-8B-Base-2512"
+    local_dir = "/root/autodl-fs/Ministral-3-8B-Base-2512"
     
     print(f"开始从 ModelScope 下载模型: {model_id}")
     print(f"保存路径: {local_dir}")
