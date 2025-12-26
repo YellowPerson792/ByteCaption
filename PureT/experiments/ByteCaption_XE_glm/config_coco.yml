@@ -30,7 +30,7 @@ MODEL:
     PROMPT_SOURCE: 'openrouter'
     USE_CHAT_TEMPLATE: True
     GENERATION:
-      MAX_NEW_TOKENS: 30
+      MAX_NEW_TOKENS: 20
       NUM_BEAMS: 5
 
   OPENROUTER:
