@@ -111,13 +111,13 @@ class HFCaptionModel(nn.Module):
                     load_from, trust_remote_code=self.trust_remote_code
                 )
                 try:
-                    self.model = self._from_pretrained_with_attn_fallback(
+                    self.model = self._from_pretrained(
                         BlipForConditionalGeneration,
                         load_from,
                         model_kwargs,
                     )
                 except OSError:
-                    self.model = self._from_pretrained_with_attn_fallback(
+                    self.model = self._from_pretrained(
                         BlipForConditionalGeneration,
                         load_from,
                         self._with_unsafe_safetensors(model_kwargs),
@@ -129,7 +129,7 @@ class HFCaptionModel(nn.Module):
                         load_from, trust_remote_code=self.trust_remote_code
                     )
                 except Exception:
-                    self.processor = self._load_processor_with_fallback(load_from)
+                    self.processor = self._load_processor(load_from)
                 try:
                     self.model = GitForCausalLM.from_pretrained(load_from, **model_kwargs)
                 except OSError:
@@ -197,152 +197,10 @@ class HFCaptionModel(nn.Module):
             return torch.log_softmax(logits, dim=-1)
         return logits
 
-    def _should_debug_print_inputs(self) -> bool:
-        if not self.debug_print_inputs:
-            return False
-        if self.debug_print_inputs_every > 0:
-            # Print on step 0, every N calls.
-            return (self._debug_printed_steps % self.debug_print_inputs_every) == 0
-        if self.debug_print_inputs_once:
-            return self._debug_printed_steps == 0
-        return False
-
-    def _decode_preview(self, input_ids: torch.Tensor) -> str:
-        if input_ids is None:
-            return ""
-        tokenizer = getattr(self.processor, "tokenizer", None)
-        try:
-            ids_cpu = input_ids.detach().to("cpu")
-            ids_1 = ids_cpu[0]
-            # Hard truncate preview length to avoid giant prints.
-            if ids_1.numel() > self.debug_print_inputs_max_tokens:
-                ids_1 = ids_1[: self.debug_print_inputs_max_tokens]
-            if tokenizer is not None and hasattr(tokenizer, "decode"):
-                return tokenizer.decode(ids_1.tolist(), skip_special_tokens=False)
-            if hasattr(self.processor, "decode"):
-                return self.processor.decode(ids_1.tolist(), skip_special_tokens=False)
-        except Exception:
-            return ""
-        return ""
-
-    def _decode_id_list(self, token_ids: List[int]) -> str:
-        if not token_ids:
-            return ""
-        tokenizer = getattr(self.processor, "tokenizer", None)
-        try:
-            if tokenizer is not None and hasattr(tokenizer, "decode"):
-                return tokenizer.decode(token_ids, skip_special_tokens=False)
-            if hasattr(self.processor, "decode"):
-                return self.processor.decode(token_ids, skip_special_tokens=False)
-        except Exception:
-            return ""
-        return ""
-
-    def _should_retry_processor_with_slow_tokenizer(self, exc: Exception) -> bool:
-        msg = str(exc).lower()
-        return "start_image_token" in msg or "qwen2tokenizerfast" in msg
-
-    def _load_processor_with_fallback(self, load_from: str):
-        try:
-            return AutoProcessor.from_pretrained(
-                load_from, trust_remote_code=self.trust_remote_code
-            )
-        except Exception as exc:
-            if self._should_retry_processor_with_slow_tokenizer(exc):
-                print("[HF] Processor init failed; retrying with use_fast=False.")
-                return AutoProcessor.from_pretrained(
-                    load_from,
-                    trust_remote_code=self.trust_remote_code,
-                    use_fast=False,
-                )
-            raise
-
-    def _tensor_brief(self, value: torch.Tensor) -> str:
-        if not isinstance(value, torch.Tensor):
-            return str(type(value))
-        parts = [f"shape={tuple(value.shape)}", f"dtype={value.dtype}"]
-        if value.device is not None:
-            parts.append(f"device={value.device}")
-        try:
-            v = value.detach()
-            if v.numel() > 0 and v.is_floating_point():
-                v_cpu = v.to("cpu")
-                parts.append(f"min={float(v_cpu.min()):.4g}")
-                parts.append(f"max={float(v_cpu.max()):.4g}")
-                parts.append(f"mean={float(v_cpu.mean()):.4g}")
-            elif v.numel() > 0:
-                v_cpu = v.to("cpu")
-                parts.append(f"min={int(v_cpu.min())}")
-                parts.append(f"max={int(v_cpu.max())}")
-        except Exception:
-            pass
-        return ", ".join(parts)
-
-    def _debug_print_model_inputs(self, model_inputs: dict) -> None:
-        # Guard against repeated noisy prints.
-        self._debug_printed_steps += 1
-
-        print("\n" + "=" * 88)
-        print("[ByteCaption][DEBUG] HF model_inputs (actual tensors fed into model)")
-        print("- Keys:")
-        for key in sorted(model_inputs.keys()):
-            value = model_inputs[key]
-            if isinstance(value, torch.Tensor):
-                print(f"  - {key}: {self._tensor_brief(value)}")
-            else:
-                print(f"  - {key}: {type(value)}")
-
-        input_ids = model_inputs.get("input_ids")
-        attention_mask = model_inputs.get("attention_mask")
-        labels = model_inputs.get("labels")
-
-        if isinstance(input_ids, torch.Tensor):
-            preview = self._decode_preview(input_ids)
-            if preview:
-                preview = preview.replace("\r", "")
-                preview = textwrap.shorten(preview, width=2000, placeholder=" ...")
-                print("- Decoded input_ids[0] preview:")
-                print(textwrap.indent(preview, prefix="  "))
-
-        if isinstance(labels, torch.Tensor):
-            try:
-                labels_cpu = labels.detach().to("cpu")
-                ignore = -100
-                ignored = int((labels_cpu == ignore).sum().item())
-                total = int(labels_cpu.numel())
-                print(f"- labels: ignore_id={ignore}, ignored={ignored}/{total}")
-            except Exception:
-                pass
-
-            # Decode the supervised caption region from labels[0] (tokens where label != -100).
-            try:
-                row = labels.detach().to("cpu")[0]
-                ignore = -100
-                # Keep only supervised token ids; drop ignore and any negative ids.
-                supervised_ids = [int(x) for x in row.tolist() if int(x) != ignore and int(x) >= 0]
-                if supervised_ids:
-                    # Also truncate for preview.
-                    if len(supervised_ids) > self.debug_print_inputs_max_tokens:
-                        supervised_ids = supervised_ids[: self.debug_print_inputs_max_tokens]
-                    caption_preview = self._decode_id_list(supervised_ids)
-                    if caption_preview:
-                        caption_preview = caption_preview.replace("\r", "")
-                        caption_preview = textwrap.shorten(caption_preview, width=2000, placeholder=" ...")
-                        print("- Supervised caption (decoded from labels[0] where labels!=-100):")
-                        print(textwrap.indent(caption_preview, prefix="  "))
-            except Exception:
-                pass
-
-        if isinstance(attention_mask, torch.Tensor):
-            try:
-                am_cpu = attention_mask.detach().to("cpu")
-                lens = am_cpu.sum(dim=1).tolist() if am_cpu.ndim == 2 else []
-                if lens:
-                    print(f"- attention_mask: seq_lens={lens[:8]}{'...' if len(lens) > 8 else ''}")
-            except Exception:
-                pass
-
-        print("=" * 88 + "\n")
+    def _load_processor(self, load_from: str):
+        return AutoProcessor.from_pretrained(
+            load_from, trust_remote_code=self.trust_remote_code
+        )
 
     def save_lora_adapter(self, output_dir: str) -> bool:
         if not self.lora_enabled:
@@ -474,7 +332,7 @@ class HFCaptionModel(nn.Module):
             return dtype_value
         return None
 
-    def _from_pretrained_with_attn_fallback(self, model_cls, load_from: str, model_kwargs: dict):
+    def _from_pretrained(self, model_cls, load_from: str, model_kwargs: dict):
         return model_cls.from_pretrained(load_from, **model_kwargs)
 
     def _build_model_kwargs(self) -> dict:
@@ -492,28 +350,6 @@ class HFCaptionModel(nn.Module):
         updated = dict(model_kwargs)
         updated["use_safetensors"] = False
         return updated
-
-    def _needs_download(self) -> bool:
-        return bool(self.local_dir) and not self._local_dir_ready()
-
-    def _download_snapshot(self) -> None:
-        if not self.local_dir:
-            return
-        try:
-            from huggingface_hub import snapshot_download
-        except Exception:
-            return
-
-        os.makedirs(self.local_dir, exist_ok=True)
-        print(f"[HF] Downloading {self.model_id} to {self.local_dir}")
-        try:
-            snapshot_download(
-                repo_id=self.model_id,
-                local_dir=self.local_dir,
-                local_dir_use_symlinks=False,
-            )
-        except Exception as exc:
-            print(f"[HF] snapshot_download failed: {exc}. Falling back to cache.")
 
     def _allow_unsafe_torch_load(self) -> None:
         try:

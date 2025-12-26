@@ -7,7 +7,7 @@ import argparse
 
 import torch
 from torch import Tensor
-from torchtext.transforms import CLIPTokenizer
+# from torchtext.transforms import CLIPTokenizer
 
 from corenet.data.text_tokenizer import TOKENIZER_REGISTRY, BaseTextTokenizer
 from corenet.utils import logger

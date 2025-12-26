@@ -9,7 +9,22 @@ import argparse
 import json
 import numpy as np
 
+# Disable torch._dynamo compilation before importing any torch-dependent modules
+os.environ['TORCH_DISABLE_COMPILATION_OPTIM'] = '1'
+os.environ['TORCHDYNAMO_DISABLE'] = '1'
+
+# Block torchvision.ops._register_onnx_ops before timm imports it
+import unittest.mock as mock
+sys.modules['torch.onnx'] = mock.MagicMock()
+sys.modules['torch.onnx.operators'] = mock.MagicMock()
+sys.modules['torch.onnx.symbolic_helper'] = mock.MagicMock()
+sys.modules['torch.onnx._internal'] = mock.MagicMock()
+sys.modules['torch.onnx._internal.exporter'] = mock.MagicMock()
+
 import torch
+# Disable dynamo globally
+torch._dynamo.disable(torch._dynamo.reset)
+
 import torch.nn as nn
 import torch.multiprocessing as mp
 import torch.distributed as dist
@@ -24,7 +39,7 @@ from evaluation.evaler_coco import CocoEvaler
 from evaluation.evaler_flickr8k import Flickr8kEvaler
 from scorer.coco_scorer import CocoScorer
 from scorer.flickr8k_scorer import Flickr8kScorer
-from scorer.scorer import Scorer  # 新增导入
+from scorer.scorer import Scorer 
 from lib.config import cfg, cfg_from_file
 from corenet.data.transforms import jpeg_corruption
 
@@ -37,7 +52,7 @@ except ImportError:
 """
 Example:
 python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 10 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_internvl --test_samples 10 --resume -1 --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE --test_samples 10 --resume -1 --disable_wandb
 """
 
 def _project_root() -> str:
@@ -280,23 +295,11 @@ class Tester(object):
 
         if self.args.resume > 0:
             ckpt = self.snapshot_path("caption_model", self.args.resume)
-            if os.path.exists(ckpt):
-                self.model.load_state_dict(
-                    torch.load(ckpt, map_location=lambda storage, loc: storage)
-                )
-                self.logger.info(f"Loaded checkpoint: {ckpt}")
-            else:
-                self.logger.warning(f"Requested checkpoint for resume not found: {ckpt}")
+            self._safe_load_checkpoint(ckpt)
         elif self.args.resume == -1:
             # 使用 cfg.ROOT_DIR 下 snapshot/best_model.pth，避免硬编码路径
             best_ckpt = os.path.join(cfg.ROOT_DIR or self.args.folder or ".", "snapshot", "best_model.pth")
-            if os.path.exists(best_ckpt):
-                self.model.load_state_dict(
-                    torch.load(best_ckpt, map_location=lambda storage, loc: storage)
-                )
-                self.logger.info(f"Loaded best model: {best_ckpt}")
-            else:
-                self.logger.warning(f"best_model.pth not found at: {best_ckpt}")
+            self._safe_load_checkpoint(best_ckpt)
 
 
     def eval(self, epoch):
@@ -311,6 +314,42 @@ class Tester(object):
         else:
             self.logger.info('TEST evaluation skipped (no test_evaler).')
         return None
+
+    def _safe_load_checkpoint(self, ckpt_path: str) -> bool:
+        """Load a checkpoint and reconcile DataParallel prefixes."""
+        if not ckpt_path or not os.path.exists(ckpt_path):
+            self.logger.warning(f"Checkpoint not found: {ckpt_path}")
+            return False
+
+        state = torch.load(ckpt_path, map_location="cpu")
+        if isinstance(state, dict):
+            if "state_dict" in state:
+                state = state["state_dict"]
+            elif "model" in state and isinstance(state["model"], dict):
+                state = state["model"]
+
+        model_to_load = self.model.module if hasattr(self.model, "module") else self.model
+        target_state = model_to_load.state_dict()
+
+        has_module_ckpt = any(k.startswith("module.") for k in state.keys())
+        has_module_target = any(k.startswith("module.") for k in target_state.keys())
+
+        if has_module_ckpt and not has_module_target:
+            state = {k[len("module."): ] if k.startswith("module.") else k: v for k, v in state.items()}
+        elif not has_module_ckpt and has_module_target:
+            state = {f"module.{k}" if not k.startswith("module.") else k: v for k, v in state.items()}
+
+        load_result = model_to_load.load_state_dict(state, strict=False)
+        missing_keys = getattr(load_result, "missing_keys", [])
+        unexpected_keys = getattr(load_result, "unexpected_keys", [])
+
+        if missing_keys:
+            self.logger.warning(f"Missing keys when loading checkpoint: {missing_keys}")
+        if unexpected_keys:
+            self.logger.warning(f"Unexpected keys in checkpoint: {unexpected_keys}")
+
+        self.logger.info(f"Loaded checkpoint: {ckpt_path}")
+        return True
 
     def snapshot_path(self, name, epoch):
         snapshot_folder = os.path.join(cfg.ROOT_DIR, 'snapshot')

@@ -20,9 +20,9 @@ TEST:
 MODEL:
   TYPE: 'GLM'
   HF:
-    MODEL_ID: 'zai-org/GLM-4.6V-Flash'
-    PROCESSOR_ID: 'zai-org/GLM-4.6V-Flash'
-    LOCAL_DIR: './GLM-4.6V-Flash'
+    MODEL_ID: 'GLM-4.6V-Flash/ZhipuAI/GLM-4.6V-Flash'
+    PROCESSOR_ID: 'GLM-4.6V-Flash/ZhipuAI/GLM-4.6V-Flash'
+    LOCAL_DIR: 'GLM-4.6V-Flash/ZhipuAI/GLM-4.6V-Flash'
     TRUST_REMOTE_CODE: True
     TORCH_DTYPE: 'bf16'
     LOW_CPU_MEM_USAGE: True

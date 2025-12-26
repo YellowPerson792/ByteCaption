@@ -10,7 +10,7 @@ import random
 from typing import Callable, Dict, List, Optional, Union
 
 import torch
-import torchaudio
+# import torchaudio
 
 from corenet.data.transforms import TRANSFORMATIONS_REGISTRY, BaseTransformation
 from corenet.data.transforms.audio_aux import mfccs
