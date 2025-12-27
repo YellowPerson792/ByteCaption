@@ -1,10 +1,10 @@
 from models.pure_transformer import PureT
 from models.pure_transformer import PureT_Base
 from models.pure_transformer import PureT_Base_22K
-from models.pure_byteformer import PureT_byteformer
-from .hf_caption_model import HFCaptionModel
-from .hf_vl_caption_model import HFVLCaptionModel
-from .openrouter_caption_model import OpenRouterCaptionModel
+from PureT.models.bytecaption_model import PureT_byteformer
+from .hf_visual_model import HFVisualModel
+from .hf_vl_chat_model import HFVLChatModel
+from .openrouter_model import OpenRouterCaptionModel
 
 __factory = {
     'PureT': PureT,
@@ -12,16 +12,16 @@ __factory = {
     'PureT_Base_22K': PureT_Base_22K,
     'PureT_byteformer': PureT_byteformer,
     # Unified HuggingFace/Transformer vision captioner
-    'BLIP': HFCaptionModel,
-    'HF_BLIP': HFCaptionModel,
-    'HF': HFCaptionModel,
-    'GIT': HFCaptionModel,
-    'HF_GIT': HFCaptionModel,
-    'QWEN': HFVLCaptionModel,
-    'INTERNVL': HFVLCaptionModel,
-    'GLM': HFVLCaptionModel,
-    'MINISTRAL': HFVLCaptionModel,
-    'MISTRAL': HFVLCaptionModel,
+    'BLIP': HFVisualModel,
+    'HF_BLIP': HFVisualModel,
+    'HF': HFVisualModel,
+    'GIT': HFVisualModel,
+    'HF_GIT': HFVisualModel,
+    'QWEN': HFVLChatModel,
+    'INTERNVL': HFVLChatModel,
+    'GLM': HFVLChatModel,
+    'MINISTRAL': HFVLChatModel,
+    'MISTRAL': HFVLChatModel,
     'OPENROUTER': OpenRouterCaptionModel,
 }
 

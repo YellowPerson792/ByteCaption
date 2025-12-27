@@ -1,0 +1,49 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_glm",
+  "model_name": "ByteCaption_XE_glm",
+  "model_type": "GLM",
+  "corrupt_type": [
+    "rbsl"
+  ],
+  "corrupt_level": "S1",
+  "corruption_params": {
+    "rbsl": {
+      "trigger_prob": 0.0005,
+      "burst_lambda": 100.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.5181431987979824,
+    "Bleu_2": 0.30339359130148796,
+    "Bleu_3": 1.8526801483486619e-06,
+    "Bleu_4": 4.791734891334646e-09,
+    "ROUGE_L": 0.37037444261193575,
+    "CIDEr": 0.19290857467692157,
+    "METEOR": 0.11880868804670364,
+    "SPICE": 0.03333333333333333,
+    "XE_Loss": null,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 2,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "A cat is sleeping in a cage",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "A picture of a person with a hat on",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20251227_151114",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20251227_151114/captions_test_best.json",
+  "captions_count": 2
+}

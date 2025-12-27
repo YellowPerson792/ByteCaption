@@ -12,6 +12,18 @@ import argparse
 from collections import deque
 import numpy as np
 
+# Disable torch._dynamo compilation before importing any torch-dependent modules
+os.environ['TORCH_DISABLE_COMPILATION_OPTIM'] = '1'
+os.environ['TORCHDYNAMO_DISABLE'] = '1'
+
+# Block torchvision.ops._register_onnx_ops before timm imports it
+import unittest.mock as mock
+sys.modules['torch.onnx'] = mock.MagicMock()
+sys.modules['torch.onnx.operators'] = mock.MagicMock()
+sys.modules['torch.onnx.symbolic_helper'] = mock.MagicMock()
+sys.modules['torch.onnx._internal'] = mock.MagicMock()
+sys.modules['torch.onnx._internal.exporter'] = mock.MagicMock()
+
 import torch
 import torch.nn as nn
 import torch.multiprocessing as mp
@@ -22,18 +34,12 @@ WANDB_AVAILABLE = True
 import losses
 import models
 
-# COCO 组件
-from datasets_.coco_dataset_hf import CocoDataset
-from datasets_.data_loader_byteformer_coco import load_train as load_train_coco
-from datasets_.data_loader_hf_caption import load_train as load_train_hf
+# COCO 组件（仅支持 COCO）
+from PureT.datasets_.coco_dataset import CocoDataset
+from PureT.datasets_.data_loader_bytecaption import load_train as load_train_coco
+from PureT.datasets_.data_loader_chat import load_train as load_train_hf
 from evaluation.evaler_coco import CocoEvaler
 from scorer.coco_scorer import CocoScorer
-
-# Flickr8k 组件
-from datasets_.flickr8k_dataset_hf import Flickr8kDataset
-from datasets_.data_loader_byteformer_f8k import load_train as load_train_f8k
-from evaluation.evaler_flickr8k import Flickr8kEvaler
-from scorer.flickr8k_scorer import Flickr8kScorer
 
 import lib.utils as utils
 from lib.utils import AverageMeter
@@ -44,7 +50,7 @@ from lib.config import cfg, cfg_from_file
 
 """
 cd /d/MLLMs/ByteCaption && python PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 100 --dataset coco --freeze_backbone --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main.py --folder PureT/experiments/ByteCaption_XE --dataset coco --eval_steps 300 --early_stop_patience 4 --val_samples 100 --load_weights --freeze_backbone  --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main.py --folder PureT/experiments/ByteCaption_XE --dataset coco --eval_steps 200 --early_stop_patience 4 --val_samples 100 --load_weights --freeze_backbone  --disable_wandb
 cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption torchrun --nproc_per_node=2 --master_port=12355 PureT/main.py --folder PureT/experiments/ByteCaption_XE --eval_steps 300 --val_samples 50 --dataset coco --load_weights --freeze_backbone
 """
 
@@ -57,8 +63,6 @@ class Trainer(object):
         self.dataset_type = getattr(args, 'dataset', 'coco').lower()
         self.best_metric = getattr(args, 'best_metric', 'CIDEr')
         grad_steps = getattr(args, 'grad_accum_steps', 1)
-        if grad_steps is None:
-            grad_steps = 1
         self.grad_accum_steps = max(1, int(grad_steps))
         
         # 设置随机数种子
@@ -98,13 +102,8 @@ class Trainer(object):
         # 训练模型结构
         self.setup_network()
         
-        # Use appropriate scorer based on dataset type
-        if self.dataset_type == 'coco':
-            self.scorer = CocoScorer(shared_dataset=self.training_dataset)
-        elif self.dataset_type == 'flickr8k':
-            self.scorer = Flickr8kScorer(shared_dataset=self.training_dataset)
-        else:
-            self.scorer = Scorer()
+        # Scorer（仅 COCO）
+        self.scorer = CocoScorer(shared_dataset=self.training_dataset)
 
         # 初始化早停和最佳分数变量（基于 best_metric）
         self.best_cider = float('-inf')
@@ -116,108 +115,61 @@ class Trainer(object):
             
     def setup_evaler(self):
         # 使用命令行参数或默认值
-        val_samples = getattr(self.args, 'val_samples', 100)
+        val_samples = getattr(self.args, 'val_samples', 0)
         if val_samples == 0:
             val_samples = None  # None表示使用所有样本
 
         # 默认启用eval_loss功能
         enable_eval_loss = True
 
-        # 根据数据集类型设置评估器
-        if self.dataset_type == 'coco':
-            eval_ids_path = cfg.DATA_LOADER.VAL_ID if cfg.DATA_LOADER.VAL_ID else None
-            val_annfile = cfg.INFERENCE.VAL_ANNFILE
-            
-            self.val_evaler = CocoEvaler(
-                eval_ids_path,
-                cfg.DATA_LOADER.VAL_GV_FEAT,
-                cfg.DATA_LOADER.VAL_ATT_FEATS,
-                val_annfile,
-                max_samples=val_samples,
-                enable_eval_loss=enable_eval_loss
-            )
-            self._log(f"Validation dataset (COCO): Using {val_samples if val_samples else 'ALL'} samples", prefix="DATASET")
-        elif self.dataset_type == 'flickr8k':
-            eval_ids_path = cfg.DATA_LOADER.VAL_ID if cfg.DATA_LOADER.VAL_ID else None
-            val_annfile = cfg.INFERENCE.VAL_ANNFILE
-            
-            self.val_evaler = Flickr8kEvaler(
-                eval_ids_path,
-                cfg.DATA_LOADER.VAL_GV_FEAT,
-                cfg.DATA_LOADER.VAL_ATT_FEATS,
-                val_annfile,
-                max_samples=val_samples,
-                enable_eval_loss=enable_eval_loss
-            )
-            self._log(f"Validation dataset (Flickr8k): Using {val_samples if val_samples else 'ALL'} samples", prefix="DATASET")
-        else:
-            raise ValueError(f"Unsupported dataset type: {self.dataset_type}")
-            
-        self._log("XE Loss during evaluation: ENABLED (default)", prefix="DATASET")
-        
-        # 暂时去掉测试集评估以节省调试时间
-        self.test_evaler = None
-    
-        # 训练数据集导入
+        # 仅 COCO 评估器
+        eval_ids_path = cfg.DATA_LOADER.VAL_ID if cfg.DATA_LOADER.VAL_ID else None
+        val_annfile = cfg.INFERENCE.VAL_ANNFILE
+        self.val_evaler = CocoEvaler(
+            eval_ids_path,
+            cfg.DATA_LOADER.VAL_GV_FEAT,
+            cfg.DATA_LOADER.VAL_ATT_FEATS,
+            val_annfile,
+            max_samples=val_samples,
+            enable_eval_loss=enable_eval_loss,
+        )
+        self._log(f"Validation dataset (COCO): Using {val_samples if val_samples else 'ALL'} samples", prefix="DATASET")
     def setup_dataset(self):
         # 使用命令行参数或默认值
-        train_samples = getattr(self.args, 'train_samples', 200)
+        train_samples = getattr(self.args, 'train_samples', 0)
         if train_samples == 0:
             train_samples = None  # None表示使用所有样本
 
         # 使用生成的 JSON 文件进行训练
         train_id_path = cfg.DATA_LOADER.TRAIN_ID if cfg.DATA_LOADER.TRAIN_ID else None
         
-        if self.dataset_type == 'coco':
-            self.training_dataset = CocoDataset(
-                image_ids_path=train_id_path,
-                input_seq=cfg.DATA_LOADER.INPUT_SEQ_PATH,
-                target_seq=cfg.DATA_LOADER.TARGET_SEQ_PATH,
-                gv_feat_path=cfg.DATA_LOADER.TRAIN_GV_FEAT,
-                seq_per_img=cfg.DATA_LOADER.SEQ_PER_IMG,
-                max_feat_num=cfg.DATA_LOADER.MAX_FEAT,
-                max_samples=train_samples,
-                return_captions=self._is_hf_training(),
-                return_pil=self._is_hf_training(),
-            )
-            self._log(f"Training dataset (COCO): Using {train_samples if train_samples else 'ALL'} samples", prefix="DATASET")
-        elif self.dataset_type == 'flickr8k':
-            self.training_dataset = Flickr8kDataset(
-                image_ids_path=train_id_path,
-                input_seq=cfg.DATA_LOADER.INPUT_SEQ_PATH,
-                target_seq=cfg.DATA_LOADER.TARGET_SEQ_PATH,
-                gv_feat_path=cfg.DATA_LOADER.TRAIN_GV_FEAT,
-                seq_per_img=cfg.DATA_LOADER.SEQ_PER_IMG,
-                max_feat_num=cfg.DATA_LOADER.MAX_FEAT,
-                max_samples=train_samples,
-                return_captions=self._is_hf_training(),
-                return_pil=self._is_hf_training(),
-            )
-            self._log(f"Training dataset (Flickr8k): Using {train_samples if train_samples else 'ALL'} samples", prefix="DATASET")
-        else:
-            raise ValueError(f"Unsupported dataset type: {self.dataset_type}")
-        
-        # 为了向后兼容，保留coco_set引用
-        self.coco_set = self.training_dataset
+        self.training_dataset = CocoDataset(
+            image_ids_path=train_id_path,
+            input_seq=cfg.DATA_LOADER.INPUT_SEQ_PATH,
+            target_seq=cfg.DATA_LOADER.TARGET_SEQ_PATH,
+            gv_feat_path=cfg.DATA_LOADER.TRAIN_GV_FEAT,
+            seq_per_img=cfg.DATA_LOADER.SEQ_PER_IMG,
+            max_feat_num=cfg.DATA_LOADER.MAX_FEAT,
+            max_samples=train_samples,
+            return_captions=self._is_hf_training(),
+            jpeg_quality=60,
+            corruption_types=[],
+            corruption_level="S0",
+            corruption_overrides={},
+            model_type=("visual" if self._is_hf_training() else "bytecaption"),
+            is_training=True,
+        )
+        self._log(f"Training dataset (COCO): Using {train_samples if train_samples else 'ALL'} samples", prefix="DATASET")
 
     # DataLoader
     def setup_loader(self, epoch):
-        if self.dataset_type == 'coco':
-            if self._is_hf_training():
-                self.training_loader = load_train_hf(
-                    self.distributed, epoch, self.training_dataset)
-            else:
-                self.training_loader = load_train_coco(
-                    self.distributed, epoch, self.training_dataset)
-        elif self.dataset_type == 'flickr8k':
-            if self._is_hf_training():
-                self.training_loader = load_train_hf(
-                    self.distributed, epoch, self.training_dataset)
-            else:
-                self.training_loader = load_train_f8k(
-                    self.distributed, epoch, self.training_dataset)
-        else:
+        if self.dataset_type != 'coco':
             raise ValueError(f"Unsupported dataset type: {self.dataset_type}")
+        # HF 可训练时使用对话式 collator；否则使用 ByteCaption 字节流 collator
+        if self._is_hf_training():
+            self.training_loader = load_train_hf(self.distributed, epoch, self.training_dataset)
+        else:
+            self.training_loader = load_train_coco(self.distributed, epoch, self.training_dataset)
 
     # 设置日志写入
     def setup_logging(self):
@@ -228,14 +180,6 @@ class Trainer(object):
             return
 
         formatter = logging.Formatter("[%(levelname)s: %(asctime)s] %(message)s")
-        
-        """
-        # 日志的屏幕打印
-        ch = logging.StreamHandler(stream=sys.stdout)
-        ch.setLevel(logging.INFO)
-        ch.setFormatter(formatter)
-        self.logger.addHandler(ch)
-        """
 
         if not os.path.exists(cfg.ROOT_DIR):
             os.makedirs(cfg.ROOT_DIR)
@@ -290,9 +234,9 @@ class Trainer(object):
         if not self.is_master:
             return
             
-        train_samples = getattr(args, 'train_samples', 200)
-        val_samples = getattr(args, 'val_samples', 100)
-        eval_steps = getattr(args, 'eval_steps', 0)
+        train_samples = getattr(args, 'train_samples', 0)
+        val_samples = getattr(args, 'val_samples', 0)
+        eval_steps = getattr(args, 'eval_steps', 50)
         log_steps = getattr(args, 'log_steps', 40)
         freeze_backbone = getattr(args, 'freeze_backbone', False)
         early_stop_patience = getattr(args, 'early_stop_patience', 0)
@@ -355,8 +299,6 @@ class Trainer(object):
             or "mistral" in model_type
             or "ministral" in model_type
             or "openrouter" in model_type
-            or model_type.startswith("gpt")
-            or "gpt" in model_type
         )
 
     def _is_hf_training(self):
@@ -818,77 +760,16 @@ class Trainer(object):
             loss_info = {}
             loss_info['reward_baseline'] = reward_baseline.mean().item()
             return loss, loss_info
-            # """
-            
-            """
-            # SCST训练过程损失计算 -- 初始的SCST，使用Greedy结果作为baseline
-            ids = kwargs[cfg.PARAM.INDICES]
-            gv_feat = kwargs[cfg.PARAM.GLOBAL_FEAT]
-            att_feats = kwargs[cfg.PARAM.ATT_FEATS]
-            att_mask = kwargs[cfg.PARAM.ATT_FEATS_MASK]
-
-            ##############
-            # Greedy
-            ##############
-            kwargs['BEAM_SIZE'] = 1
-            kwargs['GREEDY_DECODE'] = True
-            kwargs[cfg.PARAM.GLOBAL_FEAT] = gv_feat
-            kwargs[cfg.PARAM.ATT_FEATS] = att_feats
-            kwargs[cfg.PARAM.ATT_FEATS_MASK] = att_mask
-
-            self.model.eval()
-            with torch.no_grad():
-                seq_max, logP_max = self.model.module.decode(**kwargs)
-            self.model.train()
-            # 计算greedy生成的句子与GTs之间的CIDEr得分
-            rewards_max, rewards_info_max = self.scorer(ids, seq_max.data.cpu().numpy().tolist())
-            rewards_max = utils.expand_numpy(rewards_max)
-            
-            ids = utils.expand_numpy(ids)
-            gv_feat = utils.expand_tensor(gv_feat, cfg.DATA_LOADER.SEQ_PER_IMG)
-            att_feats = utils.expand_tensor(att_feats, cfg.DATA_LOADER.SEQ_PER_IMG)
-            att_mask = utils.expand_tensor(att_mask, cfg.DATA_LOADER.SEQ_PER_IMG)
-
-            ##############
-            # Sample
-            ##############
-            kwargs['BEAM_SIZE'] = 1
-            kwargs['GREEDY_DECODE'] = False
-            kwargs[cfg.PARAM.GLOBAL_FEAT] = gv_feat
-            kwargs[cfg.PARAM.ATT_FEATS] = att_feats
-            kwargs[cfg.PARAM.ATT_FEATS_MASK] = att_mask
-
-            seq_sample, logP_sample = self.model.module.decode(**kwargs)
-            # 计算Sample生成的句子与GTs之间的CIDEr得分
-            rewards_sample, rewards_info_sample = self.scorer(ids, seq_sample.data.cpu().numpy().tolist())
-
-            # print('rewards_sample:', rewards_sample)
-            # print('rewards_max:', rewards_max)
-            # 计算sample句子和greedy句子得分差值
-            rewards = rewards_sample - rewards_max
-            rewards = torch.from_numpy(rewards).float().to(self.device)
-            # 估算损失
-            loss = self.rl_criterion(seq_sample, logP_sample, rewards)
-
-            loss_info = {}
-            for key in rewards_info_sample:
-                # loss_info[key + '_sample'] = rewards_info_sample[key]
-                loss_info['reward'] = rewards_info_sample[key]
-            for key in rewards_info_max:
-                # loss_info[key + '_max'] = rewards_info_max[key]
-                loss_info['reward_baseline'] = rewards_info_max[key]
-            # """
-
+        
         return loss, loss_info
 
     # 模型训练过程
     def train(self):
         self.model.train()
-        # self.optim.zero_grad()
 
         iteration = self.load_iteration + 1
-        eval_steps = getattr(self.args, 'eval_steps', 0)
-        log_steps = getattr(self.args, 'log_steps', 20)
+        eval_steps = getattr(self.args, 'eval_steps', 50)
+        log_steps = getattr(self.args, 'log_steps', 40)
         
         # 清理旧的评估结果文件（仅在训练开始时执行一次）
         if self.is_master:
@@ -934,12 +815,6 @@ class Trainer(object):
                     self.rl_stage = True
                 # 设置DataLoader
                 self.setup_loader(epoch)
-
-                # start = time.time()
-                # 自动求均值
-                # data_time = AverageMeter()
-                # batch_time = AverageMeter()
-                # losses = AverageMeter()
                 
                 running_loss = .0
                 running_reward_baseline = .0
@@ -986,12 +861,7 @@ class Trainer(object):
                         self.optim.step()
                         self.optim.scheduler_step('Iter')
                         self.optim.zero_grad()
-
-                    # batch_time.update(time.time() - start)
-                    # start = time.time()
-                    # losses.update(loss.item())
-                    # self.display(iteration, data_time, batch_time, losses, loss_info)
-                    # tqdm 迭代信息更新
+                        
                     running_loss += loss_value
                     loss_window.append(loss_value)
                     recent_avg_loss = sum(loss_window) / len(loss_window)
@@ -1052,7 +922,6 @@ class Trainer(object):
                             })
                         overall_pbar.update()
                     
-                    # print(str(self.optim.get_lr()))
                     iteration += 1
 
                     # 基于步数的评估
@@ -1142,8 +1011,8 @@ def parse_args():
     parser.add_argument("--local_rank", type=int, default=0)
     parser.add_argument("--resume", type=int, default=-2)
     parser.add_argument("--load_epoch", action='store_true')
-    parser.add_argument("--dataset", type=str, default='coco', choices=['coco', 'flickr8k'],
-                        help='Choose dataset: coco or flickr8k (default: coco)')
+    parser.add_argument("--dataset", type=str, default='coco', choices=['coco'],
+                        help='Dataset (only coco supported)')
     parser.add_argument("--train_samples", type=int, default=0,
                         help='Number of training samples to use (0 for all)')
     parser.add_argument("--val_samples", type=int, default=50,
@@ -1223,12 +1092,7 @@ if __name__ == '__main__':
     if args.folder is not None:
         # 根据数据集选择配置文件
         dataset_type = getattr(args, 'dataset', 'coco').lower()
-        if dataset_type == 'coco':
-            config_file = 'config_coco.yml'
-        elif dataset_type == 'flickr8k':
-            config_file = 'config_flickr8k.yml'
-        else:
-            raise ValueError(f"Unsupported dataset type: {dataset_type}")
+        config_file = 'config_coco.yml'
             
         config_path = os.path.join(args.folder, config_file)
         if os.path.exists(config_path):

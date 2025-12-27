@@ -7,7 +7,10 @@ import gc
 import evaluation
 import losses
 import lib.utils as utils
-import datasets_.data_loader_byteformer_coco as data_loader
+# 使用重构后的 ByteCaption COCO dataloader（支持多模型/多评估模式）
+from PureT.datasets_ import data_loader_bytecaption as loader_byte
+from PureT.datasets_ import data_loader_visual as loader_visual
+from PureT.datasets_ import data_loader_openrouter as loader_openrouter
 from lib.config import cfg
 
 
@@ -32,8 +35,25 @@ class CocoEvaler(object):
             self.ids2path = None
             self.eval_ids = None  # set after loader
 
-        # Build loader (uses ids_path basename to infer split)
-        self.eval_loader = data_loader.load_val(eval_ids, gv_feat, att_feats, max_samples=self.max_samples)
+        # Build loader based on model type
+        model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
+        is_openrouter = ("openrouter" in model_type) or model_type.startswith("gpt") or ("gpt" in model_type)
+        is_hf_visual = (
+            model_type.startswith("hf")
+            or "blip" in model_type
+            or "git" in model_type
+            or "qwen" in model_type
+            or "internvl" in model_type
+            or "glm" in model_type
+            or "mistral" in model_type
+            or "ministral" in model_type
+        )
+        if is_openrouter:
+            self.eval_loader = loader_openrouter.load_val(eval_ids, gv_feat, max_samples=self.max_samples)
+        elif is_hf_visual:
+            self.eval_loader = loader_visual.load_val(eval_ids, gv_feat, max_samples=self.max_samples)
+        else:
+            self.eval_loader = loader_byte.load_val(eval_ids, gv_feat, max_samples=self.max_samples)
         if self.eval_ids is None:
             # For Flickr8k, load the actual image IDs from the JSON file if available
             if eval_ids and os.path.exists(eval_ids):
@@ -126,8 +146,7 @@ class CocoEvaler(object):
         # Accumulate XE loss over batches (weighted by batch size) so we can return/print it with metrics
         loss_sum = 0.0
         loss_count = 0
-        # output_indices = {0, 5, 10, 15, 20, 25}
-        # 初始化无法解码图像的计数器
+
         undecodable_count = 0
         # --- 获取对数据集内部ID列表的引用(与之前获取的方式有一点不同，我觉得有道理，因为之前加了数据样本后需要重新对齐一下) ---
         dataset_image_ids = self.eval_loader.dataset.image_ids
@@ -409,8 +428,10 @@ class CocoEvaler(object):
             eval_res['Sample_Preview'] = sample_preview
         
         # --- START: 添加码流长度统计报告 ---
-        if data_loader._BYTE_STREAM_LENGTHS:
-            lengths = np.array(data_loader._BYTE_STREAM_LENGTHS)
+        # Only ByteCaption byte-stream loader tracks lengths
+        lengths_src = getattr(loader_byte, "_BYTE_STREAM_LENGTHS", None)
+        if isinstance(lengths_src, list) and len(lengths_src) > 0:
+            lengths = np.array(lengths_src)
             count_total = len(lengths)
             count_below_20k = np.sum(lengths < 20000)
 
@@ -424,7 +445,10 @@ class CocoEvaler(object):
             print(f"  - Images with length < 20000: {count_below_20k} ({count_below_20k / count_total:.2%})")
             print(f"{'-'*30}")
             # 清空列表以便下次评估（如果在一个进程中多次调用）
-            data_loader._BYTE_STREAM_LENGTHS.clear()
+            try:
+                lengths_src.clear()
+            except Exception:
+                pass
         # --- END: 添加码流长度统计报告 ---
 
         print(f"{'='*80}\n")

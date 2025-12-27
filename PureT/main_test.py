@@ -36,9 +36,7 @@ import lib.utils as utils
 from lib.utils import AverageMeter
 from optimizer.optimizer import Optimizer
 from evaluation.evaler_coco import CocoEvaler
-from evaluation.evaler_flickr8k import Flickr8kEvaler
 from scorer.coco_scorer import CocoScorer
-from scorer.flickr8k_scorer import Flickr8kScorer
 from scorer.scorer import Scorer 
 from lib.config import cfg, cfg_from_file
 from corenet.data.transforms import jpeg_corruption
@@ -167,7 +165,7 @@ class Tester(object):
         self.val_evaler = None  # not used in test script
         self.test_evaler = None
 
-        # 根据数据集类型创建评估器（与 main.py 对齐），针对 TEST split
+        # 创建评估器（仅 COCO），针对 TEST split
         test_samples = getattr(args, "test_samples", 100)
         if test_samples == 0:
             test_samples = None
@@ -175,46 +173,26 @@ class Tester(object):
         enable_eval_loss = True
 
         # 先不依赖 training_dataset（评估脚本通常不需要训练集引用）
-        if self.dataset_type == "coco":
-            # 不使用未定义的 self.training_dataset，传 None
-            self.scorer = CocoScorer(shared_dataset=None)
-            eval_ids_path = cfg.DATA_LOADER.TEST_ID if cfg.DATA_LOADER.TEST_ID else None
-            test_annfile = cfg.INFERENCE.TEST_ANNFILE
-            gv_feat = getattr(cfg.DATA_LOADER, "TEST_GV_FEAT", cfg.DATA_LOADER.VAL_GV_FEAT)
-            att_feats = getattr(cfg.DATA_LOADER, "TEST_ATT_FEATS", cfg.DATA_LOADER.VAL_ATT_FEATS)
-            self.test_evaler = CocoEvaler(
-                eval_ids_path,
-                gv_feat,
-                att_feats,
-                test_annfile,
-                max_samples=test_samples,
-                enable_eval_loss=enable_eval_loss,
-            )
-            self._log(f"Test dataset (COCO): Using {test_samples if test_samples else 'ALL'} samples", prefix="DATASET")
-        elif self.dataset_type == "flickr8k":
-            self.scorer = Flickr8kScorer(shared_dataset=None)
-            eval_ids_path = cfg.DATA_LOADER.VAL_ID if cfg.DATA_LOADER.VAL_ID else None
-            val_annfile = cfg.INFERENCE.VAL_ANNFILE
-            self.test_evaler = Flickr8kEvaler(
-                eval_ids_path,
-                cfg.DATA_LOADER.VAL_GV_FEAT,
-                cfg.DATA_LOADER.VAL_ATT_FEATS,
-                val_annfile,
-                max_samples=test_samples,
-                enable_eval_loss=enable_eval_loss,
-                corrupt_level=self.corrupt_level,
-            )
-            self._log(f"Test dataset (Flickr8k): Using {test_samples if test_samples else 'ALL'} samples", prefix="DATASET")
-        else:
-            raise ValueError(f"Unsupported dataset type: {self.dataset_type}")
+        if self.dataset_type != "coco":
+            raise ValueError(f"Unsupported dataset type: {self.dataset_type} (only coco)")
+        # 不使用未定义的 self.training_dataset，传 None
+        self.scorer = CocoScorer(shared_dataset=None)
+        eval_ids_path = cfg.DATA_LOADER.TEST_ID if cfg.DATA_LOADER.TEST_ID else None
+        test_annfile = cfg.INFERENCE.TEST_ANNFILE
+        gv_feat = getattr(cfg.DATA_LOADER, "TEST_GV_FEAT", cfg.DATA_LOADER.VAL_GV_FEAT)
+        att_feats = getattr(cfg.DATA_LOADER, "TEST_ATT_FEATS", cfg.DATA_LOADER.VAL_ATT_FEATS)
+        self.test_evaler = CocoEvaler(
+            eval_ids_path,
+            gv_feat,
+            att_feats,
+            test_annfile,
+            max_samples=test_samples,
+            enable_eval_loss=enable_eval_loss,
+        )
+        self._log(f"Test dataset (COCO): Using {test_samples if test_samples else 'ALL'} samples", prefix="DATASET")
 
         # 选择 scorer（仅用于训练时的 reward 计算；评估脚本保留）
-        if self.dataset_type == "coco":
-            self.scorer = CocoScorer(shared_dataset=None)
-        elif self.dataset_type == "flickr8k":
-            self.scorer = Flickr8kScorer(shared_dataset=None)
-        else:
-            self.scorer = Scorer()
+        self.scorer = CocoScorer(shared_dataset=None)
 
     def setup_wandb(self):
         """Initializes wandb if enabled."""
@@ -281,8 +259,6 @@ class Tester(object):
             or "mistral" in model_type
             or "ministral" in model_type
             or "openrouter" in model_type
-            or model_type.startswith("gpt")
-            or "gpt" in model_type
         )
         if is_hf:
             adapter_dir = None
@@ -489,8 +465,9 @@ def parse_args():
     """
     Parse input arguments
     """
-    parser = argparse.ArgumentParser(description='Image Captioning - Offline COCO Test Evaluation')
+    parser = argparse.ArgumentParser(description='Image Captioning - Offline COCO Test Evaluation (COCO only)')
     parser.add_argument('--folder', dest='folder', default=None, type=str)
+    parser.add_argument('--dataset', type=str, default='coco', choices=['coco'], help='Dataset (only coco supported)')
     parser.add_argument("--resume", type=int, default=-1, help="Checkpoint epoch to load (caption_model_<N>.pth)")
     # Keep backward compatibility with --val_samples
     parser.add_argument("--test_samples", type=int, default=0, help="Number of test samples to use (0 for all)")
@@ -565,7 +542,7 @@ if __name__ == '__main__':
     print(args)
 
     if args.folder is not None:
-        # 尝试加载coco数据集的 config
+        # 仅加载 COCO 配置
         config_file = 'config_coco.yml'
         config_path = os.path.join(args.folder, config_file)
         if os.path.exists(config_path):
@@ -593,11 +570,6 @@ if __name__ == '__main__':
     cfg.ROOT_DIR = args.folder
     tester = Tester(args)
 
-    # --- START: 关键修复 ---
-    # 移除所有在 __main__ 块中的模型加载逻辑。
-    # Tester 的 __init__ 方法已经通过调用 self.setup_network() 正确处理了模型创建和权重加载。
-    # 我们只需要调用 eval 方法即可。
-
     # 确定要传递给 eval 的 epoch 字符串
     epoch_str = 'best'
     if args.resume > 0:
@@ -605,21 +577,6 @@ if __name__ == '__main__':
     
     print(f"\nStarting TEST evaluation for epoch: {epoch_str}")
     metrics = tester.eval(epoch_str)
-    # --- END: 关键修复 ---
-
-    # (删除下面所有关于 best_path, latest_ckpt, load_state_dict 和 tester.eval 的旧代码块)
-    # if args.resume > 0:
-    #     tester.eval(args.resume)
-    # elif args.resume == -1:
-    #     best_path = ...
-    #     if best_path and os.path.exists(best_path):
-    #         print(f"Loading best model: {best_path}")
-    #         tester.model.load_state_dict(...) # <--- 重复加载导致了问题
-    #         tester.eval('best')
-    #     else:
-    #         ...
-    # else:
-    #     ...
     
     if metrics is not None and not args.no_metrics_out:
         rname = f"test_{epoch_str}"

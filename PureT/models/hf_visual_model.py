@@ -38,7 +38,7 @@ def _hf_env(mirror: Optional[str], disable_proxy: bool):
                 os.environ[key] = value
 
 
-class HFCaptionModel(nn.Module):
+class HFVisualModel(nn.Module):
     """
     HuggingFace captioning wrapper simplified for BLIP and GIT models.
     Accepts a list of PIL images (with optional None placeholders) via cfg.PARAM.ATT_FEATS.
@@ -99,8 +99,6 @@ class HFCaptionModel(nn.Module):
         with _hf_env(mirror, disable_proxy):
             if allow_unsafe:
                 self._allow_unsafe_torch_load()
-            if self._needs_download():
-                self._download_snapshot()
             load_from = self.local_dir if self._local_dir_ready() else self.model_id
             model_kwargs = self._build_model_kwargs()
 

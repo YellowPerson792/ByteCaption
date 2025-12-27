@@ -70,7 +70,7 @@ def _load_processor_with_fallback(processor_id: str, trust_remote_code: bool):
             return AutoProcessor.from_pretrained(processor_id, trust_remote_code=trust_remote_code)
 
 
-class HFVLCaptionModel(nn.Module):
+class HFVLChatModel(nn.Module):
     """Generic HF vision-language captioning wrapper (Qwen/InternVL/GLM/etc.)."""
 
     def __init__(
@@ -166,7 +166,13 @@ class HFVLCaptionModel(nn.Module):
         if not valid_images:
             return [dummy_caption for _ in range(len(images))], None
 
-        inputs = self._prepare_model_inputs(valid_images)
+        try:
+            inputs = self._prepare_model_inputs(valid_images)
+        except Exception as e:
+            # If model input preparation fails (e.g., due to extreme aspect ratio),
+            # return dummy captions for all images
+            return [dummy_caption for _ in range(len(images))], None
+
         gen_kwargs = dict(self.generation_kwargs)
         gen_kwargs["num_beams"] = beam_size
 

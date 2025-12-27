@@ -22,8 +22,8 @@ except Exception:  # pragma: no cover - optional at runtime
     register_dataset = None
 
 from lib.config import cfg
-from PureT.datasets_.coco_dataset_hf import CocoDataset
-from PureT.datasets_.flickr8k_dataset_hf import Flickr8kDataset
+from PureT.datasets_.coco_dataset import CocoDataset
+from PureT.datasets_.flickr8k_dataset import Flickr8kDataset
 
 
 @dataclass

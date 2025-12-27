@@ -12,7 +12,7 @@ import numpy as np
 from torchvision import transforms  # noqa: F401 (预留未来扩展)
 
 from lib.config import cfg
-from PureT.datasets_.coco_dataset_hf import CocoDataset
+from PureT.datasets_.coco_dataset import CocoDataset
 import PureT.samplers.distributed as distributed_samplers
 from corenet.data.collate_fns.byteformer_collate_functions import byteformer_image_collate_fn
 from PureT.byteformer_immigration import get_opts
@@ -172,49 +172,41 @@ def sample_collate_val(batch):
 
 def byteformer_collate(batch: Sequence[Tuple[Any, ...]]):
     """
-    训练阶段 collate。
+    训练阶段 collate，用于ByteCaption模型。
+    现在假设CocoDataset已返回JPEG字节流。
     """
-    indices, input_seq, target_seq, gv_feat, att_feats = zip(*batch)
+    indices, input_seq, target_seq, gv_feat, jpeg_bytes_list = zip(*batch)
     
-    original_bs = len(att_feats)
+    original_bs = len(jpeg_bytes_list)
     indices_np = np.stack(indices, axis=0).reshape(-1)
     input_seq_tensor = torch.cat([torch.from_numpy(b) for b in input_seq], 0)
     target_seq_tensor = torch.cat([torch.from_numpy(b) for b in target_seq], 0)
     gv_feat_tensor = torch.cat([torch.from_numpy(b) for b in gv_feat], 0)
 
-    """
-    # 读取图像的预训练特征时，大小为[L, D]，其中L的长度可能不一（如目标特征）
-    # 因此需要进行特征数量判断，并生成特征掩码 att_mask
-    atts_num = [x.shape[0] for x in att_feats]
-    max_att_num = np.max(atts_num)
-
-    feat_arr = []
-    mask_arr = []
-    for i, num in enumerate(atts_num):
-        tmp_feat = np.zeros((1, max_att_num, att_feats[i].shape[1]), dtype=np.float32)
-        tmp_feat[:, 0:att_feats[i].shape[0], :] = att_feats[i]
-        feat_arr.append(torch.from_numpy(tmp_feat))
-
-        tmp_mask = np.zeros((1, max_att_num), dtype=np.float32)
-        tmp_mask[:, 0:num] = 1
-        mask_arr.append(torch.from_numpy(tmp_mask))
-
-    att_feats = torch.cat(feat_arr, 0)
-    att_mask = torch.cat(mask_arr, 0)
-    """
-    # 图像特征，无需与预训练特征一样进行特征数量判断，直接合并即可
-    # att_mask为最终grid特征大小，实际上grid特征无需att_mask亦可  
+    # 处理JPEG字节流：应用损坏，然后转换为ByteFormer的输入格式
+    corrupter = image_bytes.ByteStreamCorrupter(opts)
+    pipeline = corrupter.pipeline
     
-    att_feats = torch.stack(att_feats, 0)
+    corrupted_samples = []
+    for jpeg_bytes in jpeg_bytes_list:
+        if pipeline.is_enabled():
+            corrupted_variants = pipeline.apply(jpeg_bytes)
+            # 在训练时，随机选择一个损坏版本
+            corrupted_bytes, _ = corrupted_variants[np.random.randint(len(corrupted_variants))]
+        else:
+            corrupted_bytes = jpeg_bytes
+        
+        # 将字节流转换为int32 tensor
+        buf = np.frombuffer(corrupted_bytes, dtype=np.uint8)
+        sample_tensor = torch.from_numpy(buf.copy()).to(dtype=torch.int32)
+        corrupted_samples.append({"samples": sample_tensor, "targets": torch.tensor(0)})
     
-    corenet_batch = []
-    for img_tensor in att_feats:
-        corenet_batch.append({"samples": img_tensor, "targets": torch.tensor(0)})  # dummy target
-    collated = byteformer_image_collate_fn(corenet_batch, opts)
+    # 使用ByteFormer的collate函数进行padding等处理
+    collated = byteformer_image_collate_fn(corrupted_samples, opts)
     att_feats = collated["samples"]
     att_mask = None
 
-    # Duplicate caption-side metadata when corruption augments images
+    # 如果有样本增强（虽然训练时我们只选一个），需要复制元数据
     augmentation_factor = att_feats.size(0) // original_bs if original_bs > 0 else 1
     if augmentation_factor > 1:
         indices = np.repeat(indices_np, augmentation_factor, axis=0)
@@ -233,49 +225,57 @@ def byteformer_collate(batch: Sequence[Tuple[Any, ...]]):
     return indices, input_seq, target_seq, gv_feat, att_feats, att_mask
 
 def byteformer_collate_val(batch: Sequence[Tuple[Any, ...]]):
-    """验证阶段 collate。
-    已修改以支持样本堆叠增强，会同步复制所有元数据。
+    """验证阶段 collate，用于ByteCaption模型。
+    现在假设CocoDataset已返回JPEG字节流。
+    会同步复制所有元数据以支持多版本损坏评估。
     """
-    indices, gv_feat, att_feats = zip(*batch)
+    indices, gv_feat, jpeg_bytes_list = zip(*batch)
     
-    # 1. 将图像张量打包成 corenet 期望的格式
-    corenet_batch = []
-    for img_tensor in att_feats:
-        corenet_batch.append({"samples": img_tensor, "targets": torch.tensor(0)})  # dummy target
-
-    # 2. 调用核心 collate 函数，这将执行 1->N 的增强
-    collated = byteformer_image_collate_fn(corenet_batch, opts)
+    # 处理JPEG字节流：应用所有损坏类型
+    corrupter = image_bytes.ByteStreamCorrupter(opts)
+    pipeline = corrupter.pipeline
+    
+    corrupted_samples = []
+    for jpeg_bytes in jpeg_bytes_list:
+        # 收集码流长度统计
+        _BYTE_STREAM_LENGTHS.append(len(jpeg_bytes))
+        
+        if pipeline.is_enabled():
+            corrupted_variants = pipeline.apply(jpeg_bytes)
+        else:
+            corrupted_variants = [(jpeg_bytes, "none")]
+        
+        for corrupted_bytes, marker in corrupted_variants:
+            # 将字节流转换为int32 tensor
+            buf = np.frombuffer(corrupted_bytes, dtype=np.uint8)
+            sample_tensor = torch.from_numpy(buf.copy()).to(dtype=torch.int32)
+            corrupted_samples.append({"samples": sample_tensor, "targets": torch.tensor(0)})
+    
+    # 使用ByteFormer的collate函数进行padding等处理
+    collated = byteformer_image_collate_fn(corrupted_samples, opts)
     augmented_att_feats = collated["samples"]
     
-    # 3. 计算增强因子（例如，4）
-    original_bs = len(att_feats)
+    # 计算增强因子并复制元数据
+    original_bs = len(jpeg_bytes_list)
     if original_bs == 0:
-        # 处理空批次的情况
         return torch.tensor(indices), torch.tensor(gv_feat), augmented_att_feats, None
 
     augmentation_factor = augmented_att_feats.size(0) // original_bs
     
-    # 如果没有增强，直接返回
     if augmentation_factor <= 1:
         indices = np.stack(indices, axis=0).reshape(-1)
         gv_feat = torch.cat([torch.from_numpy(b) for b in gv_feat], 0)
-        att_mask = None # ByteFormer collate 后通常为 None
+        att_mask = None
         return indices, gv_feat, augmented_att_feats, att_mask
 
-    # 4. 关键修复：将所有元数据复制 N 份以匹配增强后的数据
-    # print(f"[DEBUG Metadata] Augmentation factor is {augmentation_factor}. Duplicating metadata.")
-    
-    # 复制 indices
+    # 复制元数据以匹配增强后的样本数
     indices_np = np.stack(indices, axis=0).reshape(-1)
     expanded_indices = np.repeat(indices_np, augmentation_factor, axis=0)
     
-    # 复制 gv_feat
     gv_feat_tensor = torch.cat([torch.from_numpy(b) for b in gv_feat], 0)
-    # gv_feat 的形状是 [B, D]，我们需要将其扩展为 [B*N, D]
     expanded_gv_feat = gv_feat_tensor.repeat_interleave(augmentation_factor, dim=0)
 
-    att_mask = None # ByteFormer collate 后通常为 None
-
+    att_mask = None
     return expanded_indices, expanded_gv_feat, augmented_att_feats, att_mask
 
 def blip_collate_val(batch: Sequence[Tuple[Any, ...]]):

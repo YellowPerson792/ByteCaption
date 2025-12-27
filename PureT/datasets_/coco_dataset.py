@@ -1,4 +1,11 @@
 """COCO Dataset (HuggingFace 2014) 兼容实现。
+
+重构后职责：
+1. 加载图像并标准化为224x224的JPEG字节流
+2. 根据配置应用损坏
+3. 根据模型类型返回：
+   - ByteCaption模型：损坏后的字节流（bytes）
+   - 其他视觉模型：损坏后解码的PIL图像
 """
 
 from __future__ import annotations
@@ -7,11 +14,12 @@ from __future__ import annotations
 # Standard Library
 # ====================
 import os
+import io
 import random
 import json
 import pickle
 from collections import Counter
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Any, Dict, List, Tuple, Optional, Union
 
 # ====================
 # Third-party Libraries
@@ -29,6 +37,7 @@ from torchvision import transforms
 from lib.config import cfg
 import lib.utils as utils
 from .feature_extractor import get_feature_extractor  # 保留，后续可能需要
+from corenet.data.transforms.jpeg_corruption import JPEGCorruptionPipeline
 
 
 # timm interp compatibility
@@ -56,7 +65,37 @@ def pil_to_tensor_transform(img: Image.Image) -> torch.Tensor:
     ])
     return transform(img)
 
+def pil_to_jpeg_bytes(img: Image.Image, quality: int = 60) -> bytes:
+    """将PIL图像转换为JPEG字节流。
+    
+    Args:
+        img: PIL.Image 对象（已转为RGB）
+        quality: JPEG压缩质量（默认60）
+    
+    Returns:
+        JPEG字节流
+    """
+    import io
+    # 确保尺寸为224x224
+    if img.size != (224, 224):
+        img = img.resize((224, 224), Image.BICUBIC)
+    
+    byte_buffer = io.BytesIO()
+    img.save(byte_buffer, format='JPEG', quality=quality)
+    byte_buffer.seek(0)
+    return byte_buffer.getvalue()
+
 class CocoDataset(data.Dataset):
+    """COCO数据集 - 智能处理损坏和返回格式。
+    
+    职责：
+    1. 从HuggingFace数据集加载图像
+    2. 标准化为224x224的JPEG字节流
+    3. 根据配置应用损坏
+    4. 根据模型类型返回合适的格式：
+       - ByteCaption: 返回损坏后的字节流
+       - 其他模型: 返回损坏后解码的PIL图像
+    """
     def __init__(
         self,
         image_ids_path,
@@ -65,16 +104,37 @@ class CocoDataset(data.Dataset):
         gv_feat_path,
         seq_per_img,
         max_feat_num,
-        max_samples=None,  # Add parameter to limit dataset size
+        max_samples=None,
         return_captions: bool = False,
-        return_pil: bool = False,
+        jpeg_quality: int = 60,
+        # 损坏相关参数
+        corruption_types: Optional[List[str]] = None,
+        corruption_level: str = "S0",
+        corruption_overrides: Optional[Dict[str, Dict[str, Any]]] = None,
+        # 模型类型参数
+        model_type: str = "bytecaption",  # "bytecaption" 或 "visual"
+        is_training: bool = True,  # 训练模式不损坏
     ):
         # 基础配置保存
         self.max_feat_num: int = max_feat_num
         self.seq_per_img: int = seq_per_img
         self.max_samples: Optional[int] = max_samples 
         self.return_captions = bool(return_captions)
-        self.return_pil = bool(return_pil)
+        self.jpeg_quality = int(jpeg_quality)
+        
+        # 损坏配置
+        self.corruption_types = corruption_types or []
+        self.corruption_level = corruption_level
+        self.corruption_overrides = corruption_overrides or {}
+        self.model_type = model_type.lower()
+        self.is_training = is_training
+        
+        # 创建损坏管线
+        self.corruption_pipeline = JPEGCorruptionPipeline(
+            corruption_types=self.corruption_types,
+            level=self.corruption_level,
+            overrides=self.corruption_overrides,
+        ) if self.corruption_types else None
 
         # Optional global feature dict
         self.gv_feat = (
@@ -193,28 +253,48 @@ class CocoDataset(data.Dataset):
         base_length = min(len(self.image_ids), len(self.ds))
         return min(base_length, self.max_samples) if self.max_samples is not None else base_length
 
-    def __getitem__(self, index: int):  # -> Union[Tuple, ...] 具体返回取决于模式
-        # index within HF split
+    def __getitem__(self, index: int) -> Union[Tuple, ...]:
+        """获取数据项，智能处理损坏和返回格式。"""
         indices = np.array([index]).astype('int')
-
-        # Select a corresponding id for gv/seq lookup when available
         image_id = self.image_ids[index] if index < len(self.image_ids) else str(index)
-
-        # Load image from HF first
-        # 避免重复访问：一次性取出 sample，后续传递
+        
+        # 加载图像
         sample = self.ds[index]
         img = self._extract_image(sample)
-        
         gv_feat = np.zeros((1,), dtype=np.float32)
-        if self.return_pil:
-            att_feats = img
+        
+        # 1. 转换为JPEG字节流
+        jpeg_bytes = pil_to_jpeg_bytes(img, quality=self.jpeg_quality)
+        
+        # 2. 应用损坏（如果需要）
+        if not self.is_training and self.corruption_pipeline and self.corruption_pipeline.is_enabled():
+            # 评估模式且配置了损坏
+            corrupted_variants = self.corruption_pipeline.apply(jpeg_bytes)
+            corrupted_list = corrupted_variants
         else:
-            att_feats = pil_to_tensor_transform(img)  # [1, 224, 224]
-        # gv_feat is a placeholder, att_feats is preprocessed image for Swin backbone
-
-        if self.max_feat_num > 0 and hasattr(att_feats, 'shape') and len(att_feats.shape) > 0:
-            # For image tensors this generally does nothing; kept for API parity
-            pass
+            # 训练模式或无损坏配置
+            corrupted_list = [(jpeg_bytes, "none")]
+        
+        # 3. 根据模型类型决定返回格式
+        processed_results = []
+        for corrupted_bytes, marker in corrupted_list:
+            if self.model_type == "bytecaption":
+                # ByteCaption: 返回字节流
+                processed_results.append(corrupted_bytes)
+            else:
+                # 其他视觉模型: 解码为PIL图像
+                try:
+                    decoded_img = Image.open(io.BytesIO(corrupted_bytes)).convert("RGB")
+                    processed_results.append(decoded_img)
+                except Exception as e:
+                    processed_results.append(None)
+        
+        # 4. 单个结果还是多个结果
+        if len(processed_results) == 1:
+            att_feats = processed_results[0]
+        else:
+            # 多个损坏版本，返回列表
+            att_feats = processed_results
 
         if self.return_captions:
             captions = self._extract_captions_from_sample(sample)

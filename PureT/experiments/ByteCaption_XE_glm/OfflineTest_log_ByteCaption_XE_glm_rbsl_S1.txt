@@ -1,0 +1,6 @@
+[INFO: 2025-12-27 12:09:36,484] Loaded LoRA adapter from PureT/experiments/ByteCaption_XE_glm/snapshot/best_lora
+[INFO: 2025-12-27 12:48:07,615] Loaded LoRA adapter from PureT/experiments/ByteCaption_XE_glm/snapshot/best_lora
+[INFO: 2025-12-27 12:54:30,883] Loaded LoRA adapter from PureT/experiments/ByteCaption_XE_glm/snapshot/best_lora
+[INFO: 2025-12-27 12:56:52,414] Loaded LoRA adapter from PureT/experiments/ByteCaption_XE_glm/snapshot/best_lora
+[INFO: 2025-12-27 15:45:14,407] Loaded LoRA adapter from PureT/experiments/ByteCaption_XE_glm/snapshot/best_lora
+[INFO: 2025-12-27 15:46:42,517] Loaded LoRA adapter from PureT/experiments/ByteCaption_XE_glm/snapshot/best_lora
