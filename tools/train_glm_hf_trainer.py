@@ -37,6 +37,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 import types
 import re
+import torch
 
 from transformers import AutoProcessor, Glm4vForConditionalGeneration
 
@@ -1046,8 +1047,8 @@ def main():
     from transformers import TrainingArguments, set_seed
 
     CaptionTrainer = _build_caption_trainer_class()
-    from PureT.datasets_.coco_dataset_hf import CocoDataset
-    from PureT.datasets_.flickr8k_dataset_hf import Flickr8kDataset
+    from PureT.datasets_.coco_dataset import CocoDataset
+    from PureT.datasets_.flickr8k_dataset import Flickr8kDataset
     from PureT.evaluation.evaler_coco import CocoEvaler
     from PureT.evaluation.evaler_flickr8k import Flickr8kEvaler
     folder = Path(args.folder)

@@ -15,7 +15,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # 从项目里导入数据集与转换函数
-from PureT.datasets_.coco_dataset_hf import CocoDataset
+from PureT.datasets_.coco_dataset import CocoDataset
 # 导入 corenet 的编码器（用于比较）
 from corenet.data.transforms.image_bytes import _image_to_bytes
 

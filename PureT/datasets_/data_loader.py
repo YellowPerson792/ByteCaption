@@ -3,8 +3,8 @@ import sys
 import torch
 from torchvision import transforms
 from lib.config import cfg
-from datasets_.flickr8k_dataset_hf import Flickr8kDataset
-from datasets_.coco_dataset_hf import CocoDataset
+from PureT.datasets_.flickr8k_dataset import Flickr8kDataset
+from PureT.datasets_.coco_dataset import CocoDataset
 import datasets
 import samplers.distributed
 import numpy as np

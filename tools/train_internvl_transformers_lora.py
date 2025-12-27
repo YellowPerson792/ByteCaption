@@ -63,8 +63,8 @@ if str(PROJECT_ROOT / "PureT") not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT / "PureT"))
 
 from lib.config import cfg, cfg_from_file  # noqa: E402
-from PureT.datasets_.coco_dataset_hf import CocoDataset  # noqa: E402
-from PureT.datasets_.flickr8k_dataset_hf import Flickr8kDataset  # noqa: E402
+from PureT.datasets_.coco_dataset import CocoDataset  # noqa: E402
+from PureT.datasets_.flickr8k_dataset import Flickr8kDataset  # noqa: E402
 from PureT.evaluation.evaler_coco import CocoEvaler  # noqa: E402
 from PureT.evaluation.evaler_flickr8k import Flickr8kEvaler  # noqa: E402
 

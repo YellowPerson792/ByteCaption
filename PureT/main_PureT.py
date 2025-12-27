@@ -17,8 +17,8 @@ import losses
 import models
 
 # COCO and Flickr8k components
-from datasets_.coco_dataset_hf import CocoDataset
-from datasets_.flickr8k_dataset_hf import Flickr8kDataset
+from PureT.datasets_.coco_dataset import CocoDataset
+from PureT.datasets_.flickr8k_dataset import Flickr8kDataset
 from datasets_.data_loader import load_train
 from evaluation.evaler_coco import CocoEvaler
 from evaluation.evaler_flickr8k import Flickr8kEvaler
