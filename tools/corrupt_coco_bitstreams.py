@@ -38,7 +38,7 @@ if PURET_ROOT.exists() and str(PURET_ROOT) not in sys.path:
 
 from corenet.data.transforms.jpeg_corruption import JPEGCorruptionPipeline, normalize_level
 from lib.config import cfg, cfg_from_file
-from PureT.datasets_.coco_dataset_hf import CocoDataset
+from PureT.datasets_.coco_dataset import CocoDataset
 
 try:
     from pycocotools.coco import COCO
@@ -86,6 +86,7 @@ def _load_coco_dataset(image_ids_path: Optional[str], gv_feat_path: str, max_sam
         seq_per_img=1,
         max_feat_num=cfg.DATA_LOADER.MAX_FEAT,
         max_samples=max_samples,
+        return_jpeg_bytes=True
     )
 
 

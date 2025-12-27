@@ -43,14 +43,20 @@ class PTBTokenizer:
         # save sentences to temporary file
         # ======================================================
         path_to_jar_dirname=os.path.dirname(os.path.abspath(__file__))
-        tmp_file = tempfile.NamedTemporaryFile(delete=False, dir=path_to_jar_dirname)
+        tmp_root = os.environ.get("PTB_TOKENIZER_TMPDIR") or os.environ.get("TMPDIR") or path_to_jar_dirname
+        if not os.path.isdir(tmp_root):
+            tmp_root = path_to_jar_dirname
+        try:
+            tmp_file = tempfile.NamedTemporaryFile(delete=False, dir=tmp_root)
+        except OSError:
+            tmp_file = tempfile.NamedTemporaryFile(delete=False, dir=path_to_jar_dirname)
         tmp_file.write(sentences.encode('utf-8'))
         tmp_file.close()
 
         # ======================================================
         # tokenize sentence
         # ======================================================
-        cmd.append(os.path.basename(tmp_file.name))
+        cmd.append(tmp_file.name)
         p_tokenizer = subprocess.Popen(cmd, cwd=path_to_jar_dirname, \
                 stdout=subprocess.PIPE)
         token_lines = p_tokenizer.communicate(input=sentences.rstrip())[0]

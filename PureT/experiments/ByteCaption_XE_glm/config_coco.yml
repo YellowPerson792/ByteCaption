@@ -1,0 +1,50 @@
+SEED: 1234
+
+############################ DATA ############################
+DATA_LOADER:
+  NUM_WORKERS: 8
+  PIN_MEMORY: True
+  PERSISTENT_WORKERS: True
+  PREFETCH_FACTOR: 4
+  TRAIN_ID: './PureT/data/coco_karpathy/train_ids.json'
+  VAL_ID: './PureT/data/coco_karpathy/validation_ids.json'
+  TEST_ID: './PureT/data/coco_karpathy/test_ids.json'
+  TEST_4W_ID: './PureT/data/coco_karpathy/test_ids.json'
+  MAX_FEAT: -1
+
+############################ EVAL BATCH ############################
+TEST:
+  BATCH_SIZE: 10
+
+############################ MODEL (HuggingFace) ############################
+MODEL:
+  TYPE: 'GLM'
+  HF:
+    MODEL_ID: 'GLM-4.6V-Flash/ZhipuAI/GLM-4.6V-Flash'
+    PROCESSOR_ID: 'GLM-4.6V-Flash/ZhipuAI/GLM-4.6V-Flash'
+    LOCAL_DIR: 'GLM-4.6V-Flash/ZhipuAI/GLM-4.6V-Flash'
+    TRUST_REMOTE_CODE: True
+    TORCH_DTYPE: 'bf16'
+    LOW_CPU_MEM_USAGE: True
+    ATTN_IMPLEMENTATION: 'flash_attention_2'
+    PROMPT_SOURCE: 'openrouter'
+    USE_CHAT_TEMPLATE: True
+    GENERATION:
+      MAX_NEW_TOKENS: 20
+      NUM_BEAMS: 5
+
+  OPENROUTER:
+    SYSTEM_PROMPT: 'You are a vision captioning model.'
+    USER_PROMPT: 'You are given a possibly corrupted JPEG image. Output a short COCO-style caption. Use 5-12 words. Output only the caption with no extra text.'
+    PLACEHOLDER: 'this is a dummy caption for an undecodable image'
+
+############################ EVALUATION ############################
+SCORER:
+  TYPES: ['Bleu_1', 'Bleu_2', 'Bleu_3', 'Bleu_4', 'ROUGE_L', 'CIDEr', 'METEOR', 'SPICE']
+  WEIGHTS: [0.1, 0.1, 0.1, 0.2, 0.1, 0.3, 0.1, 0.1]
+
+INFERENCE:
+  VAL_ANNFILE: './PureT/data/coco_karpathy/captions_validation.json'
+  TEST_ANNFILE: './PureT/data/coco_karpathy/captions_test.json'
+  VOCAB: './PureT/data/coco_karpathy/coco_vocabulary.txt'
+  EVAL: 'CocoHFEvaluer'

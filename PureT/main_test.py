@@ -9,7 +9,22 @@ import argparse
 import json
 import numpy as np
 
+# Disable torch._dynamo compilation before importing any torch-dependent modules
+os.environ['TORCH_DISABLE_COMPILATION_OPTIM'] = '1'
+os.environ['TORCHDYNAMO_DISABLE'] = '1'
+
+# Block torchvision.ops._register_onnx_ops before timm imports it
+import unittest.mock as mock
+sys.modules['torch.onnx'] = mock.MagicMock()
+sys.modules['torch.onnx.operators'] = mock.MagicMock()
+sys.modules['torch.onnx.symbolic_helper'] = mock.MagicMock()
+sys.modules['torch.onnx._internal'] = mock.MagicMock()
+sys.modules['torch.onnx._internal.exporter'] = mock.MagicMock()
+
 import torch
+# Disable dynamo globally
+torch._dynamo.disable(torch._dynamo.reset)
+
 import torch.nn as nn
 import torch.multiprocessing as mp
 import torch.distributed as dist
@@ -21,12 +36,11 @@ import lib.utils as utils
 from lib.utils import AverageMeter
 from optimizer.optimizer import Optimizer
 from evaluation.evaler_coco import CocoEvaler
-from evaluation.evaler_flickr8k import Flickr8kEvaler
 from scorer.coco_scorer import CocoScorer
-from scorer.flickr8k_scorer import Flickr8kScorer
-from scorer.scorer import Scorer  # 新增导入
+from scorer.scorer import Scorer 
 from lib.config import cfg, cfg_from_file
 from corenet.data.transforms import jpeg_corruption
+import re
 
 try:
     import wandb
@@ -36,8 +50,8 @@ except ImportError:
 
 """
 Example:
-python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 120 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_qwen --test_samples 0 --resume -1 --disable_wandb
+python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 10 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_blip --test_samples 20 --resume -1 --disable_wandb
 """
 
 def _project_root() -> str:
@@ -82,6 +96,18 @@ def _build_reference_map(ann_path: str):
             pass
         ref_map.setdefault(image_id, []).append(caption)
     return ref_map
+
+def _postprocess_caption(text: str) -> str:
+    """Keep only the first sentence."""
+    if not text:
+        return text
+    
+    # Split by sentence terminators and get first non-empty sentence
+    for seg in re.split(r'[.!?]', text):
+        seg = seg.strip()
+        if seg:
+            return seg
+    return text
 
 class Tester(object):
     def __init__(self, args):
@@ -139,7 +165,7 @@ class Tester(object):
         self.val_evaler = None  # not used in test script
         self.test_evaler = None
 
-        # 根据数据集类型创建评估器（与 main.py 对齐），针对 TEST split
+        # 创建评估器（仅 COCO），针对 TEST split
         test_samples = getattr(args, "test_samples", 100)
         if test_samples == 0:
             test_samples = None
@@ -147,46 +173,26 @@ class Tester(object):
         enable_eval_loss = True
 
         # 先不依赖 training_dataset（评估脚本通常不需要训练集引用）
-        if self.dataset_type == "coco":
-            # 不使用未定义的 self.training_dataset，传 None
-            self.scorer = CocoScorer(shared_dataset=None)
-            eval_ids_path = cfg.DATA_LOADER.TEST_ID if cfg.DATA_LOADER.TEST_ID else None
-            test_annfile = cfg.INFERENCE.TEST_ANNFILE
-            gv_feat = getattr(cfg.DATA_LOADER, "TEST_GV_FEAT", cfg.DATA_LOADER.VAL_GV_FEAT)
-            att_feats = getattr(cfg.DATA_LOADER, "TEST_ATT_FEATS", cfg.DATA_LOADER.VAL_ATT_FEATS)
-            self.test_evaler = CocoEvaler(
-                eval_ids_path,
-                gv_feat,
-                att_feats,
-                test_annfile,
-                max_samples=test_samples,
-                enable_eval_loss=enable_eval_loss,
-            )
-            self._log(f"Test dataset (COCO): Using {test_samples if test_samples else 'ALL'} samples", prefix="DATASET")
-        elif self.dataset_type == "flickr8k":
-            self.scorer = Flickr8kScorer(shared_dataset=None)
-            eval_ids_path = cfg.DATA_LOADER.VAL_ID if cfg.DATA_LOADER.VAL_ID else None
-            val_annfile = cfg.INFERENCE.VAL_ANNFILE
-            self.test_evaler = Flickr8kEvaler(
-                eval_ids_path,
-                cfg.DATA_LOADER.VAL_GV_FEAT,
-                cfg.DATA_LOADER.VAL_ATT_FEATS,
-                val_annfile,
-                max_samples=test_samples,
-                enable_eval_loss=enable_eval_loss,
-                corrupt_level=self.corrupt_level,
-            )
-            self._log(f"Test dataset (Flickr8k): Using {test_samples if test_samples else 'ALL'} samples", prefix="DATASET")
-        else:
-            raise ValueError(f"Unsupported dataset type: {self.dataset_type}")
+        if self.dataset_type != "coco":
+            raise ValueError(f"Unsupported dataset type: {self.dataset_type} (only coco)")
+        # 不使用未定义的 self.training_dataset，传 None
+        self.scorer = CocoScorer(shared_dataset=None)
+        eval_ids_path = cfg.DATA_LOADER.TEST_ID if cfg.DATA_LOADER.TEST_ID else None
+        test_annfile = cfg.INFERENCE.TEST_ANNFILE
+        gv_feat = getattr(cfg.DATA_LOADER, "TEST_GV_FEAT", cfg.DATA_LOADER.VAL_GV_FEAT)
+        att_feats = getattr(cfg.DATA_LOADER, "TEST_ATT_FEATS", cfg.DATA_LOADER.VAL_ATT_FEATS)
+        self.test_evaler = CocoEvaler(
+            eval_ids_path,
+            gv_feat,
+            att_feats,
+            test_annfile,
+            max_samples=test_samples,
+            enable_eval_loss=enable_eval_loss,
+        )
+        self._log(f"Test dataset (COCO): Using {test_samples if test_samples else 'ALL'} samples", prefix="DATASET")
 
         # 选择 scorer（仅用于训练时的 reward 计算；评估脚本保留）
-        if self.dataset_type == "coco":
-            self.scorer = CocoScorer(shared_dataset=None)
-        elif self.dataset_type == "flickr8k":
-            self.scorer = Flickr8kScorer(shared_dataset=None)
-        else:
-            self.scorer = Scorer()
+        self.scorer = CocoScorer(shared_dataset=None)
 
     def setup_wandb(self):
         """Initializes wandb if enabled."""
@@ -248,11 +254,11 @@ class Tester(object):
             or "blip" in model_type
             or "git" in model_type
             or "qwen" in model_type
+            or "internvl" in model_type
+            or "glm" in model_type
             or "mistral" in model_type
             or "ministral" in model_type
             or "openrouter" in model_type
-            or model_type.startswith("gpt")
-            or "gpt" in model_type
         )
         if is_hf:
             adapter_dir = None
@@ -278,23 +284,11 @@ class Tester(object):
 
         if self.args.resume > 0:
             ckpt = self.snapshot_path("caption_model", self.args.resume)
-            if os.path.exists(ckpt):
-                self.model.load_state_dict(
-                    torch.load(ckpt, map_location=lambda storage, loc: storage)
-                )
-                self.logger.info(f"Loaded checkpoint: {ckpt}")
-            else:
-                self.logger.warning(f"Requested checkpoint for resume not found: {ckpt}")
+            self._safe_load_checkpoint(ckpt)
         elif self.args.resume == -1:
             # 使用 cfg.ROOT_DIR 下 snapshot/best_model.pth，避免硬编码路径
             best_ckpt = os.path.join(cfg.ROOT_DIR or self.args.folder or ".", "snapshot", "best_model.pth")
-            if os.path.exists(best_ckpt):
-                self.model.load_state_dict(
-                    torch.load(best_ckpt, map_location=lambda storage, loc: storage)
-                )
-                self.logger.info(f"Loaded best model: {best_ckpt}")
-            else:
-                self.logger.warning(f"best_model.pth not found at: {best_ckpt}")
+            self._safe_load_checkpoint(best_ckpt)
 
 
     def eval(self, epoch):
@@ -309,6 +303,42 @@ class Tester(object):
         else:
             self.logger.info('TEST evaluation skipped (no test_evaler).')
         return None
+
+    def _safe_load_checkpoint(self, ckpt_path: str) -> bool:
+        """Load a checkpoint and reconcile DataParallel prefixes."""
+        if not ckpt_path or not os.path.exists(ckpt_path):
+            self.logger.warning(f"Checkpoint not found: {ckpt_path}")
+            return False
+
+        state = torch.load(ckpt_path, map_location="cpu")
+        if isinstance(state, dict):
+            if "state_dict" in state:
+                state = state["state_dict"]
+            elif "model" in state and isinstance(state["model"], dict):
+                state = state["model"]
+
+        model_to_load = self.model.module if hasattr(self.model, "module") else self.model
+        target_state = model_to_load.state_dict()
+
+        has_module_ckpt = any(k.startswith("module.") for k in state.keys())
+        has_module_target = any(k.startswith("module.") for k in target_state.keys())
+
+        if has_module_ckpt and not has_module_target:
+            state = {k[len("module."): ] if k.startswith("module.") else k: v for k, v in state.items()}
+        elif not has_module_ckpt and has_module_target:
+            state = {f"module.{k}" if not k.startswith("module.") else k: v for k, v in state.items()}
+
+        load_result = model_to_load.load_state_dict(state, strict=False)
+        missing_keys = getattr(load_result, "missing_keys", [])
+        unexpected_keys = getattr(load_result, "unexpected_keys", [])
+
+        if missing_keys:
+            self.logger.warning(f"Missing keys when loading checkpoint: {missing_keys}")
+        if unexpected_keys:
+            self.logger.warning(f"Unexpected keys in checkpoint: {unexpected_keys}")
+
+        self.logger.info(f"Loaded checkpoint: {ckpt_path}")
+        return True
 
     def snapshot_path(self, name, epoch):
         snapshot_folder = os.path.join(cfg.ROOT_DIR, 'snapshot')
@@ -435,8 +465,9 @@ def parse_args():
     """
     Parse input arguments
     """
-    parser = argparse.ArgumentParser(description='Image Captioning - Offline COCO Test Evaluation')
+    parser = argparse.ArgumentParser(description='Image Captioning - Offline COCO Test Evaluation (COCO only)')
     parser.add_argument('--folder', dest='folder', default=None, type=str)
+    parser.add_argument('--dataset', type=str, default='coco', choices=['coco'], help='Dataset (only coco supported)')
     parser.add_argument("--resume", type=int, default=-1, help="Checkpoint epoch to load (caption_model_<N>.pth)")
     # Keep backward compatibility with --val_samples
     parser.add_argument("--test_samples", type=int, default=0, help="Number of test samples to use (0 for all)")
@@ -511,7 +542,7 @@ if __name__ == '__main__':
     print(args)
 
     if args.folder is not None:
-        # 尝试加载coco数据集的 config
+        # 仅加载 COCO 配置
         config_file = 'config_coco.yml'
         config_path = os.path.join(args.folder, config_file)
         if os.path.exists(config_path):
@@ -539,11 +570,6 @@ if __name__ == '__main__':
     cfg.ROOT_DIR = args.folder
     tester = Tester(args)
 
-    # --- START: 关键修复 ---
-    # 移除所有在 __main__ 块中的模型加载逻辑。
-    # Tester 的 __init__ 方法已经通过调用 self.setup_network() 正确处理了模型创建和权重加载。
-    # 我们只需要调用 eval 方法即可。
-
     # 确定要传递给 eval 的 epoch 字符串
     epoch_str = 'best'
     if args.resume > 0:
@@ -551,21 +577,6 @@ if __name__ == '__main__':
     
     print(f"\nStarting TEST evaluation for epoch: {epoch_str}")
     metrics = tester.eval(epoch_str)
-    # --- END: 关键修复 ---
-
-    # (删除下面所有关于 best_path, latest_ckpt, load_state_dict 和 tester.eval 的旧代码块)
-    # if args.resume > 0:
-    #     tester.eval(args.resume)
-    # elif args.resume == -1:
-    #     best_path = ...
-    #     if best_path and os.path.exists(best_path):
-    #         print(f"Loading best model: {best_path}")
-    #         tester.model.load_state_dict(...) # <--- 重复加载导致了问题
-    #         tester.eval('best')
-    #     else:
-    #         ...
-    # else:
-    #     ...
     
     if metrics is not None and not args.no_metrics_out:
         rname = f"test_{epoch_str}"
@@ -644,6 +655,9 @@ if __name__ == '__main__':
                             continue
                         image_id = item.get(id_key)
                         generated = item.get(cap_key)
+                        # Post-process caption: deduplicate and keep only first sentence
+                        if isinstance(generated, str):
+                            generated = _postprocess_caption(generated)
                         lookup_id = image_id
                         try:
                             lookup_id = int(image_id)

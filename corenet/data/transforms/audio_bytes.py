@@ -9,7 +9,7 @@ from typing import Dict, Union
 
 import numpy as np
 import torch
-import torchaudio
+# import torchaudio
 
 from corenet.data.transforms import TRANSFORMATIONS_REGISTRY, BaseTransformation
 

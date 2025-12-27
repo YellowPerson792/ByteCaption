@@ -7,7 +7,10 @@ import gc
 import evaluation
 import losses
 import lib.utils as utils
-import datasets_.data_loader_byteformer_coco as data_loader
+# 使用重构后的 ByteCaption COCO dataloader（支持多模型/多评估模式）
+from PureT.datasets_ import data_loader_bytecaption as loader_byte
+from PureT.datasets_ import data_loader_visual as loader_visual
+from PureT.datasets_ import data_loader_openrouter as loader_openrouter
 from lib.config import cfg
 
 
@@ -32,8 +35,25 @@ class CocoEvaler(object):
             self.ids2path = None
             self.eval_ids = None  # set after loader
 
-        # Build loader (uses ids_path basename to infer split)
-        self.eval_loader = data_loader.load_val(eval_ids, gv_feat, att_feats, max_samples=self.max_samples)
+        # Build loader based on model type
+        model_type = str(getattr(cfg.MODEL, "TYPE", "")).lower()
+        is_openrouter = ("openrouter" in model_type) or model_type.startswith("gpt") or ("gpt" in model_type)
+        is_hf_visual = (
+            model_type.startswith("hf")
+            or "blip" in model_type
+            or "git" in model_type
+            or "qwen" in model_type
+            or "internvl" in model_type
+            or "glm" in model_type
+            or "mistral" in model_type
+            or "ministral" in model_type
+        )
+        if is_openrouter:
+            self.eval_loader = loader_openrouter.load_val(eval_ids, gv_feat, max_samples=self.max_samples)
+        elif is_hf_visual:
+            self.eval_loader = loader_visual.load_val(eval_ids, gv_feat, max_samples=self.max_samples)
+        else:
+            self.eval_loader = loader_byte.load_val(eval_ids, gv_feat, max_samples=self.max_samples)
         if self.eval_ids is None:
             # For Flickr8k, load the actual image IDs from the JSON file if available
             if eval_ids and os.path.exists(eval_ids):
@@ -126,11 +146,11 @@ class CocoEvaler(object):
         # Accumulate XE loss over batches (weighted by batch size) so we can return/print it with metrics
         loss_sum = 0.0
         loss_count = 0
-        # output_indices = {0, 5, 10, 15, 20, 25}
-        # 初始化无法解码图像的计数器
+
         undecodable_count = 0
         # --- 获取对数据集内部ID列表的引用(与之前获取的方式有一点不同，我觉得有道理，因为之前加了数据样本后需要重新对齐一下) ---
         dataset_image_ids = self.eval_loader.dataset.image_ids
+        
         sample_limit = getattr(getattr(cfg, "INFERENCE", {}), "SAMPLE_PREVIEW", 5)
         sample_preview = []
 
@@ -138,20 +158,11 @@ class CocoEvaler(object):
             pbar = tqdm.tqdm(self.eval_loader, desc=f"Evaluating {rname} ({cfg.MODEL.TYPE})", leave=False)
             for batch_idx, data_batch in enumerate(pbar):
                 indices, gv_feat, data, att_mask = data_batch
-                
-                # --- 执行可靠的ID查找 ---
-                # 使用从 DataLoader 获得的 indices，去数据集的 image_ids 列表中查找
-                # 这比使用 self.eval_ids 更安全，因为它保证了顺序的一致性
-                try:
-                    # 将 numpy 索引转换为整数列表
-                    int_indices = indices.astype(int)
-                    # 使用列表推导式进行查找
-                    ids = [dataset_image_ids[i] for i in int_indices]
-                except IndexError:
-                    # 如果发生错误，回退到旧的不安全方法，并打印警告
-                    print("\n[警告] ID查找失败，回退到旧方法。评估结果可能不准确。")
-                    ids = self.eval_ids[indices]
-                
+                # 将 numpy 索引转换为整数列表
+                int_indices = indices.astype(int)
+                # 使用列表推导式进行查找
+                ids = [dataset_image_ids[i] for i in int_indices]
+
                 gv_feat = gv_feat.to(device)
                 
                 # --- 根据模型类型选择数据并传递 ---
@@ -251,32 +262,30 @@ class CocoEvaler(object):
 
                 # --- 关键修复：修改 image_id 以区分不同的损坏样本 ---
                 # 1. 获取原始批次大小和增强因子
-                original_bs = len(indices) // (len(sents) // len(indices)) if len(indices) > 0 and len(sents) > 0 else len(indices)
-                augmentation_factor = len(sents) // original_bs if original_bs > 0 else 1
-
                 # 2. 循环并创建带有唯一ID的结果
+                seen_counts = {}
                 for sid, sent in enumerate(sents):
-                    # 计算这个样本在原始批次中的索引
                     if sent == "this is a dummy caption for an undecodable image":
                         undecodable_count += 1
-                    original_sample_idx = sid // augmentation_factor
-                    # 计算这是第几个增强版本 (0, 1, 2, 3...)
-                    augmentation_idx = sid % augmentation_factor
+                    # 使用从数据加载器获得的 ids（已正确映射）
+                    if sid < len(ids):
+                        original_image_id = ids[sid]
+                        # 确保转换为整数以便查找
+                        try:
+                            original_image_id = int(original_image_id)
+                        except (ValueError, TypeError):
+                            pass
+                    else:
+                        original_image_id = ids[-1] if ids else 0
                     
-                    # 获取原始的 image_id
-                    original_image_id = int(ids[original_sample_idx])
+                    augmentation_idx = seen_counts.get(original_image_id, 0)
+                    seen_counts[original_image_id] = augmentation_idx + 1
                     
-                    # 创建一个新的、唯一的 image_id。
-                    # 例如，ID 123 的第2个增强版本 -> 12302
-                    # 我们使用一个足够大的偏移量以避免与真实ID冲突
-                    unique_image_id = original_image_id * 100 + augmentation_idx
+                    # 直接使用原始 image_id（不修改）以保证评估正确性
+                    # 如果需要区分增强版本，可以在其他地方处理，但不在这里修改用于评估的ID
+                    final_image_id = original_image_id
 
-                    # --- 调试语句：打印ID转换过程 ---
-                    # if global_idx < 20: # 只打印前几个样本的调试信息
-                    #     print(f"[DEBUG ID] sid: {sid}, original_idx: {original_sample_idx}, aug_idx: {augmentation_idx}, original_id: {original_image_id}, unique_id: {unique_image_id}")
-                    # ------------------------------------
-
-                    result = {cfg.INFERENCE.ID_KEY: original_image_id, cfg.INFERENCE.CAP_KEY: sent}
+                    result = {cfg.INFERENCE.ID_KEY: final_image_id, cfg.INFERENCE.CAP_KEY: sent}
                     results.append(result)
 
                     # 后续的打印逻辑也需要使用新的 unique_id 来查找参考标题
@@ -285,10 +294,19 @@ class CocoEvaler(object):
                         gt_captions = []
                         if hasattr(self.evaler, 'id_to_captions') and original_image_id in self.evaler.id_to_captions:
                             gt_captions = self.evaler.id_to_captions[original_image_id]
-                        elif hasattr(self.evaler, 'coco_data'):
+                        elif hasattr(self.evaler, 'id_to_captions'):
+                            # 尝试其他可能的ID格式
+                            for key_candidate in [str(original_image_id), int(original_image_id)]:
+                                if key_candidate in self.evaler.id_to_captions:
+                                    gt_captions = self.evaler.id_to_captions[key_candidate]
+                                    break
+                        
+                        # 如果仍然没找到，尝试从coco_data搜索
+                        if not gt_captions and hasattr(self.evaler, 'coco_data'):
                             for ann in self.evaler.coco_data.get('annotations', []):
-                                if ann['image_id'] == original_image_id:
+                                if ann.get('image_id') == original_image_id:
                                     gt_captions.append(ann['caption'])
+                        
                         gt_str = gt_captions[0] if gt_captions else "N/A"
 
                         sample_preview.append(
@@ -410,8 +428,10 @@ class CocoEvaler(object):
             eval_res['Sample_Preview'] = sample_preview
         
         # --- START: 添加码流长度统计报告 ---
-        if data_loader._BYTE_STREAM_LENGTHS:
-            lengths = np.array(data_loader._BYTE_STREAM_LENGTHS)
+        # Only ByteCaption byte-stream loader tracks lengths
+        lengths_src = getattr(loader_byte, "_BYTE_STREAM_LENGTHS", None)
+        if isinstance(lengths_src, list) and len(lengths_src) > 0:
+            lengths = np.array(lengths_src)
             count_total = len(lengths)
             count_below_20k = np.sum(lengths < 20000)
 
@@ -425,7 +445,10 @@ class CocoEvaler(object):
             print(f"  - Images with length < 20000: {count_below_20k} ({count_below_20k / count_total:.2%})")
             print(f"{'-'*30}")
             # 清空列表以便下次评估（如果在一个进程中多次调用）
-            data_loader._BYTE_STREAM_LENGTHS.clear()
+            try:
+                lengths_src.clear()
+            except Exception:
+                pass
         # --- END: 添加码流长度统计报告 ---
 
         print(f"{'='*80}\n")

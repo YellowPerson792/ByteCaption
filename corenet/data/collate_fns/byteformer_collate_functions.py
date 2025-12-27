@@ -40,7 +40,16 @@ def byteformer_image_collate_fn(
     Returns:
         The modified batch.
     """
-    batch = apply_pil_save(batch, opts)
+    # 如果样本已经是字节流（int32 1D），则跳过 PILSave，避免重复编码
+    first = batch[0]["samples"] if isinstance(batch, list) and batch else None
+    needs_pil_save = True
+    try:
+        if isinstance(first, torch.Tensor) and first.dtype == torch.int32 and first.dim() == 1:
+            needs_pil_save = False
+    except Exception:
+        needs_pil_save = True
+    if needs_pil_save:
+        batch = apply_pil_save(batch, opts)
     # 在 PILSave 之后，应用新的字节流损坏
     batch = apply_byte_stream_corrupter(batch, opts)
     batch = apply_shuffle_bytes(batch, opts)
@@ -134,7 +143,10 @@ def apply_pil_save(
     if getattr(opts, "image_augmentation.pil_save.enable"):
         transform = image_bytes.PILSave(opts)
         for i, elem in enumerate(batch):
-            batch[i] = transform(elem)
+            sample = elem.get("samples") if isinstance(elem, dict) else None
+            # 仅当样本看起来是规范化图像张量（[C,H,W] 浮点且范围[0,1]）时才应用
+            if isinstance(sample, torch.Tensor) and sample.dim() == 3 and sample.dtype in (torch.float32, torch.float64):
+                batch[i] = transform(elem)
     return batch
 
 

@@ -1,0 +1,67 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_glm",
+  "model_name": "ByteCaption_XE_glm",
+  "model_type": "GLM",
+  "corrupt_type": [
+    "rbbf"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "bit_error_rate": 0.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.8245167853505471,
+    "Bleu_2": 0.6698323139669585,
+    "Bleu_3": 0.527052378288451,
+    "Bleu_4": 0.40857425285820304,
+    "ROUGE_L": 0.6069929247682971,
+    "CIDEr": 1.4488790619440328,
+    "METEOR": 0.30869784970100794,
+    "SPICE": 0.24013020996234447,
+    "XE_Loss": null,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 200,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "A dog is laying on a shoe rack",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "A street light sitting above a street next to tall buildings",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "A toilet with a hole in the bottom of it",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "A living room with a couch, coffee table and pillows",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "A basket of food sitting on top of a table",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20251226_233524",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20251226_233524/captions_test_best.json",
+  "captions_count": 200
+}

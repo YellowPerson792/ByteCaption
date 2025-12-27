@@ -95,9 +95,13 @@ class CocoJsonEvaler(object):
         """Build reference captions for evaluation."""
         gts = {}
         for img_id in img_ids:
-            # Get captions from HuggingFace dataset
-            caps = self.id_to_captions.get(img_id, [])
+            ref_id = img_id
+            # 直接查找，不使用修改后的ID的fallback
+            # （如果需要处理ID偏移，应该在数据加载时解决，而不是这里）
+            caps = self.id_to_captions.get(ref_id, [])
             if not caps:
+                # 如果找不到，打印警告并使用默认值
+                print(f"[WARN] No captions found for image_id {ref_id}")
                 caps = ['.']  # fallback caption
             gts[img_id] = [{'caption': c} for c in caps]
         return gts

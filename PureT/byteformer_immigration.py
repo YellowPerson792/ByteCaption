@@ -8,8 +8,8 @@ from dataclasses import dataclass, field
 from corenet.options.opts import get_training_arguments
 from byteformer_hf_migration.utils.hf_adapter_utils import CorenetToHFPretrainedConfig, CorenetToHFPretrainedModel
 from transformers import PreTrainedModel
-import torchtext
-torchtext.disable_torchtext_deprecation_warning()
+# import torchtext
+# torchtext.disable_torchtext_deprecation_warning()
 
 from transformers.models.auto.configuration_auto import CONFIG_MAPPING
 from transformers.models.auto.modeling_auto import MODEL_MAPPING
