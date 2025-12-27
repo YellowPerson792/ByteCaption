@@ -6,7 +6,7 @@ examples for visual inspection. Dataset loading now mirrors training/eval
 Quick run examples (from repo root, with venv python):
   python tools/corrupt_coco_bitstreams.py \
       --config PureT/experiments/ByteCaption_XE/config_coco.yml \
-      --images-per-cat 10 --max-images 200 \
+      --images-per-cat 30 --max-images 200 \
       --severity-levels S1 S2 S3 S4 S5 \
       --corrupt-types rbbf rbsl \
       --mode sequential \
@@ -192,9 +192,6 @@ def main() -> None:
             clean_dir.mkdir(parents=True, exist_ok=True)
             clean_path = clean_dir / f"{img_id}_clean.jpg"
             clean_path.write_bytes(raw_bytes)
-            decoded = _decode_image(raw_bytes)
-            if decoded is not None:
-                decoded.save(clean_dir / f"{img_id}_clean_preview.png")
 
         for ctype, level_map in pipelines.items():
             for level, pipeline in level_map.items():
@@ -209,8 +206,6 @@ def main() -> None:
 
                     preview = _decode_image(corrupted_bytes)
                     preview_ok = preview is not None
-                    if preview_ok:
-                        preview.save(out_dir / f"{img_id}_{marker}_preview.png")
 
                     decode_stats.setdefault(ctype, {}).setdefault(level, {"ok": 0, "total": 0})
                     decode_stats[ctype][level]["total"] += 1
