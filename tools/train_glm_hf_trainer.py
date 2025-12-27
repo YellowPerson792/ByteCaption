@@ -9,22 +9,23 @@ Example:
         --processor_id GLM-4.6V-Flash/ZhipuAI/GLM-4.6V-Flash \
         --local_dir GLM-4.6V-Flash/ZhipuAI/GLM-4.6V-Flash \
         --train_samples 0 \
-        --val_samples 10 \
-        --eval_steps 5 \
+        --val_samples 200 \
+        --eval_steps 200 \
         --best_metric SPICE \
+        --base_lr 1e-4 \
         --early_stop_patience 4 \
         --max_epoch 2 \
         --batch_size 1 \
         --grad_accum_steps 8 \
+        --gradient_checkpointing \
         --num_workers 8 \
-        --train_max_length 512 \
+        --train_max_length 1024 \
         --train_truncation 1 \
         --lora_r 16 \
         --lora_alpha 32 \
         --lora_dropout 0.05 \
         --lora_target_modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj \
-        --attn_implementation flash_attention_2 \
-        --disable_wandb
+        --attn_implementation flash_attention_2 
 """
 
 from __future__ import annotations
@@ -34,8 +35,11 @@ import os
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
+import types
+import re
 
-import torch
+from transformers import AutoProcessor, Glm4vForConditionalGeneration
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -209,12 +213,34 @@ def _build_generation_kwargs(hf_cfg) -> dict:
             max_new_tokens = int(gen_cfg.MAX_NEW_TOKENS)
         except Exception:
             max_new_tokens = None
-    max_length = int(gen_cfg.MAX_LENGTH) if gen_cfg and hasattr(gen_cfg, "MAX_LENGTH") else 50
+    max_length = int(gen_cfg.MAX_LENGTH) if gen_cfg and hasattr(gen_cfg, "MAX_LENGTH") else None
     num_beams = int(gen_cfg.NUM_BEAMS) if gen_cfg and hasattr(gen_cfg, "NUM_BEAMS") else 3
-    generation_kwargs = {"num_beams": num_beams}
-    if max_new_tokens is not None and max_new_tokens > 0:
-        generation_kwargs["max_new_tokens"] = max_new_tokens
-    else:
+    # Anti-repetition defaults unless explicitly provided (tighter by default)
+    no_repeat_ngram_size = int(getattr(gen_cfg, "NO_REPEAT_NGRAM_SIZE", 4)) if gen_cfg else 4
+    repetition_penalty = float(getattr(gen_cfg, "REPETITION_PENALTY", 1.12)) if gen_cfg else 1.12
+    length_penalty = float(getattr(gen_cfg, "LENGTH_PENALTY", 0.9)) if gen_cfg else 0.9
+    early_stopping = bool(getattr(gen_cfg, "EARLY_STOPPING", True)) if gen_cfg else True
+
+    # If both are provided, prefer max_new_tokens to silence HF warning
+    if max_new_tokens and max_new_tokens > 0 and max_length and max_length > 0:
+        print(
+            "[gen_cfg] Both max_new_tokens and max_length set; using max_new_tokens and ignoring max_length to avoid conflicts."
+        )
+        max_length = None
+
+    generation_kwargs = {
+        "num_beams": num_beams,
+        "no_repeat_ngram_size": no_repeat_ngram_size,
+        "repetition_penalty": repetition_penalty,
+        "length_penalty": length_penalty,
+        "early_stopping": early_stopping,
+    }
+    # Default to a short COCO-style length if not provided
+    if max_new_tokens is None or max_new_tokens <= 0:
+        max_new_tokens = 64
+    generation_kwargs["max_new_tokens"] = max_new_tokens
+    # Only set max_length when explicitly configured to avoid warnings
+    if max_length is not None and max_length > 0:
         generation_kwargs["max_length"] = max_length
     return generation_kwargs
 
@@ -434,17 +460,10 @@ def _load_model_and_processor(hf_cfg):
     )
     trust_remote_code = bool(getattr(hf_cfg, "TRUST_REMOTE_CODE", False))
 
-    from transformers import AutoProcessor
-
     processor = AutoProcessor.from_pretrained(processor_load_from, trust_remote_code=trust_remote_code)
 
     model_kwargs = _build_model_kwargs(hf_cfg)
     use_safetensors = bool(getattr(hf_cfg, "SAFE_SERIALIZATION", True))
-
-    try:
-        from transformers import Glm4vForConditionalGeneration
-    except Exception as exc:  # pragma: no cover
-        raise ImportError(f"Glm4vForConditionalGeneration not available: {exc}") from exc
 
     model = _load_with_safetensor_retry(Glm4vForConditionalGeneration)
 
@@ -476,6 +495,49 @@ def _apply_lora(model, hf_cfg):
         print(f"[GLM] LoRA disabled: peft unavailable ({exc})")
         return model, False
 
+    # Some vision submodules (e.g., Glm4vVisionModel) inherit PreTrainedModel but
+    # do not implement get_input_embeddings; PEFT calls enable_input_require_grads()
+    # which iterates submodules and invokes get_input_embeddings(), causing a
+    # NotImplementedError. We proactively monkey‑patch such modules to return None.
+    def _patch_missing_get_input_embeddings(root_model):
+        patched = 0
+        for module in root_model.modules():
+            get_ie = getattr(module, "get_input_embeddings", None)
+            if get_ie is None:
+                continue
+            try:
+                _ = get_ie()
+            except NotImplementedError:
+                def _gie_stub(self):
+                    return None
+                def _sie_stub(self, new_embeddings):
+                    return None
+                try:
+                    setattr(module, "get_input_embeddings", types.MethodType(_gie_stub, module))
+                    if not hasattr(module, "set_input_embeddings") or isinstance(getattr(module, "set_input_embeddings"), types.BuiltinMethodType):
+                        setattr(module, "set_input_embeddings", types.MethodType(_sie_stub, module))
+                    patched += 1
+                except Exception:
+                    # Best effort; continue
+                    pass
+            except Exception:
+                # If calling get_input_embeddings itself errors, make it a stub
+                def _gie_stub(self):
+                    return None
+                def _sie_stub(self, new_embeddings):
+                    return None
+                try:
+                    setattr(module, "get_input_embeddings", types.MethodType(_gie_stub, module))
+                    if not hasattr(module, "set_input_embeddings"):
+                        setattr(module, "set_input_embeddings", types.MethodType(_sie_stub, module))
+                    patched += 1
+                except Exception:
+                    pass
+        if patched:
+            print(f"[GLM] Patched {patched} submodule(s) lacking get_input_embeddings().")
+
+    _patch_missing_get_input_embeddings(model)
+
     task_name = str(getattr(lora_cfg, "TASK_TYPE", "CAUSAL_LM")).upper()
     task_type = getattr(TaskType, task_name, TaskType.CAUSAL_LM)
     target_modules = list(getattr(lora_cfg, "TARGET_MODULES", []) or [])
@@ -494,6 +556,11 @@ def _apply_lora(model, hf_cfg):
     except ValueError as exc:
         print(f"[GLM] LoRA target modules not found; disabling LoRA. ({exc})")
         return model, False
+    except NotImplementedError as exc:
+        # As a fallback, attempt to patch again (in case PEFT rewrapped modules)
+        print(f"[GLM] LoRA init hit NotImplementedError: {exc}; retrying after patch.")
+        _patch_missing_get_input_embeddings(model)
+        model = get_peft_model(model, lora_config)
 
     if hasattr(model, "print_trainable_parameters"):
         model.print_trainable_parameters()
@@ -549,7 +616,13 @@ class GLMTrainerCollator:
         messages.append({"role": "user", "content": user_content})
 
         if caption is not None:
-            messages.append({"role": "assistant", "content": [{"type": "text", "text": caption}]})
+            eos_tok = None
+            try:
+                eos_tok = getattr(self.processor.tokenizer, "eos_token", None)
+            except Exception:
+                eos_tok = None
+            cap_text = caption if eos_tok is None else f"{caption} {eos_tok}"
+            messages.append({"role": "assistant", "content": [{"type": "text", "text": cap_text}]})
         return messages
 
     def _resolve_truncation(self) -> Tuple[bool, Optional[int]]:
@@ -600,6 +673,8 @@ class GLMTrainerCollator:
             raise
 
     def _safe_apply_chat_template(self, conversation, **kwargs):
+        # Force-disable model-side "thinking" tokens
+        kwargs.setdefault("enable_thinking", False)
         try:
             return self.processor.apply_chat_template(conversation, **kwargs)
         except ValueError as exc:
@@ -610,6 +685,7 @@ class GLMTrainerCollator:
                     self._warned_truncation = True
                 kwargs["truncation"] = False
                 kwargs.pop("max_length", None)
+                kwargs.setdefault("enable_thinking", False)
                 return self.processor.apply_chat_template(conversation, **kwargs)
             raise
 
@@ -776,6 +852,7 @@ class GLMDecodeWrapper:
                 return_dict=True,
                 return_tensors="pt",
                 padding=True,
+                enable_thinking=False,
             )
         else:
             prompt_text = self._compose_prompt_text()
@@ -822,9 +899,34 @@ class GLMDecodeWrapper:
         generated_ids = self._trim_generated_ids(generated_ids, inputs)
         generated_captions = self.processor.batch_decode(generated_ids, skip_special_tokens=True)
 
+        def _dedup_sentences(text: str) -> str:
+            if not text:
+                return text
+            parts = [p.strip() for p in re.split(r"[.!?]", text) if p.strip()]
+            seen = []
+            for p in parts:
+                if not seen or p.lower() != seen[-1].lower():
+                    seen.append(p)
+            return (". ".join(seen)).strip()
+
+        def _first_sentence(text: str, max_words: int = 15) -> str:
+            if not text:
+                return text
+            for seg in re.split(r"[.!?]", text):
+                seg = seg.strip()
+                if not seg:
+                    continue
+                words = seg.split()
+                if len(words) > max_words:
+                    seg = " ".join(words[:max_words])
+                return seg
+            return text
+
         final_captions = [self.placeholder for _ in range(len(images))]
         for idx, caption in zip(original_indices, generated_captions):
-            final_captions[idx] = caption.strip() if caption.strip() else self.placeholder
+            clean_cap = _dedup_sentences(caption.strip()) if isinstance(caption, str) else ""
+            clean_cap = _first_sentence(clean_cap)
+            final_captions[idx] = clean_cap if clean_cap else self.placeholder
         return final_captions, None
 
     def decode(self, **kwargs):
@@ -1138,6 +1240,15 @@ def main():
 
     training_args = TrainingArguments(**training_kwargs)
     generation_kwargs = _build_generation_kwargs(hf_cfg)
+    # Ensure EOS/PAD for generation to terminate early when possible
+    if processor is not None and hasattr(processor, "tokenizer"):
+        tok = processor.tokenizer
+        eos_id = getattr(tok, "eos_token_id", None)
+        pad_id = getattr(tok, "pad_token_id", None)
+        if eos_id is not None:
+            generation_kwargs.setdefault("eos_token_id", eos_id)
+        if pad_id is not None:
+            generation_kwargs.setdefault("pad_token_id", pad_id)
 
     trainer = CaptionTrainer(
         model=model,

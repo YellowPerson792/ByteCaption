@@ -12,11 +12,11 @@ python tools/run_batch_corruption_eval.py \
 --test-samples 0
     
 python tools/run_batch_corruption_eval.py \
---models PureT/experiments/ByteCaption_XE_internvl \
+--models PureT/experiments/ByteCaption_XE_glm \
 --corrupt-types rbbf \
---corrupt-levels S0 \
+--corrupt-levels S0 S1 \
 --save-captions 500 \
---test-samples 20
+--test-samples 0
 """
 
 import argparse
