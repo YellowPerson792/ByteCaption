@@ -12,7 +12,7 @@ python tools/run_batch_corruption_eval.py \
 --test-samples 0
     
 python tools/run_batch_corruption_eval.py \
---models PureT/experiments/ByteCaption_XE_glm \
+--models PureT/experiments/ByteCaption_XE_internvl \
 --corrupt-types rbsl \
 --corrupt-levels S1 S2 S3 S4 S5 \
 --save-captions 500 \
