@@ -30,9 +30,9 @@ MODEL:
     MIRROR: 'https://hf-mirror.com'
     DISABLE_PROXY: False
     PROMPT_SOURCE: 'openrouter'
-    USE_CHAT_TEMPLATE: False
+    USE_CHAT_TEMPLATE: True
     GENERATION:
-      MAX_NEW_TOKENS: 30
+      MAX_NEW_TOKENS: 20
       NUM_BEAMS: 5
 
   OPENROUTER:
