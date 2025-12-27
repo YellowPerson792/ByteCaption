@@ -1,5 +1,5 @@
 ---
-base_model: /root/autodl-fs/trained_models/InternVL3_5-8B-swift-lora-merged
+base_model: InternVL3_5-8B-HF/OpenGVLab/InternVL3_5-8B-HF
 library_name: peft
 ---
 

@@ -8,12 +8,12 @@ Example:
   python tools/train_internvl_transformers_lora.py \
     --folder PureT/experiments/ByteCaption_XE_internvl \
     --dataset coco \
-    --model_id OpenGVLab/InternVL3_5-8B \
-    --processor_id OpenGVLab/InternVL3_5-8B \
+    --model_id InternVL3_5-8B-HF/OpenGVLab/InternVL3_5-8B-HF \
+    --processor_id InternVL3_5-8B-HF/OpenGVLab/InternVL3_5-8B-HF \
     --local_dir InternVL3_5-8B-HF/OpenGVLab/InternVL3_5-8B-HF \
     --train_samples 0 \
     --val_samples 200 \
-    --save_steps 50 \
+    --save_steps 200 \
     --save_total_limit 1 \
     --best_metric SPICE \
     --base_lr 1e-4 \
@@ -30,8 +30,7 @@ Example:
     --lora_alpha 32 \
     --lora_dropout 0.05 \
     --lora_target_modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj \
-    --attn_implementation sdpa \
-    --disable_wandb
+    --attn_implementation sdpa 
 """
 
 from __future__ import annotations
