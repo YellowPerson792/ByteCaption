@@ -99,8 +99,6 @@ class HFVisualModel(nn.Module):
         with _hf_env(mirror, disable_proxy):
             if allow_unsafe:
                 self._allow_unsafe_torch_load()
-            if self._needs_download():
-                self._download_snapshot()
             load_from = self.local_dir if self._local_dir_ready() else self.model_id
             model_kwargs = self._build_model_kwargs()
 

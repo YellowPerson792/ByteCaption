@@ -1,2 +1,3 @@
 [INFO: 2025-12-27 12:20:23,099] Loaded LoRA adapter from PureT/experiments/ByteCaption_XE_glm/snapshot/best_lora
 [INFO: 2025-12-27 13:07:22,985] Loaded LoRA adapter from PureT/experiments/ByteCaption_XE_glm/snapshot/best_lora
+[INFO: 2025-12-27 15:57:49,064] Loaded LoRA adapter from PureT/experiments/ByteCaption_XE_glm/snapshot/best_lora

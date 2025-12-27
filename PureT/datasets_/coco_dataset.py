@@ -287,7 +287,6 @@ class CocoDataset(data.Dataset):
                     decoded_img = Image.open(io.BytesIO(corrupted_bytes)).convert("RGB")
                     processed_results.append(decoded_img)
                 except Exception as e:
-                    print(f"[警告] 解码失败 ({marker}): {e}")
                     processed_results.append(None)
         
         # 4. 单个结果还是多个结果

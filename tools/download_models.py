@@ -10,8 +10,8 @@ import os
 def download_internvl():
     """下载模型"""
     
-    model_id = "mistralai/Ministral-3-8B-Base-2512"
-    local_dir = "/root/autodl-fs/Ministral-3-8B-Base-2512"
+    model_id = "Salesforce/blip-image-captioning-base"
+    local_dir = "blip-image-captioning-base"
     
     print(f"开始从 ModelScope 下载模型: {model_id}")
     print(f"保存路径: {local_dir}")
