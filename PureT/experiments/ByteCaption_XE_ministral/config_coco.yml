@@ -20,9 +20,9 @@ TEST:
 MODEL:
   TYPE: 'MINISTRAL'
   HF:
-    MODEL_ID: 'mistralai/Ministral-3-8B-Instruct-2512'
-    PROCESSOR_ID: 'mistralai/Ministral-3-8B-Instruct-2512'
-    LOCAL_DIR: '/autodl-fs/data/mistralai_Ministral-3-8B-Instruct-2512'
+    MODEL_ID: './Ministral-3-8B-Base-2512/mistralai/Ministral-3-8B-Base-2512'
+    PROCESSOR_ID: './Ministral-3-8B-Base-2512/mistralai/Ministral-3-8B-Base-2512'
+    LOCAL_DIR: './Ministral-3-8B-Base-2512/mistralai/Ministral-3-8B-Base-2512'
     TRUST_REMOTE_CODE: True
     TORCH_DTYPE: 'bf16'
     LOW_CPU_MEM_USAGE: True

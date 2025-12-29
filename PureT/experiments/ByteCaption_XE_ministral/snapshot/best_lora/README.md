@@ -1,5 +1,5 @@
 ---
-base_model: Ministral-3-8B-Instruct-2512
+base_model: ./Ministral-3-8B-Base-2512/mistralai/Ministral-3-8B-Base-2512
 library_name: peft
 ---
 

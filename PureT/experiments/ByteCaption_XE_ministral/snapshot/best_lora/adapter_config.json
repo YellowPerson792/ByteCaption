@@ -1,7 +1,7 @@
 {
   "alpha_pattern": {},
   "auto_mapping": null,
-  "base_model_name_or_path": "Ministral-3-8B-Instruct-2512",
+  "base_model_name_or_path": "./Ministral-3-8B-Base-2512/mistralai/Ministral-3-8B-Base-2512",
   "bias": "none",
   "corda_config": null,
   "eva_config": null,
@@ -24,11 +24,11 @@
   "rank_pattern": {},
   "revision": null,
   "target_modules": [
-    "k_proj",
-    "up_proj",
     "q_proj",
-    "v_proj",
+    "up_proj",
     "gate_proj",
+    "k_proj",
+    "v_proj",
     "o_proj",
     "down_proj"
   ],

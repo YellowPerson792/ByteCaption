@@ -7,21 +7,6 @@
   "model_type": "mistral3",
   "multimodal_projector_bias": false,
   "projector_hidden_act": "gelu",
-  "tie_word_embeddings": false,
-  "quantization_config": {
-    "activation_scheme": "static",
-    "dequantize": false,
-    "modules_to_not_convert": [
-      "model.vision_tower",
-      "model.multi_modal_projector",
-      "lm_head",
-      "model.vision_tower",
-      "model.multi_modal_projector",
-      "lm_head"
-    ],
-    "quant_method": "fp8",
-    "weight_block_size": null
-  },
   "spatial_merge_size": 2,
   "text_config": {
     "attention_dropout": 0.0,
@@ -69,7 +54,8 @@
     "rope_parameters": {
       "rope_theta": 10000.0,
       "rope_type": "default"
-    }
+    },
+    "rope_theta": 10000.0
   },
   "vision_feature_layer": -1
 }
