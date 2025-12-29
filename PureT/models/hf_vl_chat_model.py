@@ -1,18 +1,26 @@
 from __future__ import annotations
 
 import os
+import io
+import base64
 from contextlib import contextmanager
+from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
 
 import torch
+from PIL import Image
 import torch.nn as nn
 from transformers import (
     AutoModel, 
     AutoModelForCausalLM, 
     AutoProcessor,
+    AutoModelForImageTextToText,
     AutoModelForVision2Seq,
     InternVLForConditionalGeneration,
-    Glm4vForConditionalGeneration
+    Glm4vForConditionalGeneration,
+    Mistral3ForConditionalGeneration,
+    MistralCommonBackend
+    
 )
 from peft import PeftModel
 
@@ -55,19 +63,23 @@ def _ensure_image_token(text: str, image_token: str) -> str:
     return image_token
 
 
-def _load_processor_with_fallback(processor_id: str, trust_remote_code: bool):
+def _load_processor_with_fallback(processor_id: str, trust_remote_code: bool, model_id_lower: str = ""):
+    # Special handling for Mistral/Ministral
+    if "mistral" in model_id_lower or "ministral" in model_id_lower:
+        try:
+            return MistralCommonBackend.from_pretrained(processor_id, trust_remote_code=trust_remote_code)
+        except Exception as exc:
+            print(f"[WARNING] Failed to load MistralCommonBackend: {exc}. Falling back to AutoProcessor.")
+    
     try:
         return AutoProcessor.from_pretrained(processor_id, trust_remote_code=trust_remote_code)
     except Exception as exc:
-        msg = str(exc)
-        if "start_image_token" not in msg and "start_image_token" not in repr(exc):
-            raise
-        try:
+        # Retry with use_fast=False for tokenizer issues
+        if "start_image_token" in str(exc):
             return AutoProcessor.from_pretrained(
                 processor_id, trust_remote_code=trust_remote_code, use_fast=False
             )
-        except TypeError:
-            return AutoProcessor.from_pretrained(processor_id, trust_remote_code=trust_remote_code)
+        raise
 
 
 class HFVLChatModel(nn.Module):
@@ -114,7 +126,8 @@ class HFVLChatModel(nn.Module):
 
         with _hf_env(mirror, disable_proxy):
             processor_load_from = self._resolve_processor_source()
-            self.processor = _load_processor_with_fallback(processor_load_from, trust_remote_code=self.trust_remote_code)
+            model_id_lower = self.model_id.lower()
+            self.processor = _load_processor_with_fallback(processor_load_from, trust_remote_code=self.trust_remote_code, model_id_lower=model_id_lower)
             self.model = self._load_model()
 
         tokenizer = getattr(self.processor, "tokenizer", None)
@@ -126,6 +139,7 @@ class HFVLChatModel(nn.Module):
         
         # Detect if this is a GLM model for special handling
         self.is_glm_model = self._detect_glm_model()
+        self.is_ministral_model = self._detect_ministral_model()
 
     def forward(self, *args, **kwargs):
         raise NotImplementedError("HFVLCaptionModel is inference-only in this pipeline.")
@@ -171,6 +185,9 @@ class HFVLChatModel(nn.Module):
         except Exception as e:
             # If model input preparation fails (e.g., due to extreme aspect ratio),
             # return dummy captions for all images
+            print(f"[MINISTRAL] WARNING: _prepare_model_inputs failed: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
             return [dummy_caption for _ in range(len(images))], None
 
         gen_kwargs = dict(self.generation_kwargs)
@@ -227,6 +244,9 @@ class HFVLChatModel(nn.Module):
         # Then try InternVL
         if model is None and "internvl" in lowered and InternVLForConditionalGeneration is not None:
             model = self._safe_from_pretrained(InternVLForConditionalGeneration, load_from, model_kwargs)
+        # Mistral/Ministral prefers ImageTextToText
+        if model is None and ("mistral" in lowered or "ministral" in lowered):
+            model = self._safe_from_pretrained(Mistral3ForConditionalGeneration, load_from, model_kwargs)
         # Then try Vision2Seq
         if model is None and AutoModelForVision2Seq is not None:
             model = self._safe_from_pretrained(AutoModelForVision2Seq, load_from, model_kwargs)
@@ -256,6 +276,10 @@ class HFVLChatModel(nn.Module):
         """Check if loaded model is a GLM model."""
         model_id_lower = f"{self.model_id or ''} {self.local_dir or ''}".lower()
         return "glm" in model_id_lower
+
+    def _detect_ministral_model(self) -> bool:
+        lowered = f"{self.model_id or ''} {self.local_dir or ''}".lower()
+        return "mistral" in lowered or "ministral" in lowered or isinstance(self.model, Mistral3ForConditionalGeneration)
 
     def _resolve_attn_impl(self) -> Optional[str]:
         attn_impl = (self.attn_implementation or "").strip()
@@ -313,6 +337,8 @@ class HFVLChatModel(nn.Module):
             raise
 
     def _prepare_model_inputs(self, images: List) -> dict:
+        if self.is_ministral_model:
+            return self._prepare_ministral_inputs(images)
         prompt = None
         use_chat_template = self._should_use_chat_template()
         if use_chat_template:
@@ -340,6 +366,56 @@ class HFVLChatModel(nn.Module):
             else:
                 inputs = self.processor(text=["" for _ in images], return_tensors="pt", padding=True)
 
+        return inputs.to(self.device)
+
+    def _image_to_data_url(self, image: any) -> str:
+        if isinstance(image, torch.Tensor):
+            # Inference path should pass PIL; tensor not supported here
+            raise ValueError("Tensor images are not supported in chat-template path; pass PIL or path.")
+        if isinstance(image, Image.Image):
+            img = image.convert("RGB")
+        elif isinstance(image, (str, Path)):
+            with Image.open(image) as img_obj:
+                img = img_obj.convert("RGB")
+        else:
+            raise ValueError("Image must be PIL.Image or path")
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+        return f"data:image/png;base64,{b64}"
+
+    def _prepare_ministral_inputs(self, images: List) -> dict:
+        messages_batch = []
+        for img in images:
+            image_url = self._image_to_data_url(img)
+            user_content = []
+            if self.user_prompt:
+                user_content.append({"type": "text", "text": self.user_prompt})
+            user_content.append({"type": "image_url", "image_url": {"url": image_url}})
+
+            conv: List[dict] = []
+            if self.system_prompt:
+                conv.append({"role": "system", "content": [{"type": "text", "text": self.system_prompt}]})
+            conv.append({"role": "user", "content": user_content})
+            messages_batch.append(conv)
+
+        inputs = self._safe_apply_chat_template(
+            messages_batch,
+            tokenize=True,
+            add_generation_prompt=True,
+            continue_final_message=False,
+            return_tensors="pt",
+            return_dict=True,
+            padding=True,
+            truncation=False,
+        )
+
+        pixel_values = inputs.get("pixel_values")
+        if isinstance(pixel_values, torch.Tensor):
+            inputs["pixel_values"] = pixel_values.to(dtype=torch.bfloat16)
+            if inputs.get("image_sizes") is None:
+                h, w = pixel_values.shape[-2:]
+                inputs["image_sizes"] = [(h, w)] * pixel_values.shape[0]
         return inputs.to(self.device)
 
     def _trim_generated_ids(self, generated_ids: torch.Tensor, inputs: dict) -> torch.Tensor:

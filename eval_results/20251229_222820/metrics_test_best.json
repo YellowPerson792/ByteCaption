@@ -1,0 +1,67 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_ministral",
+  "model_name": "ByteCaption_XE_ministral",
+  "model_type": "MINISTRAL",
+  "corrupt_type": [
+    "rbbf"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "bit_error_rate": 0.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.19999999999555554,
+    "Bleu_2": 1.5811388300479551e-09,
+    "Bleu_3": 3.2931687799635614e-12,
+    "Bleu_4": 1.561969968421466e-13,
+    "ROUGE_L": 0.14570330326116024,
+    "CIDEr": 0.026882179955876856,
+    "METEOR": 0.054120477973855156,
+    "SPICE": 0.0,
+    "XE_Loss": null,
+    "Undecodable_Count": 10,
+    "Undecodable_Ratio": 1.0,
+    "Total_Samples": 10,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20251229_222820",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20251229_222820/captions_test_best.json",
+  "captions_count": 10
+}
