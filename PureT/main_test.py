@@ -51,7 +51,7 @@ except ImportError:
 """
 Example:
 python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 10 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
-cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_blip --test_samples 20 --resume -1 --disable_wandb
+cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_internvl --test_samples 10 --resume -1 --disable_wandb
 """
 
 def _project_root() -> str:

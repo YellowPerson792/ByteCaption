@@ -35,7 +35,6 @@ MODEL:
     HTTP_REFERER: ''
     APP_TITLE: 'ByteCaption'
     PROXY: 'http://127.0.0.1:7897'
-    # PROXY: ''
     TIMEOUT: 15
     MAX_TOKENS: 64
     TEMPERATURE: 0.0
@@ -68,5 +67,5 @@ INFERENCE:
   EVAL: 'CocoHFEvaluer'
   VAL_ANNFILE: './PureT/data/coco_karpathy/captions_validation.json'
   TEST_ANNFILE: './PureT/data/coco_karpathy/captions_test.json'
-  BEAM_SIZE: 1
+  BEAM_SIZE: 5
   GREEDY_DECODE: True

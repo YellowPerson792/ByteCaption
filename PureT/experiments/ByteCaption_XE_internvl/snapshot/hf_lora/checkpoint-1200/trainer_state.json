@@ -1,0 +1,758 @@
+{
+  "best_global_step": 1200,
+  "best_metric": 0.23886496947105512,
+  "best_model_checkpoint": "PureT/experiments/ByteCaption_XE_internvl/snapshot/hf_lora/checkpoint-1200",
+  "epoch": 0.08474052627397671,
+  "eval_steps": 200,
+  "global_step": 1200,
+  "is_hyper_param_search": false,
+  "is_local_process_zero": true,
+  "is_world_process_zero": true,
+  "log_history": [
+    {
+      "epoch": 7.061710522831393e-05,
+      "grad_norm": 6.168126583099365,
+      "learning_rate": 0.0001,
+      "loss": 3.4691,
+      "step": 1
+    },
+    {
+      "epoch": 0.0014123421045662786,
+      "grad_norm": 0.8526443243026733,
+      "learning_rate": 9.986582868441496e-05,
+      "loss": 1.6921,
+      "step": 20
+    },
+    {
+      "epoch": 0.0028246842091325572,
+      "grad_norm": 1.0719852447509766,
+      "learning_rate": 9.97245957206412e-05,
+      "loss": 1.4378,
+      "step": 40
+    },
+    {
+      "epoch": 0.004237026313698836,
+      "grad_norm": 1.019544005393982,
+      "learning_rate": 9.958336275686746e-05,
+      "loss": 1.4691,
+      "step": 60
+    },
+    {
+      "epoch": 0.0056493684182651145,
+      "grad_norm": 0.8681735396385193,
+      "learning_rate": 9.944212979309371e-05,
+      "loss": 1.4534,
+      "step": 80
+    },
+    {
+      "epoch": 0.0070617105228313925,
+      "grad_norm": 1.3232260942459106,
+      "learning_rate": 9.930089682931997e-05,
+      "loss": 1.442,
+      "step": 100
+    },
+    {
+      "epoch": 0.008474052627397671,
+      "grad_norm": 1.0360193252563477,
+      "learning_rate": 9.915966386554623e-05,
+      "loss": 1.4475,
+      "step": 120
+    },
+    {
+      "epoch": 0.00988639473196395,
+      "grad_norm": 0.8065745830535889,
+      "learning_rate": 9.901843090177247e-05,
+      "loss": 1.4403,
+      "step": 140
+    },
+    {
+      "epoch": 0.011298736836530229,
+      "grad_norm": 0.7675708532333374,
+      "learning_rate": 9.887719793799874e-05,
+      "loss": 1.3707,
+      "step": 160
+    },
+    {
+      "epoch": 0.012711078941096507,
+      "grad_norm": 0.8064260482788086,
+      "learning_rate": 9.873596497422499e-05,
+      "loss": 1.4301,
+      "step": 180
+    },
+    {
+      "epoch": 0.014123421045662785,
+      "grad_norm": 1.1245132684707642,
+      "learning_rate": 9.859473201045124e-05,
+      "loss": 1.4678,
+      "step": 200
+    },
+    {
+      "epoch": 0.014123421045662785,
+      "eval_Bleu_1": 0.8218700455900323,
+      "eval_Bleu_2": 0.6802260246033714,
+      "eval_Bleu_3": 0.5399906087415093,
+      "eval_Bleu_4": 0.42458158353232867,
+      "eval_CIDEr": 1.4997556938666627,
+      "eval_METEOR": 0.3019888789233318,
+      "eval_ROUGE_L": 0.6199629037702041,
+      "eval_SPICE": 0.22956463905291621,
+      "eval_Sample_Preview": [
+        {
+          "augmentation_idx": 0,
+          "generated": "A living room with a television and a dining room.",
+          "image_id": 1,
+          "reference": "A woman stands in the dining area at the table."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A brown bear is laying on the grass.",
+          "image_id": 2,
+          "reference": "A big burly grizzly bear is show with grass in the background."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A young boy crouching down on a field with a glove.",
+          "image_id": 3,
+          "reference": "A young boy getting ready to catch a baseball in a grass field."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A sandwich sitting on top of a table.",
+          "image_id": 4,
+          "reference": "A chicken sandwich in a wrapper near a cell phone."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A bathroom with a sink and a mirror.",
+          "image_id": 5,
+          "reference": "a bathroom wih a big mirror and a tv attached in the corner"
+        }
+      ],
+      "eval_Total_Samples": 200,
+      "eval_Undecodable_Count": 0,
+      "eval_Undecodable_Ratio": 0.0,
+      "eval_XE_Loss": null,
+      "step": 200
+    },
+    {
+      "epoch": 0.015535763150229065,
+      "grad_norm": 0.8634759783744812,
+      "learning_rate": 9.84534990466775e-05,
+      "loss": 1.441,
+      "step": 220
+    },
+    {
+      "epoch": 0.016948105254795343,
+      "grad_norm": 0.9521318674087524,
+      "learning_rate": 9.831226608290376e-05,
+      "loss": 1.4748,
+      "step": 240
+    },
+    {
+      "epoch": 0.018360447359361622,
+      "grad_norm": 0.763655424118042,
+      "learning_rate": 9.817103311913e-05,
+      "loss": 1.4542,
+      "step": 260
+    },
+    {
+      "epoch": 0.0197727894639279,
+      "grad_norm": 0.8615720272064209,
+      "learning_rate": 9.802980015535627e-05,
+      "loss": 1.4123,
+      "step": 280
+    },
+    {
+      "epoch": 0.021185131568494178,
+      "grad_norm": 0.7510824203491211,
+      "learning_rate": 9.788856719158253e-05,
+      "loss": 1.4536,
+      "step": 300
+    },
+    {
+      "epoch": 0.022597473673060458,
+      "grad_norm": 0.9044696688652039,
+      "learning_rate": 9.774733422780877e-05,
+      "loss": 1.4729,
+      "step": 320
+    },
+    {
+      "epoch": 0.024009815777626734,
+      "grad_norm": 0.9830892086029053,
+      "learning_rate": 9.760610126403503e-05,
+      "loss": 1.4535,
+      "step": 340
+    },
+    {
+      "epoch": 0.025422157882193014,
+      "grad_norm": 1.0450372695922852,
+      "learning_rate": 9.746486830026128e-05,
+      "loss": 1.4317,
+      "step": 360
+    },
+    {
+      "epoch": 0.026834499986759294,
+      "grad_norm": 0.7947292923927307,
+      "learning_rate": 9.732363533648754e-05,
+      "loss": 1.5101,
+      "step": 380
+    },
+    {
+      "epoch": 0.02824684209132557,
+      "grad_norm": 0.8541868329048157,
+      "learning_rate": 9.71824023727138e-05,
+      "loss": 1.3814,
+      "step": 400
+    },
+    {
+      "epoch": 0.02824684209132557,
+      "eval_Bleu_1": 0.8163580246909381,
+      "eval_Bleu_2": 0.6720951314554299,
+      "eval_Bleu_3": 0.5348581657143665,
+      "eval_Bleu_4": 0.42025878099826297,
+      "eval_CIDEr": 1.5034246839718834,
+      "eval_METEOR": 0.30826695435807266,
+      "eval_ROUGE_L": 0.6173456306791273,
+      "eval_SPICE": 0.23679500090597042,
+      "eval_Sample_Preview": [
+        {
+          "augmentation_idx": 0,
+          "generated": "A living room with a television and a dining room.",
+          "image_id": 1,
+          "reference": "A woman stands in the dining area at the table."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A brown bear laying on the grass in the sun.",
+          "image_id": 2,
+          "reference": "A big burly grizzly bear is show with grass in the background."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A young boy crouching down on a field with a glove.",
+          "image_id": 3,
+          "reference": "A young boy getting ready to catch a baseball in a grass field."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A sandwich with a bun and a piece of meat.",
+          "image_id": 4,
+          "reference": "A chicken sandwich in a wrapper near a cell phone."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A bathroom with a mirror, sink, and a television.",
+          "image_id": 5,
+          "reference": "a bathroom wih a big mirror and a tv attached in the corner"
+        }
+      ],
+      "eval_Total_Samples": 200,
+      "eval_Undecodable_Count": 0,
+      "eval_Undecodable_Ratio": 0.0,
+      "eval_XE_Loss": null,
+      "step": 400
+    },
+    {
+      "epoch": 0.02965918419589185,
+      "grad_norm": 1.0326982736587524,
+      "learning_rate": 9.704116940894005e-05,
+      "loss": 1.4727,
+      "step": 420
+    },
+    {
+      "epoch": 0.03107152630045813,
+      "grad_norm": 0.7516640424728394,
+      "learning_rate": 9.68999364451663e-05,
+      "loss": 1.4229,
+      "step": 440
+    },
+    {
+      "epoch": 0.03248386840502441,
+      "grad_norm": 0.7514557838439941,
+      "learning_rate": 9.675870348139256e-05,
+      "loss": 1.3945,
+      "step": 460
+    },
+    {
+      "epoch": 0.033896210509590685,
+      "grad_norm": 0.7651605606079102,
+      "learning_rate": 9.661747051761882e-05,
+      "loss": 1.4153,
+      "step": 480
+    },
+    {
+      "epoch": 0.03530855261415696,
+      "grad_norm": 0.898307740688324,
+      "learning_rate": 9.647623755384507e-05,
+      "loss": 1.3491,
+      "step": 500
+    },
+    {
+      "epoch": 0.036720894718723245,
+      "grad_norm": 0.8042995929718018,
+      "learning_rate": 9.633500459007133e-05,
+      "loss": 1.5,
+      "step": 520
+    },
+    {
+      "epoch": 0.03813323682328952,
+      "grad_norm": 0.7289939522743225,
+      "learning_rate": 9.619377162629759e-05,
+      "loss": 1.4343,
+      "step": 540
+    },
+    {
+      "epoch": 0.0395455789278558,
+      "grad_norm": 0.7685198783874512,
+      "learning_rate": 9.605253866252384e-05,
+      "loss": 1.4339,
+      "step": 560
+    },
+    {
+      "epoch": 0.04095792103242208,
+      "grad_norm": 0.7822473049163818,
+      "learning_rate": 9.59113056987501e-05,
+      "loss": 1.476,
+      "step": 580
+    },
+    {
+      "epoch": 0.042370263136988356,
+      "grad_norm": 0.9768433570861816,
+      "learning_rate": 9.577007273497634e-05,
+      "loss": 1.4341,
+      "step": 600
+    },
+    {
+      "epoch": 0.042370263136988356,
+      "eval_Bleu_1": 0.7765853658532798,
+      "eval_Bleu_2": 0.620430879259695,
+      "eval_Bleu_3": 0.4803216454519288,
+      "eval_Bleu_4": 0.3695341461348417,
+      "eval_CIDEr": 1.3980325934810793,
+      "eval_METEOR": 0.29244722746720847,
+      "eval_ROUGE_L": 0.5951759261825198,
+      "eval_SPICE": 0.22886527614827826,
+      "eval_Sample_Preview": [
+        {
+          "augmentation_idx": 0,
+          "generated": "A living room filled with furniture and a flat screen TV.",
+          "image_id": 1,
+          "reference": "A woman stands in the dining area at the table."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A brown bear laying on the grass in a field.",
+          "image_id": 2,
+          "reference": "A big burly grizzly bear is show with grass in the background."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A young boy crouching down on a grass field.",
+          "image_id": 3,
+          "reference": "A young boy getting ready to catch a baseball in a grass field."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A hamburger with a bun and a bun wrapper.",
+          "image_id": 4,
+          "reference": "A chicken sandwich in a wrapper near a cell phone."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A bathroom with a mirror, sink, and a television.",
+          "image_id": 5,
+          "reference": "a bathroom wih a big mirror and a tv attached in the corner"
+        }
+      ],
+      "eval_Total_Samples": 200,
+      "eval_Undecodable_Count": 0,
+      "eval_Undecodable_Ratio": 0.0,
+      "eval_XE_Loss": null,
+      "step": 600
+    },
+    {
+      "epoch": 0.04378260524155463,
+      "grad_norm": 0.8123417496681213,
+      "learning_rate": 9.562883977120261e-05,
+      "loss": 1.4385,
+      "step": 620
+    },
+    {
+      "epoch": 0.045194947346120916,
+      "grad_norm": 0.9546293616294861,
+      "learning_rate": 9.548760680742885e-05,
+      "loss": 1.4724,
+      "step": 640
+    },
+    {
+      "epoch": 0.04660728945068719,
+      "grad_norm": 0.8382259011268616,
+      "learning_rate": 9.534637384365511e-05,
+      "loss": 1.4695,
+      "step": 660
+    },
+    {
+      "epoch": 0.04801963155525347,
+      "grad_norm": 0.6793422698974609,
+      "learning_rate": 9.520514087988138e-05,
+      "loss": 1.4877,
+      "step": 680
+    },
+    {
+      "epoch": 0.04943197365981975,
+      "grad_norm": 0.8690952062606812,
+      "learning_rate": 9.506390791610762e-05,
+      "loss": 1.4156,
+      "step": 700
+    },
+    {
+      "epoch": 0.05084431576438603,
+      "grad_norm": 0.8772953152656555,
+      "learning_rate": 9.492267495233387e-05,
+      "loss": 1.3852,
+      "step": 720
+    },
+    {
+      "epoch": 0.052256657868952304,
+      "grad_norm": 0.8803642988204956,
+      "learning_rate": 9.478144198856014e-05,
+      "loss": 1.4619,
+      "step": 740
+    },
+    {
+      "epoch": 0.05366899997351859,
+      "grad_norm": 0.7593809366226196,
+      "learning_rate": 9.464020902478639e-05,
+      "loss": 1.4892,
+      "step": 760
+    },
+    {
+      "epoch": 0.05508134207808486,
+      "grad_norm": 0.8577835559844971,
+      "learning_rate": 9.449897606101264e-05,
+      "loss": 1.315,
+      "step": 780
+    },
+    {
+      "epoch": 0.05649368418265114,
+      "grad_norm": 0.6433749794960022,
+      "learning_rate": 9.43577430972389e-05,
+      "loss": 1.3869,
+      "step": 800
+    },
+    {
+      "epoch": 0.05649368418265114,
+      "eval_Bleu_1": 0.7909090909086914,
+      "eval_Bleu_2": 0.6497033187933019,
+      "eval_Bleu_3": 0.5111884460438134,
+      "eval_Bleu_4": 0.3959810742606482,
+      "eval_CIDEr": 1.4492670191564878,
+      "eval_METEOR": 0.29792118570344106,
+      "eval_ROUGE_L": 0.6062417689728401,
+      "eval_SPICE": 0.2301555383550334,
+      "eval_Sample_Preview": [
+        {
+          "augmentation_idx": 0,
+          "generated": "A living room with a television and a dining room with a table and chairs.",
+          "image_id": 1,
+          "reference": "A woman stands in the dining area at the table."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A brown bear is sitting in the grass.",
+          "image_id": 2,
+          "reference": "A big burly grizzly bear is show with grass in the background."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A young boy in a tie-dye shirt and shorts playing baseball.",
+          "image_id": 3,
+          "reference": "A young boy getting ready to catch a baseball in a grass field."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A half eaten hamburger sitting on a table.",
+          "image_id": 4,
+          "reference": "A chicken sandwich in a wrapper near a cell phone."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A bathroom with a mirror and two sinks.",
+          "image_id": 5,
+          "reference": "a bathroom wih a big mirror and a tv attached in the corner"
+        }
+      ],
+      "eval_Total_Samples": 200,
+      "eval_Undecodable_Count": 0,
+      "eval_Undecodable_Ratio": 0.0,
+      "eval_XE_Loss": null,
+      "step": 800
+    },
+    {
+      "epoch": 0.05790602628721742,
+      "grad_norm": 0.972979724407196,
+      "learning_rate": 9.421651013346515e-05,
+      "loss": 1.399,
+      "step": 820
+    },
+    {
+      "epoch": 0.0593183683917837,
+      "grad_norm": 0.8334614634513855,
+      "learning_rate": 9.407527716969141e-05,
+      "loss": 1.4291,
+      "step": 840
+    },
+    {
+      "epoch": 0.060730710496349975,
+      "grad_norm": 0.8500505089759827,
+      "learning_rate": 9.393404420591767e-05,
+      "loss": 1.4024,
+      "step": 860
+    },
+    {
+      "epoch": 0.06214305260091626,
+      "grad_norm": 0.8762972354888916,
+      "learning_rate": 9.379281124214392e-05,
+      "loss": 1.3773,
+      "step": 880
+    },
+    {
+      "epoch": 0.06355539470548253,
+      "grad_norm": 1.3535722494125366,
+      "learning_rate": 9.365157827837018e-05,
+      "loss": 1.6355,
+      "step": 900
+    },
+    {
+      "epoch": 0.06496773681004882,
+      "grad_norm": 0.8218612670898438,
+      "learning_rate": 9.351034531459642e-05,
+      "loss": 1.4817,
+      "step": 920
+    },
+    {
+      "epoch": 0.06638007891461509,
+      "grad_norm": 1.065142035484314,
+      "learning_rate": 9.336911235082269e-05,
+      "loss": 1.4205,
+      "step": 940
+    },
+    {
+      "epoch": 0.06779242101918137,
+      "grad_norm": 0.9092613458633423,
+      "learning_rate": 9.322787938704895e-05,
+      "loss": 1.3829,
+      "step": 960
+    },
+    {
+      "epoch": 0.06920476312374765,
+      "grad_norm": 0.8729127049446106,
+      "learning_rate": 9.308664642327519e-05,
+      "loss": 1.4133,
+      "step": 980
+    },
+    {
+      "epoch": 0.07061710522831392,
+      "grad_norm": 0.9963304400444031,
+      "learning_rate": 9.294541345950146e-05,
+      "loss": 1.4392,
+      "step": 1000
+    },
+    {
+      "epoch": 0.07061710522831392,
+      "eval_Bleu_1": 0.798717316230489,
+      "eval_Bleu_2": 0.6515337107761289,
+      "eval_Bleu_3": 0.5138423057065709,
+      "eval_Bleu_4": 0.40101316093716827,
+      "eval_CIDEr": 1.4763697829724864,
+      "eval_METEOR": 0.30759039370912966,
+      "eval_ROUGE_L": 0.6167124395586971,
+      "eval_SPICE": 0.2307315611627093,
+      "eval_Sample_Preview": [
+        {
+          "augmentation_idx": 0,
+          "generated": "A living room with a television and a fireplace.",
+          "image_id": 1,
+          "reference": "A woman stands in the dining area at the table."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A brown bear laying on the grass in the sun.",
+          "image_id": 2,
+          "reference": "A big burly grizzly bear is show with grass in the background."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A young boy in a tie-dye shirt and shorts playing baseball.",
+          "image_id": 3,
+          "reference": "A young boy getting ready to catch a baseball in a grass field."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A half eaten burger on a table with a knife.",
+          "image_id": 4,
+          "reference": "A chicken sandwich in a wrapper near a cell phone."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A bathroom with two sinks and a mirror.",
+          "image_id": 5,
+          "reference": "a bathroom wih a big mirror and a tv attached in the corner"
+        }
+      ],
+      "eval_Total_Samples": 200,
+      "eval_Undecodable_Count": 0,
+      "eval_Undecodable_Ratio": 0.0,
+      "eval_XE_Loss": null,
+      "step": 1000
+    },
+    {
+      "epoch": 0.0720294473328802,
+      "grad_norm": 0.9168207049369812,
+      "learning_rate": 9.280418049572771e-05,
+      "loss": 1.4214,
+      "step": 1020
+    },
+    {
+      "epoch": 0.07344178943744649,
+      "grad_norm": 1.1174567937850952,
+      "learning_rate": 9.266294753195396e-05,
+      "loss": 1.3815,
+      "step": 1040
+    },
+    {
+      "epoch": 0.07485413154201276,
+      "grad_norm": 0.811549723148346,
+      "learning_rate": 9.252171456818021e-05,
+      "loss": 1.3702,
+      "step": 1060
+    },
+    {
+      "epoch": 0.07626647364657904,
+      "grad_norm": 0.8972666263580322,
+      "learning_rate": 9.238048160440648e-05,
+      "loss": 1.4463,
+      "step": 1080
+    },
+    {
+      "epoch": 0.07767881575114532,
+      "grad_norm": 0.9339348673820496,
+      "learning_rate": 9.223924864063272e-05,
+      "loss": 1.3535,
+      "step": 1100
+    },
+    {
+      "epoch": 0.0790911578557116,
+      "grad_norm": 1.2154231071472168,
+      "learning_rate": 9.209801567685898e-05,
+      "loss": 1.4392,
+      "step": 1120
+    },
+    {
+      "epoch": 0.08050349996027788,
+      "grad_norm": 0.7582396864891052,
+      "learning_rate": 9.195678271308525e-05,
+      "loss": 1.3683,
+      "step": 1140
+    },
+    {
+      "epoch": 0.08191584206484416,
+      "grad_norm": 0.9524491429328918,
+      "learning_rate": 9.181554974931149e-05,
+      "loss": 1.4528,
+      "step": 1160
+    },
+    {
+      "epoch": 0.08332818416941043,
+      "grad_norm": 0.7199220061302185,
+      "learning_rate": 9.167431678553775e-05,
+      "loss": 1.3944,
+      "step": 1180
+    },
+    {
+      "epoch": 0.08474052627397671,
+      "grad_norm": 0.8109763860702515,
+      "learning_rate": 9.153308382176402e-05,
+      "loss": 1.3809,
+      "step": 1200
+    },
+    {
+      "epoch": 0.08474052627397671,
+      "eval_Bleu_1": 0.8079404466497231,
+      "eval_Bleu_2": 0.6638484684635676,
+      "eval_Bleu_3": 0.5272054503699778,
+      "eval_Bleu_4": 0.41556975337403707,
+      "eval_CIDEr": 1.4868905945966748,
+      "eval_METEOR": 0.30867001312686937,
+      "eval_ROUGE_L": 0.6198486206713278,
+      "eval_SPICE": 0.23886496947105512,
+      "eval_Sample_Preview": [
+        {
+          "augmentation_idx": 0,
+          "generated": "A living room with a television and a fireplace.",
+          "image_id": 1,
+          "reference": "A woman stands in the dining area at the table."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A brown bear laying on top of a green grass field.",
+          "image_id": 2,
+          "reference": "A big burly grizzly bear is show with grass in the background."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A young boy crouching down on a field with a glove.",
+          "image_id": 3,
+          "reference": "A young boy getting ready to catch a baseball in a grass field."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A sandwich wrapped in paper on a table.",
+          "image_id": 4,
+          "reference": "A chicken sandwich in a wrapper near a cell phone."
+        },
+        {
+          "augmentation_idx": 0,
+          "generated": "A bathroom with a mirror and two sinks.",
+          "image_id": 5,
+          "reference": "a bathroom wih a big mirror and a tv attached in the corner"
+        }
+      ],
+      "eval_Total_Samples": 200,
+      "eval_Undecodable_Count": 0,
+      "eval_Undecodable_Ratio": 0.0,
+      "eval_XE_Loss": null,
+      "step": 1200
+    }
+  ],
+  "logging_steps": 20,
+  "max_steps": 14161,
+  "num_input_tokens_seen": 0,
+  "num_train_epochs": 1,
+  "save_steps": 200,
+  "stateful_callbacks": {
+    "EarlyStoppingCallback": {
+      "args": {
+        "early_stopping_patience": 4,
+        "early_stopping_threshold": 0.0
+      },
+      "attributes": {
+        "early_stopping_patience_counter": 0
+      }
+    },
+    "TrainerControl": {
+      "args": {
+        "should_epoch_stop": false,
+        "should_evaluate": false,
+        "should_log": false,
+        "should_save": true,
+        "should_training_stop": false
+      },
+      "attributes": {}
+    }
+  },
+  "total_flos": 1.1263389875273318e+18,
+  "train_batch_size": 1,
+  "trial_name": null,
+  "trial_params": null
+}
