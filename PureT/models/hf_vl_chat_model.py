@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
 
 import torch
+from PIL import Image
 import torch.nn as nn
 from transformers import (
     AutoModel, 
@@ -17,7 +18,9 @@ from transformers import (
     AutoModelForVision2Seq,
     InternVLForConditionalGeneration,
     Glm4vForConditionalGeneration,
-    Mistral3ForConditionalGeneration
+    Mistral3ForConditionalGeneration,
+    MistralCommonBackend
+    
 )
 from peft import PeftModel
 
@@ -60,19 +63,23 @@ def _ensure_image_token(text: str, image_token: str) -> str:
     return image_token
 
 
-def _load_processor_with_fallback(processor_id: str, trust_remote_code: bool):
+def _load_processor_with_fallback(processor_id: str, trust_remote_code: bool, model_id_lower: str = ""):
+    # Special handling for Mistral/Ministral
+    if "mistral" in model_id_lower or "ministral" in model_id_lower:
+        try:
+            return MistralCommonBackend.from_pretrained(processor_id, trust_remote_code=trust_remote_code)
+        except Exception as exc:
+            print(f"[WARNING] Failed to load MistralCommonBackend: {exc}. Falling back to AutoProcessor.")
+    
     try:
         return AutoProcessor.from_pretrained(processor_id, trust_remote_code=trust_remote_code)
     except Exception as exc:
-        msg = str(exc)
-        if "start_image_token" not in msg and "start_image_token" not in repr(exc):
-            raise
-        try:
+        # Retry with use_fast=False for tokenizer issues
+        if "start_image_token" in str(exc):
             return AutoProcessor.from_pretrained(
                 processor_id, trust_remote_code=trust_remote_code, use_fast=False
             )
-        except TypeError:
-            return AutoProcessor.from_pretrained(processor_id, trust_remote_code=trust_remote_code)
+        raise
 
 
 class HFVLChatModel(nn.Module):
@@ -119,7 +126,8 @@ class HFVLChatModel(nn.Module):
 
         with _hf_env(mirror, disable_proxy):
             processor_load_from = self._resolve_processor_source()
-            self.processor = _load_processor_with_fallback(processor_load_from, trust_remote_code=self.trust_remote_code)
+            model_id_lower = self.model_id.lower()
+            self.processor = _load_processor_with_fallback(processor_load_from, trust_remote_code=self.trust_remote_code, model_id_lower=model_id_lower)
             self.model = self._load_model()
 
         tokenizer = getattr(self.processor, "tokenizer", None)
@@ -177,6 +185,9 @@ class HFVLChatModel(nn.Module):
         except Exception as e:
             # If model input preparation fails (e.g., due to extreme aspect ratio),
             # return dummy captions for all images
+            print(f"[MINISTRAL] WARNING: _prepare_model_inputs failed: {type(e).__name__}: {e}")
+            import traceback
+            traceback.print_exc()
             return [dummy_caption for _ in range(len(images))], None
 
         gen_kwargs = dict(self.generation_kwargs)
@@ -358,7 +369,6 @@ class HFVLChatModel(nn.Module):
         return inputs.to(self.device)
 
     def _image_to_data_url(self, image: any) -> str:
-        import PIL.Image as Image
         if isinstance(image, torch.Tensor):
             # Inference path should pass PIL; tensor not supported here
             raise ValueError("Tensor images are not supported in chat-template path; pass PIL or path.")
