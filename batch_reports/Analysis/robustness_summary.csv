@@ -1,0 +1,10 @@
+model,robustness_score
+ByteCaption,0.819679
+BLIP,0.274766
+GIT,0.255279
+Qwen3-VL-8B,0.318155
+GPT-5.1,0.341048
+Gemini-2.5-flash,0.320715
+Claude-Haiku-4.5,0.259745
+InternVL3.5-8B,0.326722
+GLM,0.327096

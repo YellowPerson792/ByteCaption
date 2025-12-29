@@ -663,7 +663,7 @@ class MinistralTrainerCollator:
             if truncation and max_length is not None:
                 full_inputs_kwargs["max_length"] = max_length
             full_inputs = self._safe_apply_chat_template(full_messages, **full_inputs_kwargs)
-            # Ensure pixel_values dtype matches vision tower (bf16) to avoid double vs bf16 mismatch
+            # Ensure pixel_values dtype matches vision tower (bf16) to avoid double vs bf16 mismatch.............................................................................................................................................
             pixel_values = full_inputs.get("pixel_values")
             if isinstance(pixel_values, torch.Tensor):
                 full_inputs["pixel_values"] = pixel_values.to(dtype=torch.bfloat16)
