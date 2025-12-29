@@ -1,0 +1,112 @@
+[
+  {
+    "image_id": 1,
+    "caption": "A pile of shoes and a dog on a shelf",
+    "references": [
+      "This wire metal rack holds several pairs of shoes and sandals",
+      "A dog sleeping on a show rack in the shoes.",
+      "Various slides and other footwear rest in a metal basket outdoors.",
+      "A small dog is curled up on top of the shoes",
+      "a shoe rack with some shoes and a dog sleeping on them"
+    ]
+  },
+  {
+    "image_id": 2,
+    "caption": "A traffic light hanging over a street with a tall building in the background",
+    "references": [
+      "A traffic light over a street surrounded by tall buildings.",
+      "A black and white shot of a city with a tall skyscraper in the distance.",
+      "some buildings a traffic light and a cloudy sky",
+      "A black and white photograph of a stop light from the street.",
+      "A traffic light and street sign surrounded by buildings."
+    ]
+  },
+  {
+    "image_id": 3,
+    "caption": "A toilet with a view of the outside through the bowl",
+    "references": [
+      "A toilet seat sits on top of a hole in the ground.",
+      "A toilet lid on a hole in a floor leading to the outside.",
+      "a toilet seat over a hole in a bath room",
+      "a toilet that has a big deep hole in it",
+      "Toilet with indefinite end because of bright light"
+    ]
+  },
+  {
+    "image_id": 4,
+    "caption": "A living room with a couch and a coffee table",
+    "references": [
+      "A coffee table sits in the middle of a living room.",
+      "a living room with two couches and colorful walls",
+      "A well furnished living room with couches and a wooden table.",
+      "A living room is themed in southwestern and brightly colored.",
+      "The living room has a wood and glass coffee table, an area rug, a pillow covered futon, and a love seat in it."
+    ]
+  },
+  {
+    "image_id": 5,
+    "caption": "A basket of food sitting on top of a table",
+    "references": [
+      "a sandwich in a plastic food basket on a table",
+      "Sandwich and a lollipop in a bright orange serving tray sitting on a table.",
+      "Two plastic baskets filled with food sitting on top of a table.",
+      "On the table are a sandwich and a sucker.",
+      "A sandwich sitting in a red basket cut in half"
+    ]
+  },
+  {
+    "image_id": 6,
+    "caption": "A group of people riding on the back of an elephant",
+    "references": [
+      "An elephant with a man and three children on its back drinking water in the jungle.",
+      "A man riding on and elephants neck and guiding it while children ride on a seat behind him.",
+      "a group of people ride atop of an elephant",
+      "A guide and three people riding an elephant.",
+      "A few people riding on an elephants back."
+    ]
+  },
+  {
+    "image_id": 7,
+    "caption": "A man wearing a black shirt and a tie",
+    "references": [
+      "A young man wearing black attire and a flowered tie is standing and smiling.",
+      "A man with glasses and his eyes closed dressed in a black shirt and a necktie.",
+      "A man in a green tie with his eyes closed.",
+      "Smiling man wearing black shirt and pale green tie.",
+      "A person that is dressed up very nicely."
+    ]
+  },
+  {
+    "image_id": 8,
+    "caption": "A woman standing in front of a table with a cake",
+    "references": [
+      "A woman standing over a sheet cake sitting on top of a table.",
+      "A LADY IS HAVING A CELEBRATION AND LOOKING AT HER CAKE",
+      "A lady in a hat standing in front of a big cake.",
+      "A woman wearing a hat while looking at a cake.",
+      "A woman in a silly hat cuts the cake."
+    ]
+  },
+  {
+    "image_id": 9,
+    "caption": "A baby sitting at a table with a cake in front of her",
+    "references": [
+      "A baby in high chair with bib and cake.",
+      "Two babies with a birthday cake with one candle.",
+      "a close up of two children at a table with a cake",
+      "a little boy looking at a birthday cake with white frosting",
+      "The children are getting ready to enjoy a piece of cake."
+    ]
+  },
+  {
+    "image_id": 10,
+    "caption": "A group of children riding in a red bumper car",
+    "references": [
+      "some children are riding on a mini orange train",
+      "Several children are riding on a toy train ride.",
+      "The children are riding on an indoor train.",
+      "Several children on a small  indoor kiddie train.",
+      "A group of children ride on an indoor train."
+    ]
+  }
+]

@@ -1,0 +1,67 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_internvl",
+  "model_name": "ByteCaption_XE_internvl",
+  "model_type": "INTERNVL",
+  "corrupt_type": [
+    "rbbf"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "bit_error_rate": 0.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.8073394495338776,
+    "Bleu_2": 0.6817857466040088,
+    "Bleu_3": 0.5508312898848756,
+    "Bleu_4": 0.42206563574577194,
+    "ROUGE_L": 0.5849750732850214,
+    "CIDEr": 1.3636468546757246,
+    "METEOR": 0.30111696763159546,
+    "SPICE": 0.2566158689470884,
+    "XE_Loss": null,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 10,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "A pile of shoes and a dog on a shelf.",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "A traffic light hanging over a street with a tall building in the background.",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "A toilet with a view of the outside through the bowl.",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "A living room with a couch and a coffee table.",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "A basket of food sitting on top of a table.",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20251229_230512",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20251229_230512/captions_test_best.json",
+  "captions_count": 10
+}
