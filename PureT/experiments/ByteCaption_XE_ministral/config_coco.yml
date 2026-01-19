@@ -36,7 +36,7 @@ MODEL:
   OPENROUTER:
     SYSTEM_PROMPT: 'You are a vision captioning model.'
     USER_PROMPT: 'You are given a possibly corrupted JPEG image. Output a short COCO-style caption. Use 5-12 words. Output only the caption with no extra text.'
-    PLACEHOLDER: 'this is a dummy caption for an undecodable image'
+    PLACEHOLDER: 'A person standing in a room.'
 
 ############################ EVALUATION ############################
 SCORER:

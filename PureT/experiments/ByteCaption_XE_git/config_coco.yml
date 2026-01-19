@@ -42,7 +42,7 @@ MODEL:
   HF:
     MODEL_ID: 'microsoft/git-base-coco'
     PROCESSOR_ID: 'microsoft/git-base-coco'
-    LOCAL_DIR: 'git-base-coco'
+    LOCAL_DIR: 'git-base-coco/models--microsoft--git-base-coco/snapshots/a13141da42abd4a8cbf283601a8104265f537cee'
     DEVICE: 'cuda'
     SAFE_SERIALIZATION: True
     TRUST_REMOTE_CODE: False
@@ -50,8 +50,8 @@ MODEL:
     DISABLE_PROXY: True
     ALLOW_UNSAFE_TORCH_LOAD: True
     GENERATION:
-      MAX_LENGTH: 50
-      NUM_BEAMS: 3
+      MAX_NEW_TOKENS: 30
+      # NUM_BEAMS: 4
 
   SEQ_LEN: 17                               # include <EOS>/<BOS>
   VOCAB_SIZE: 9487                          # exclude <EOS>/<BOS> - COCO vocabulary size
@@ -169,5 +169,5 @@ INFERENCE:
   EVAL: 'CocoHFEvaluer'                              # Use original coco evaluator with JSON files
   VAL_ANNFILE: './PureT/data/coco_karpathy/captions_validation.json'
   TEST_ANNFILE: './PureT/data/coco_karpathy/captions_test.json'
-  BEAM_SIZE: 5
-  GREEDY_DECODE: True
+  BEAM_SIZE: 1
+  # GREEDY_DECODE: True

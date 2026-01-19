@@ -1,4 +1,24 @@
-# Note: please mirror changes of this file to .dockerignore.
+# Hugging Face local snapshots and locks
+blip-image-captioning-base/models--*/
+blip-image-captioning-base/.locks/
+git-base-coco/models--*/
+git-base-coco/.locks/
+Ministral-3-8B-Base-2512/**
+
+# Eval outputs and logs
+eval_results/
+batch_reports/
+wandb/
+PureT/experiments/*/OfflineTest_log*.txt
+PureT/experiments/*/result/
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Misc
+.DS_Store
+*.log# Note: please mirror changes of this file to .dockerignore.
 
 .vscode/
 .coverage
