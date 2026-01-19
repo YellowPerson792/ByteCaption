@@ -1,0 +1,73 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_openrouter",
+  "model_name": "ByteCaption_XE_openrouter",
+  "model_type": "OPENROUTER",
+  "corrupt_type": [
+    "rbbf",
+    "rbsl"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "bit_error_rate": 0.0
+    },
+    "rbsl": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.5840895306701335,
+    "Bleu_2": 0.3861069446440789,
+    "Bleu_3": 0.2630981121586573,
+    "Bleu_4": 0.1848683721579597,
+    "ROUGE_L": 0.4312004079154752,
+    "CIDEr": 0.8501111954557707,
+    "METEOR": 0.23976761465174426,
+    "SPICE": 0.22078609146247846,
+    "XE_Loss": null,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 20,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "Small curly dog sleeping among shoes on rack",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "Silhouetted city street with distant tower at sunset",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "Old toilet seat with view of ground below",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "cozy living room with couches and coffee table",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "Sandwich baskets on outdoor cafe table in sunlight",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260119_221517",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20260119_221517/rbbf_rbsl_S0/captions_test_best.json",
+  "captions_count": 20
+}

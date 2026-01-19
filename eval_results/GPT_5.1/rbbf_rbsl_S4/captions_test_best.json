@@ -1,0 +1,482 @@
+[
+  {
+    "image_id": 1,
+    "caption": "A person standing in a room",
+    "references": [
+      "This wire metal rack holds several pairs of shoes and sandals",
+      "A dog sleeping on a show rack in the shoes.",
+      "Various slides and other footwear rest in a metal basket outdoors.",
+      "A small dog is curled up on top of the shoes",
+      "a shoe rack with some shoes and a dog sleeping on them"
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 1,
+    "caption": "A person standing in a room",
+    "references": [
+      "This wire metal rack holds several pairs of shoes and sandals",
+      "A dog sleeping on a show rack in the shoes.",
+      "Various slides and other footwear rest in a metal basket outdoors.",
+      "A small dog is curled up on top of the shoes",
+      "a shoe rack with some shoes and a dog sleeping on them"
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 2,
+    "caption": "A person standing in a room",
+    "references": [
+      "A traffic light over a street surrounded by tall buildings.",
+      "A black and white shot of a city with a tall skyscraper in the distance.",
+      "some buildings a traffic light and a cloudy sky",
+      "A black and white photograph of a stop light from the street.",
+      "A traffic light and street sign surrounded by buildings."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 2,
+    "caption": "A person standing in a room",
+    "references": [
+      "A traffic light over a street surrounded by tall buildings.",
+      "A black and white shot of a city with a tall skyscraper in the distance.",
+      "some buildings a traffic light and a cloudy sky",
+      "A black and white photograph of a stop light from the street.",
+      "A traffic light and street sign surrounded by buildings."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 3,
+    "caption": "A person standing in a room",
+    "references": [
+      "A toilet seat sits on top of a hole in the ground.",
+      "A toilet lid on a hole in a floor leading to the outside.",
+      "a toilet seat over a hole in a bath room",
+      "a toilet that has a big deep hole in it",
+      "Toilet with indefinite end because of bright light"
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 3,
+    "caption": "A person standing in a room",
+    "references": [
+      "A toilet seat sits on top of a hole in the ground.",
+      "A toilet lid on a hole in a floor leading to the outside.",
+      "a toilet seat over a hole in a bath room",
+      "a toilet that has a big deep hole in it",
+      "Toilet with indefinite end because of bright light"
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 4,
+    "caption": "A person standing in a room",
+    "references": [
+      "A coffee table sits in the middle of a living room.",
+      "a living room with two couches and colorful walls",
+      "A well furnished living room with couches and a wooden table.",
+      "A living room is themed in southwestern and brightly colored.",
+      "The living room has a wood and glass coffee table, an area rug, a pillow covered futon, and a love seat in it."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 4,
+    "caption": "A person standing in a room",
+    "references": [
+      "A coffee table sits in the middle of a living room.",
+      "a living room with two couches and colorful walls",
+      "A well furnished living room with couches and a wooden table.",
+      "A living room is themed in southwestern and brightly colored.",
+      "The living room has a wood and glass coffee table, an area rug, a pillow covered futon, and a love seat in it."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 5,
+    "caption": "A person standing in a room",
+    "references": [
+      "a sandwich in a plastic food basket on a table",
+      "Sandwich and a lollipop in a bright orange serving tray sitting on a table.",
+      "Two plastic baskets filled with food sitting on top of a table.",
+      "On the table are a sandwich and a sucker.",
+      "A sandwich sitting in a red basket cut in half"
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 5,
+    "caption": "A person standing in a room",
+    "references": [
+      "a sandwich in a plastic food basket on a table",
+      "Sandwich and a lollipop in a bright orange serving tray sitting on a table.",
+      "Two plastic baskets filled with food sitting on top of a table.",
+      "On the table are a sandwich and a sucker.",
+      "A sandwich sitting in a red basket cut in half"
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 6,
+    "caption": "A person standing in a room",
+    "references": [
+      "An elephant with a man and three children on its back drinking water in the jungle.",
+      "A man riding on and elephants neck and guiding it while children ride on a seat behind him.",
+      "a group of people ride atop of an elephant",
+      "A guide and three people riding an elephant.",
+      "A few people riding on an elephants back."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 6,
+    "caption": "A person standing in a room",
+    "references": [
+      "An elephant with a man and three children on its back drinking water in the jungle.",
+      "A man riding on and elephants neck and guiding it while children ride on a seat behind him.",
+      "a group of people ride atop of an elephant",
+      "A guide and three people riding an elephant.",
+      "A few people riding on an elephants back."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 7,
+    "caption": "A person standing in a room",
+    "references": [
+      "A young man wearing black attire and a flowered tie is standing and smiling.",
+      "A man with glasses and his eyes closed dressed in a black shirt and a necktie.",
+      "A man in a green tie with his eyes closed.",
+      "Smiling man wearing black shirt and pale green tie.",
+      "A person that is dressed up very nicely."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 7,
+    "caption": "A person standing in a room",
+    "references": [
+      "A young man wearing black attire and a flowered tie is standing and smiling.",
+      "A man with glasses and his eyes closed dressed in a black shirt and a necktie.",
+      "A man in a green tie with his eyes closed.",
+      "Smiling man wearing black shirt and pale green tie.",
+      "A person that is dressed up very nicely."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 8,
+    "caption": "A person standing in a room",
+    "references": [
+      "A woman standing over a sheet cake sitting on top of a table.",
+      "A LADY IS HAVING A CELEBRATION AND LOOKING AT HER CAKE",
+      "A lady in a hat standing in front of a big cake.",
+      "A woman wearing a hat while looking at a cake.",
+      "A woman in a silly hat cuts the cake."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 8,
+    "caption": "A person standing in a room",
+    "references": [
+      "A woman standing over a sheet cake sitting on top of a table.",
+      "A LADY IS HAVING A CELEBRATION AND LOOKING AT HER CAKE",
+      "A lady in a hat standing in front of a big cake.",
+      "A woman wearing a hat while looking at a cake.",
+      "A woman in a silly hat cuts the cake."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 9,
+    "caption": "A person standing in a room",
+    "references": [
+      "A baby in high chair with bib and cake.",
+      "Two babies with a birthday cake with one candle.",
+      "a close up of two children at a table with a cake",
+      "a little boy looking at a birthday cake with white frosting",
+      "The children are getting ready to enjoy a piece of cake."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 9,
+    "caption": "A person standing in a room",
+    "references": [
+      "A baby in high chair with bib and cake.",
+      "Two babies with a birthday cake with one candle.",
+      "a close up of two children at a table with a cake",
+      "a little boy looking at a birthday cake with white frosting",
+      "The children are getting ready to enjoy a piece of cake."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 10,
+    "caption": "A person standing in a room",
+    "references": [
+      "some children are riding on a mini orange train",
+      "Several children are riding on a toy train ride.",
+      "The children are riding on an indoor train.",
+      "Several children on a small  indoor kiddie train.",
+      "A group of children ride on an indoor train."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 10,
+    "caption": "A person standing in a room",
+    "references": [
+      "some children are riding on a mini orange train",
+      "Several children are riding on a toy train ride.",
+      "The children are riding on an indoor train.",
+      "Several children on a small  indoor kiddie train.",
+      "A group of children ride on an indoor train."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 11,
+    "caption": "A person standing in a room",
+    "references": [
+      "A green vase filed with red roses sitting on top of table.",
+      "A bouquet of roses in a red walled road.",
+      "a close up of a vase with flowers with a dark background",
+      "The flowers are inside a colorful green vase.",
+      "A green vase with several red roses in it."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 11,
+    "caption": "A person standing in a room",
+    "references": [
+      "A green vase filed with red roses sitting on top of table.",
+      "A bouquet of roses in a red walled road.",
+      "a close up of a vase with flowers with a dark background",
+      "The flowers are inside a colorful green vase.",
+      "A green vase with several red roses in it."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 12,
+    "caption": "A person standing in a room",
+    "references": [
+      "A meal is lying on a plate on a table.",
+      "part of a sandwich sitting on a table",
+      "A plate with a burger that is halfway eaten.",
+      "A half eaten meal sitting on a plate.",
+      "A sandwich with a bite taken on a plate."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 12,
+    "caption": "A person standing in a room",
+    "references": [
+      "A meal is lying on a plate on a table.",
+      "part of a sandwich sitting on a table",
+      "A plate with a burger that is halfway eaten.",
+      "A half eaten meal sitting on a plate.",
+      "A sandwich with a bite taken on a plate."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 13,
+    "caption": "A person standing in a room",
+    "references": [
+      "A giraffe bending over while standing on green grass.",
+      "A baby giraffe bending over to graze on the grass.",
+      "A single young giraffe eats from a grassy field.",
+      "The giraffe is leaning down to eat the grass.",
+      "A giraffe bends down to graze on some grass."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 13,
+    "caption": "A person standing in a room",
+    "references": [
+      "A giraffe bending over while standing on green grass.",
+      "A baby giraffe bending over to graze on the grass.",
+      "A single young giraffe eats from a grassy field.",
+      "The giraffe is leaning down to eat the grass.",
+      "A giraffe bends down to graze on some grass."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 14,
+    "caption": "A person standing in a room",
+    "references": [
+      "A kitchen scene with an oven and a stove.",
+      "A desk with drawer on which daily use item are kept.",
+      "A teddy bear is sitting in a cooking pot on a stove.",
+      "A vintage stove and washing tub on a brick floor.",
+      "There is an old stove with old pots on the burners"
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 14,
+    "caption": "A person standing in a room",
+    "references": [
+      "A kitchen scene with an oven and a stove.",
+      "A desk with drawer on which daily use item are kept.",
+      "A teddy bear is sitting in a cooking pot on a stove.",
+      "A vintage stove and washing tub on a brick floor.",
+      "There is an old stove with old pots on the burners"
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 15,
+    "caption": "A person standing in a room",
+    "references": [
+      "A load of trash or work supplies in a dumpster outside.",
+      "A utility truck on a street next to a building.",
+      "An overhead view show the contents of a trash dumpster.",
+      "A cow stands in the back of a large truck.",
+      "A cow sits in a truck with hay barrels in it ."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 15,
+    "caption": "A person standing in a room",
+    "references": [
+      "A load of trash or work supplies in a dumpster outside.",
+      "A utility truck on a street next to a building.",
+      "An overhead view show the contents of a trash dumpster.",
+      "A cow stands in the back of a large truck.",
+      "A cow sits in a truck with hay barrels in it ."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 16,
+    "caption": "A person standing in a room",
+    "references": [
+      "Two smiling young people playing a game of Wii.",
+      "A man and woman playing a video game together.",
+      "A man and woman in a living room play against each other on a Wii.",
+      "Two people are playing video games in a living room.",
+      "Two people play a game on a Wii."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 16,
+    "caption": "A person standing in a room",
+    "references": [
+      "Two smiling young people playing a game of Wii.",
+      "A man and woman playing a video game together.",
+      "A man and woman in a living room play against each other on a Wii.",
+      "Two people are playing video games in a living room.",
+      "Two people play a game on a Wii."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 17,
+    "caption": "A person standing in a room",
+    "references": [
+      "A man is holding a cell phone in front of a mountain.",
+      "An older man standing on top of a snow covered slope.",
+      "A man looking at a vast mountain landscape.",
+      "a man looks out into the mountains",
+      "A man takes a picture of snowy mountains with his cell phone."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 17,
+    "caption": "A person standing in a room",
+    "references": [
+      "A man is holding a cell phone in front of a mountain.",
+      "An older man standing on top of a snow covered slope.",
+      "A man looking at a vast mountain landscape.",
+      "a man looks out into the mountains",
+      "A man takes a picture of snowy mountains with his cell phone."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 18,
+    "caption": "A person standing in a room",
+    "references": [
+      "A boat sailing on top of a body of water.",
+      "A sailboat is in the distance with a buoy ball nearby.",
+      "an ocean with a sail boat sitting out in it",
+      "ocean showing a boat sailing on the waters",
+      "A boat in the distance on a clear lake."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 18,
+    "caption": "A person standing in a room",
+    "references": [
+      "A boat sailing on top of a body of water.",
+      "A sailboat is in the distance with a buoy ball nearby.",
+      "an ocean with a sail boat sitting out in it",
+      "ocean showing a boat sailing on the waters",
+      "A boat in the distance on a clear lake."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 19,
+    "caption": "A person standing in a room",
+    "references": [
+      "A man riding a snow board on top of a snow covered slope.",
+      "A boy on a snowboard at the top of a hill.",
+      "A young boy is riding a snowboard downhill",
+      "A picture of a young boy standing on a snowboard.",
+      "A young boy is attempting to slide down a slope."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 19,
+    "caption": "A person standing in a room",
+    "references": [
+      "A man riding a snow board on top of a snow covered slope.",
+      "A boy on a snowboard at the top of a hill.",
+      "A young boy is riding a snowboard downhill",
+      "A picture of a young boy standing on a snowboard.",
+      "A young boy is attempting to slide down a slope."
+    ],
+    "corruption": "rbsl_S4"
+  },
+  {
+    "image_id": 20,
+    "caption": "A person standing in a room",
+    "references": [
+      "Two very attractive women enjoy a glass of white wine.",
+      "A woman and her friend sitting on a table drinking wine.",
+      "Two women sitting at a table looking at another person with a shocked look.",
+      "Two women sitting at a table looking towards the head of it with a glass of wine in front of one",
+      "Two women sit at a table with wine glasses and papers."
+    ],
+    "corruption": "rbbf_S4"
+  },
+  {
+    "image_id": 20,
+    "caption": "A person standing in a room",
+    "references": [
+      "Two very attractive women enjoy a glass of white wine.",
+      "A woman and her friend sitting on a table drinking wine.",
+      "Two women sitting at a table looking at another person with a shocked look.",
+      "Two women sitting at a table looking towards the head of it with a glass of wine in front of one",
+      "Two women sit at a table with wine glasses and papers."
+    ],
+    "corruption": "rbsl_S4"
+  }
+]

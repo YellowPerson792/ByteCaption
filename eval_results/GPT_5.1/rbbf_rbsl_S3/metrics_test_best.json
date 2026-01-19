@@ -1,0 +1,73 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_openrouter",
+  "model_name": "ByteCaption_XE_openrouter",
+  "model_type": "OPENROUTER",
+  "corrupt_type": [
+    "rbbf",
+    "rbsl"
+  ],
+  "corrupt_level": "S3",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0005,
+      "burst_lambda": 200.0,
+      "bit_error_rate": 0.36
+    },
+    "rbsl": {
+      "trigger_prob": 0.002,
+      "burst_lambda": 360.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.34156171905569044,
+    "Bleu_2": 0.15685632238066252,
+    "Bleu_3": 5.834243494583868e-07,
+    "Bleu_4": 1.2021659991328483e-09,
+    "ROUGE_L": 0.3022381775554523,
+    "CIDEr": 0.06231465059566057,
+    "METEOR": 0.08639530997985678,
+    "SPICE": 0.033381823698540335,
+    "XE_Loss": null,
+    "Undecodable_Count": 31,
+    "Undecodable_Ratio": 0.775,
+    "Total_Samples": 40,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "A person standing in a room.",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 1,
+        "generated": "A person standing in a room.",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 1
+      },
+      {
+        "image_id": 2,
+        "generated": "A person standing in a room.",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "A person standing in a room.",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 1
+      },
+      {
+        "image_id": 3,
+        "generated": "A person standing in a room.",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260119_221517",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20260119_221517/rbbf_rbsl_S3/captions_test_best.json",
+  "captions_count": 40
+}

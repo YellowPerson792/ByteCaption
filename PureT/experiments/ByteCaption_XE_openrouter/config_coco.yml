@@ -24,11 +24,11 @@ MODEL:
   TYPE: 'OPENROUTER'
   OPENROUTER:
     # MODEL_ID: 'google/gemini-2.5-flash'
-    # MODEL_ID: 'openai/gpt-5.1'
+    MODEL_ID: 'openai/gpt-5.1'
     # MODEL_ID: 'qwen/qwen3-vl-32b-instruct'
     # MODEL_ID: 'x-ai/grok-4'
     # MODEL_ID: 'mistralai/mistral-large-2512'
-    MODEL_ID: 'anthropic/claude-haiku-4.5'
+    # MODEL_ID: 'anthropic/claude-haiku-4.5'
     API_BASE: 'https://openrouter.ai/api/v1/chat/completions'
     API_KEY: ''
     API_KEY_PATH: 'openrouter_api'
@@ -46,7 +46,7 @@ MODEL:
     # USER_PROMPT: 'You are given a possibly corrupted JPEG image. If you can decode it, output a short COCO-style caption. If you cannot decode it, output exactly: this is a dummy caption for an undecodable image Output only the caption with no extra text.'
     IMAGE_DETAIL: 'low'
     REASONING: { enabled: false }
-    PLACEHOLDER: 'this is a dummy caption for an undecodable image'
+    PLACEHOLDER: 'A person standing in a room.'
     RETRY:
       MAX_ATTEMPTS: 5
       BACKOFF_BASE: 1.2
@@ -68,4 +68,4 @@ INFERENCE:
   VAL_ANNFILE: './PureT/data/coco_karpathy/captions_validation.json'
   TEST_ANNFILE: './PureT/data/coco_karpathy/captions_test.json'
   BEAM_SIZE: 5
-  GREEDY_DECODE: True
+  # GREEDY_DECODE: True
