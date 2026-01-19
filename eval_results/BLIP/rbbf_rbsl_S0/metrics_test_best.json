@@ -1,0 +1,73 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+  "model_name": "ByteCaption_XE_blip",
+  "model_type": "BLIP",
+  "corrupt_type": [
+    "rbbf",
+    "rbsl"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "bit_error_rate": 0.0
+    },
+    "rbsl": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.7560955237225395,
+    "Bleu_2": 0.5772575248496381,
+    "Bleu_3": 0.44074152014862117,
+    "Bleu_4": 0.32924677097137073,
+    "ROUGE_L": 0.5031540327877436,
+    "CIDEr": 0.9751189427118543,
+    "METEOR": 0.2495893920999898,
+    "SPICE": 0.19784099274466108,
+    "XE_Loss": null,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 20,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "a dog is sitting in a basket filled with shoes",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a black and white photo of a city street",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "a white toilet bowl",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "a living room with couches and a coffee table",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "a table with a basket of food on it",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260119_184113",
+  "references_annfile": "D:\\MLLMs\\ByteCaption\\PureT\\data\\coco_karpathy\\captions_test.json",
+  "captions_file": "eval_results\\20260119_184113\\rbbf_rbsl_S0\\captions_test_best.json",
+  "captions_count": 20
+}

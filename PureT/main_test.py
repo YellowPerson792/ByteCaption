@@ -50,7 +50,7 @@ except ImportError:
 
 """
 Example:
-python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_openrouter --test_samples 10 --corrupt_types rbbf --corrupt_level S0 --resume -1 --disable_wandb
+python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_blip --test_samples 20 --corrupt_types rbbf rbsl --corrupt_level S1 --resume -1 --disable_wandb --save_eval_images 40
 cd /root/autodl-tmp/ByteCaption && PYTHONPATH=/root/autodl-tmp/ByteCaption python PureT/main_test.py --folder PureT/experiments/ByteCaption_XE_internvl --test_samples 10 --resume -1 --disable_wandb
 """
 
@@ -116,7 +116,7 @@ class Tester(object):
 
         self.corrupt_level = jpeg_corruption.normalize_level(getattr(args, "corrupt_level", "S0"))
         self.corrupt_types = getattr(args, "corrupt_types", [])
-        # 将 CLI 设置同步到 cfg，供数据加载器读取
+        # 将 CLI 设置同步到 cfg,供数据加载器读取
         cfg.CORRUPTION.BYTE_STREAM_LEVEL = self.corrupt_level
         cfg.CORRUPTION.BYTE_STREAM_TYPES = self.corrupt_types
 
@@ -473,8 +473,8 @@ def parse_args():
     parser.add_argument("--test_samples", type=int, default=0, help="Number of test samples to use (0 for all)")
     parser.add_argument("--val_samples", type=int, default=None, help="(Alias) Number of test samples to use (0 for all)")
     level_choices = sorted(set(jpeg_corruption.available_levels() + ["none", "light", "medium", "heavy"]))
-    parser.add_argument("--corrupt_level", type=str, default="S0", choices=level_choices,
-                        help="JPEG bitstream corruption severity (S0-S5/M0-M1; legacy none/light/medium/heavy aliases)")
+    parser.add_argument("--corrupt_level", type=str, nargs="+", default=["S0"], choices=level_choices,
+                        help="JPEG bitstream corruption severity (S0-S5/M0-M1; legacy none/light/medium/heavy aliases). Support multiple levels for sequential evaluation.")
     parser.add_argument("--corrupt_types", type=str, nargs="+", default=["rbbf"],
                         choices=["rbbf", "rbsl", "metadata_loss", "none"],
                         help="Corruption types to apply to JPEG bitstreams")
@@ -525,6 +525,15 @@ def parse_args():
             "-1 = all evaluated samples, 0 = disable, N>0 = first N samples."
         ),
     )
+    parser.add_argument(
+        "--save_eval_images",
+        type=int,
+        default=0,
+        help=(
+            "Save corrupted evaluation images to disk (for reproducibility). "
+            "0 = disable, N>0 = save first N corrupted images."
+        ),
+    )
     parser.set_defaults(pin_memory=None)
 
     if len(sys.argv) == 1:
@@ -536,69 +545,127 @@ def parse_args():
         args.test_samples = args.val_samples
     return args
 
-if __name__ == '__main__':
-    args = parse_args()
-    print('Called with args:')
-    print(args)
-
-    if args.folder is not None:
+def run_single_evaluation(args, corrupt_level, shared_timestamp):
+    """
+    Run a single evaluation for a specific corruption level.
+    
+    Args:
+        args: Original parsed arguments
+        corrupt_level: Specific corruption level to evaluate
+        shared_timestamp: Shared timestamp for all levels in this batch
+    
+    Returns:
+        True if successful, False otherwise.
+    """
+    # Create a copy of args with this specific level
+    args_copy = argparse.Namespace(**vars(args))
+    # Convert list back to single value for this iteration
+    args_copy.corrupt_level = corrupt_level
+    
+    if args_copy.folder is not None:
         # 仅加载 COCO 配置
         config_file = 'config_coco.yml'
-        config_path = os.path.join(args.folder, config_file)
+        config_path = os.path.join(args_copy.folder, config_file)
         if os.path.exists(config_path):
             cfg_from_file(config_path)
             print(f"[CONFIG] Loaded config: {config_path}")
             # 若文件夹名包含 blip，强制切换模型类型，避免默认值覆盖
-            if "blip" in args.folder.lower() or os.getenv("FORCE_BLIP", "").lower() in ("1", "true", "yes"):
+            if "blip" in args_copy.folder.lower() or os.getenv("FORCE_BLIP", "").lower() in ("1", "true", "yes"):
                 cfg.MODEL.TYPE = "BLIP"
                 print(f"[CONFIG] FORCE_BLIP active or folder contains 'blip'; cfg.MODEL.TYPE set to BLIP")
-            if "git" in args.folder.lower() or os.getenv("FORCE_GIT", "").lower() in ("1", "true", "yes"):
+            if "git" in args_copy.folder.lower() or os.getenv("FORCE_GIT", "").lower() in ("1", "true", "yes"):
                 cfg.MODEL.TYPE = "GIT"
                 print(f"[CONFIG] FORCE_GIT active or folder contains 'git'; cfg.MODEL.TYPE set to GIT")
-            if "qwen" in args.folder.lower() or os.getenv("FORCE_QWEN", "").lower() in ("1", "true", "yes"):
+            if "qwen" in args_copy.folder.lower() or os.getenv("FORCE_QWEN", "").lower() in ("1", "true", "yes"):
                 cfg.MODEL.TYPE = "QWEN"
                 print(f"[CONFIG] FORCE_QWEN active or folder contains 'qwen'; cfg.MODEL.TYPE set to QWEN")
         else:
             # 若找不到，仍尝试读取 generic config.yml（兼容旧项目）
-            alt = os.path.join(args.folder, 'config.yml')
+            alt = os.path.join(args_copy.folder, 'config.yml')
             if os.path.exists(alt):
                 cfg_from_file(alt)
                 print(f"[CONFIG] Loaded config: {alt}")
             else:
-                print(f"[WARNING] Config file not found in folder: {args.folder}")
+                print(f"[WARNING] Config file not found in folder: {args_copy.folder}")
 
-    cfg.ROOT_DIR = args.folder
-    tester = Tester(args)
+    cfg.ROOT_DIR = args_copy.folder
+    
+    # Use shared timestamp to keep all levels in same batch
+    run_timestamp = shared_timestamp
+    
+    # 按损坏类型创建子文件夹名称（格式：{type}_{level}）
+    corrupt_subdir = f"{'_'.join(args_copy.corrupt_types)}_{corrupt_level}" if args_copy.corrupt_types else "none"
+    
+    # ===== 重要：在创建 Tester（包含 CocoEvaler）之前设置图像保存配置 =====
+    # 设置评估图像保存配置（在创建evaluator之前，与结果目录同步）
+    save_eval_max = max(0, int(getattr(args_copy, "save_eval_images", 0)))
+    if save_eval_max > 0:
+        # 先确定结果输出目录
+        model_folder = args_copy.folder or cfg.ROOT_DIR or os.getcwd()
+        out_spec = args_copy.metrics_out
+        if not out_spec:
+            out_spec = os.path.join(cfg.ROOT_DIR or model_folder or ".", "eval_results")
+        
+        has_ext = bool(os.path.splitext(out_spec)[1])
+        is_dir_spec = (
+            out_spec.endswith(("/", "\\"))
+            or os.path.isdir(out_spec)
+            or not has_ext
+        )
+        
+        if is_dir_spec:
+            base_dir = out_spec.rstrip("/\\")
+            if not base_dir:
+                base_dir = "."
+            run_dir = os.path.join(base_dir, run_timestamp, corrupt_subdir)
+            # 图像保存到同一个timestamp/corrupt_type目录下的images子目录
+            save_dir = os.path.join(run_dir, "images")
+        else:
+            # 如果指定的是文件，则在同级目录创建结构
+            parent = os.path.dirname(out_spec)
+            run_dir = os.path.join(parent, run_timestamp, corrupt_subdir) if parent else os.path.join(run_timestamp, corrupt_subdir)
+            save_dir = os.path.join(run_dir, "images")
+        
+        cfg.INFERENCE.SAVE_EVAL_IMAGES_DIR = save_dir
+        cfg.INFERENCE.SAVE_EVAL_IMAGES_MAX = save_eval_max
+        print(f"[EVAL IMAGES] Will save up to {save_eval_max} corrupted images to {save_dir}")
+    else:
+        cfg.INFERENCE.SAVE_EVAL_IMAGES_DIR = None
+        cfg.INFERENCE.SAVE_EVAL_IMAGES_MAX = 0
+    # ===== 图像保存配置完成 =====
+    
+    tester = Tester(args_copy)
 
     # 确定要传递给 eval 的 epoch 字符串
     epoch_str = 'best'
-    if args.resume > 0:
-        epoch_str = str(args.resume)
+    if args_copy.resume > 0:
+        epoch_str = str(args_copy.resume)
     
     print(f"\nStarting TEST evaluation for epoch: {epoch_str}")
+    
     metrics = tester.eval(epoch_str)
     
-    if metrics is not None and not args.no_metrics_out:
+    if metrics is not None and not args_copy.no_metrics_out:
         rname = f"test_{epoch_str}"
-        model_folder = args.folder or cfg.ROOT_DIR or os.getcwd()
+        model_folder = args_copy.folder or cfg.ROOT_DIR or os.getcwd()
         model_name = os.path.basename(str(model_folder).rstrip(os.sep))
-        timestamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
         corruption_params = {}
-        for ctype in args.corrupt_types:
+        for ctype in args_copy.corrupt_types:
             preset = jpeg_corruption.JPEG_CORRUPTION_PRESETS.get(ctype, {})
             corruption_params[ctype] = preset.get(tester.corrupt_level, {})
         run_record = {
             "model_folder": str(model_folder),
             "model_name": model_name,
             "model_type": str(getattr(cfg.MODEL, "TYPE", "")),
-            "corrupt_type": list(args.corrupt_types),
+            "corrupt_type": list(args_copy.corrupt_types),
             "corrupt_level": tester.corrupt_level,
             "corruption_params": corruption_params,
             "metrics": metrics,
             "rname": rname,
-            "timestamp": timestamp,
+            "timestamp": run_timestamp,
         }
-        out_spec = args.metrics_out
+        
+        out_spec = args_copy.metrics_out
         if not out_spec:
             out_spec = os.path.join(cfg.ROOT_DIR or model_folder or ".", "eval_results")
 
@@ -617,7 +684,9 @@ if __name__ == '__main__':
             base_dir = out_spec.rstrip("/\\")
             if not base_dir:
                 base_dir = "."
-            run_dir = os.path.join(base_dir, timestamp)
+            run_dir = os.path.join(base_dir, run_timestamp)
+            # 添加损坏类型子目录
+            run_dir = os.path.join(run_dir, corrupt_subdir)
             os.makedirs(run_dir, exist_ok=True)
             out_path = os.path.join(run_dir, f"metrics_{rname}.json")
         else:
@@ -629,7 +698,7 @@ if __name__ == '__main__':
         # Save per-sample generations + references (best-effort)
         captions_out_path = None
         captions_count = 0
-        if getattr(args, "save_captions", 0) != 0:
+        if getattr(args_copy, "save_captions", 0) != 0:
             try:
                 result_path = os.path.join(str(model_folder), "result", f"result_{rname}.json")
                 if os.path.exists(result_path):
@@ -639,11 +708,11 @@ if __name__ == '__main__':
                     raw_results = None
 
                 if isinstance(raw_results, list):
-                    max_n = int(getattr(args, "save_captions", -1))
+                    max_n = int(getattr(args_copy, "save_captions", -1))
                     if max_n > 0:
                         raw_results = raw_results[:max_n]
 
-                    dataset_type = getattr(tester, "dataset_type", getattr(args, "dataset", "coco"))
+                    dataset_type = getattr(tester, "dataset_type", getattr(args_copy, "dataset", "coco"))
                     ann_path = _resolve_reference_annfile(dataset_type)
                     ref_map = _build_reference_map(ann_path) if ann_path else None
 
@@ -666,13 +735,15 @@ if __name__ == '__main__':
                         references = []
                         if ref_map is not None:
                             references = ref_map.get(lookup_id) or ref_map.get(image_id) or []
-                        enriched.append(
-                            {
-                                id_key: image_id,
-                                cap_key: generated,
-                                "references": references,
-                            }
-                        )
+                        enriched_item = {
+                            id_key: image_id,
+                            cap_key: generated,
+                            "references": references,
+                        }
+                        # 保留损坏类型标记（如果有）
+                        if "corruption" in item:
+                            enriched_item["corruption"] = item["corruption"]
+                        enriched.append(enriched_item)
 
                     captions_count = len(enriched)
                     # place next to metrics output
@@ -694,10 +765,66 @@ if __name__ == '__main__':
             print(f"[RESULT] Saved captions+references JSON: {captions_out_path} (n={captions_count})")
 
     tester.shutdown()
+    return True
 
+if __name__ == '__main__':
+    args = parse_args()
+    print('Called with args:')
+    print(args)
+    
+    # Handle both single level (string) and multiple levels (list)
+    corrupt_levels = args.corrupt_level
+    if isinstance(corrupt_levels, str):
+        corrupt_levels = [corrupt_levels]
+    
+    print(f"\n{'='*80}")
+    print(f"Will evaluate {len(corrupt_levels)} corruption level(s): {corrupt_levels}")
+    print(f"{'='*80}\n")
+    
+    # Generate shared timestamp for all levels in this batch
+    shared_timestamp = time.strftime("%Y%m%d_%H%M%S", time.localtime())
+    
+    success_count = 0
+    failed_count = 0
+    failed_levels = []
+    
+    # Run evaluation for each corruption level sequentially
+    for idx, level in enumerate(corrupt_levels, 1):
+        print(f"\n{'='*80}")
+        print(f"[{idx}/{len(corrupt_levels)}] Running evaluation for corruption level: {level}")
+        print(f"{'='*80}\n")
+        
+        try:
+            success = run_single_evaluation(args, level, shared_timestamp)
+            if success:
+                success_count += 1
+            else:
+                failed_count += 1
+                failed_levels.append(level)
+        except Exception as e:
+            print(f"[ERROR] Evaluation failed for level {level}: {e}")
+            import traceback
+            traceback.print_exc()
+            failed_count += 1
+            failed_levels.append(level)
+    
+    # Print summary
+    print(f"\n{'='*80}")
+    print(f"EVALUATION SUMMARY")
+    print(f"{'='*80}")
+    print(f"Total levels evaluated: {len(corrupt_levels)}")
+    print(f"Successful: {success_count}")
+    print(f"Failed: {failed_count}")
+    if failed_levels:
+        print(f"Failed levels: {', '.join(failed_levels)}")
+    print(f"{'='*80}\n")
+    
     # Extra safety: ensure buffered streams are flushed.
     try:
         sys.stdout.flush()
         sys.stderr.flush()
     except Exception:
         pass
+    
+    # Exit with non-zero if any evaluation failed
+    sys.exit(0 if failed_count == 0 else 1)

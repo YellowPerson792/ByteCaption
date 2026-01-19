@@ -114,6 +114,9 @@ class CocoDataset(data.Dataset):
         # 模型类型参数
         model_type: str = "bytecaption",  # "bytecaption" 或 "visual"
         is_training: bool = True,  # 训练模式不损坏
+        # 评估图像保存
+        save_eval_images_dir: Optional[str] = None,
+        save_eval_images_max: int = 0,
     ):
         # 基础配置保存
         self.max_feat_num: int = max_feat_num
@@ -128,12 +131,23 @@ class CocoDataset(data.Dataset):
         self.corruption_overrides = corruption_overrides or {}
         self.model_type = model_type.lower()
         self.is_training = is_training
+
+        # 评估图像保存配置
+        self.save_eval_images_dir = save_eval_images_dir
+        self.save_eval_images_max = max(0, int(save_eval_images_max))
+        self._saved_images = 0
+        if self.save_eval_images_dir:
+            os.makedirs(self.save_eval_images_dir, exist_ok=True)
+            print(f"[CocoDataset] Image save dir created: {self.save_eval_images_dir}")
+            print(f"[CocoDataset] Max images to save: {self.save_eval_images_max}")
         
         # 创建损坏管线
+        pipeline_seed = int(getattr(cfg, "SEED", 0)) if getattr(cfg, "SEED", 0) > 0 else None
         self.corruption_pipeline = JPEGCorruptionPipeline(
             corruption_types=self.corruption_types,
             level=self.corruption_level,
             overrides=self.corruption_overrides,
+            seed=pipeline_seed,
         ) if self.corruption_types else None
 
         # Optional global feature dict
@@ -253,6 +267,26 @@ class CocoDataset(data.Dataset):
         base_length = min(len(self.image_ids), len(self.ds))
         return min(base_length, self.max_samples) if self.max_samples is not None else base_length
 
+    def _maybe_save_corrupted(self, image_id, corrupted_list: List[Tuple[bytes, str]]):
+        """Optionally save corrupted JPEG bytes used for evaluation (bounded by max)."""
+        if not self.save_eval_images_dir or self.save_eval_images_max <= 0:
+            return
+        if self._saved_images >= self.save_eval_images_max:
+            return
+        for corrupted_bytes, marker in corrupted_list:
+            if self._saved_images >= self.save_eval_images_max:
+                break
+            fname = f"{image_id}_{marker}.jpg"
+            out_path = os.path.join(self.save_eval_images_dir, fname)
+            try:
+                with open(out_path, "wb") as f:
+                    f.write(corrupted_bytes)
+                self._saved_images += 1
+                if self._saved_images <= 3 or self._saved_images == self.save_eval_images_max:
+                    print(f"[SAVED] Image {self._saved_images}/{self.save_eval_images_max}: {out_path}")
+            except Exception as e:
+                print(f"[WARN] Failed to save eval image {out_path}: {e}")
+
     def __getitem__(self, index: int) -> Union[Tuple, ...]:
         """获取数据项，智能处理损坏和返回格式。"""
         indices = np.array([index]).astype('int')
@@ -269,11 +303,14 @@ class CocoDataset(data.Dataset):
         # 2. 应用损坏（如果需要）
         if not self.is_training and self.corruption_pipeline and self.corruption_pipeline.is_enabled():
             # 评估模式且配置了损坏
-            corrupted_variants = self.corruption_pipeline.apply(jpeg_bytes)
+            corrupted_variants = self.corruption_pipeline.apply(jpeg_bytes, image_id=image_id)
             corrupted_list = corrupted_variants
         else:
             # 训练模式或无损坏配置
             corrupted_list = [(jpeg_bytes, "none")]
+
+        # 可选保存用于评估的损坏图像
+        self._maybe_save_corrupted(image_id, corrupted_list)
         
         # 3. 根据模型类型决定返回格式
         processed_results = []

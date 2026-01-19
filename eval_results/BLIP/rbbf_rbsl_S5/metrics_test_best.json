@@ -1,0 +1,73 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+  "model_name": "ByteCaption_XE_blip",
+  "model_type": "BLIP",
+  "corrupt_type": [
+    "rbbf",
+    "rbsl"
+  ],
+  "corrupt_level": "S5",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.005,
+      "burst_lambda": 360.0,
+      "bit_error_rate": 0.5
+    },
+    "rbsl": {
+      "trigger_prob": 0.007,
+      "burst_lambda": 640.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.35118651803663137,
+    "Bleu_2": 0.15825889256562817,
+    "Bleu_3": 5.876931933503013e-07,
+    "Bleu_4": 1.2169608696846393e-09,
+    "ROUGE_L": 0.32226058919186257,
+    "CIDEr": 0.052558066960659365,
+    "METEOR": 0.09086653185689778,
+    "SPICE": 0.037331832820963265,
+    "XE_Loss": null,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 40,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "A person standing in a room.",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 1,
+        "generated": "A person standing in a room.",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 1
+      },
+      {
+        "image_id": 2,
+        "generated": "A person standing in a room.",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "A person standing in a room.",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 1
+      },
+      {
+        "image_id": 3,
+        "generated": "A person standing in a room.",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260119_191446",
+  "references_annfile": "D:\\MLLMs\\ByteCaption\\PureT\\data\\coco_karpathy\\captions_test.json",
+  "captions_file": "eval_results\\20260119_191446\\rbbf_rbsl_S5\\captions_test_best.json",
+  "captions_count": 40
+}

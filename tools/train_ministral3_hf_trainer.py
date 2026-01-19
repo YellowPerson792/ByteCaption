@@ -252,7 +252,7 @@ def _resolve_prompt_settings(hf_cfg) -> Tuple[str, str, str, str]:
         placeholder = (hf_cfg.PLACEHOLDER if hf_cfg else "").strip()
 
     if not placeholder:
-        placeholder = "this is a dummy caption for an undecodable image"
+        placeholder = "A person standing in a room."
 
     if prompt_source == "openrouter" and not user_prompt:
         user_prompt = (
@@ -750,7 +750,7 @@ class MinistralDecodeWrapper:
         generation_kwargs: Optional[dict] = None,
         system_prompt: str = "",
         user_prompt: str = "",
-        placeholder: str = "this is a dummy caption for an undecodable image",
+        placeholder: str = "A person standing in a room.",
         use_chat_template: bool = True,
     ) -> None:
         self.model = getattr(model, "module", model)

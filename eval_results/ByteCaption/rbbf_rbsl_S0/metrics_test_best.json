@@ -1,0 +1,73 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE",
+  "model_name": "ByteCaption_XE",
+  "model_type": "PureT_byteformer",
+  "corrupt_type": [
+    "rbbf",
+    "rbsl"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "bit_error_rate": 0.0
+    },
+    "rbsl": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.6245239329196326,
+    "Bleu_2": 0.441592878370446,
+    "Bleu_3": 0.30628269072648945,
+    "Bleu_4": 0.23536253930065312,
+    "ROUGE_L": 0.45855791671814156,
+    "CIDEr": 0.5961936594072124,
+    "METEOR": 0.19029922601265228,
+    "SPICE": 0.10851390295908785,
+    "XE_Loss": 2.3981401920318604,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 20,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "a cat that is sitting on a chair",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a black and white photo of a traffic light",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "a white toilet sitting next to a sink",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "a living room filled with furniture and a television",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "a person is riding a skateboard on a ramp",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260119_175642",
+  "references_annfile": "D:\\MLLMs\\ByteCaption\\PureT\\data\\coco_karpathy\\captions_test.json",
+  "captions_file": "eval_results\\20260119_175642\\captions_test_best.json",
+  "captions_count": 20
+}

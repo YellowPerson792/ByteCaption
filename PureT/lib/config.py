@@ -246,7 +246,7 @@ __C.MODEL.HF.GRADIENT_CHECKPOINTING = False
 __C.MODEL.HF.PROMPT_SOURCE = ''  # '', 'openrouter', 'hf'
 __C.MODEL.HF.SYSTEM_PROMPT = ''
 __C.MODEL.HF.USER_PROMPT = ''
-__C.MODEL.HF.PLACEHOLDER = 'this is a dummy caption for an undecodable image'
+__C.MODEL.HF.PLACEHOLDER = 'A person standing in a room.'  # e.g. "A person standing in a room."
 __C.MODEL.HF.USE_CHAT_TEMPLATE = False
 __C.MODEL.HF.TRAINABLE = False  # Enable HF training path (e.g., LoRA finetuning)
 __C.MODEL.HF.TRAIN_MODE = 'auto'  # auto/vision2seq/chat
@@ -308,7 +308,7 @@ __C.MODEL.OPENROUTER.EXTRA_PAYLOAD = None
 __C.MODEL.OPENROUTER.REASONING = edict()
 __C.MODEL.OPENROUTER.REASONING.enabled = False
 __C.MODEL.OPENROUTER.REASONING.effort = ''
-__C.MODEL.OPENROUTER.PLACEHOLDER = 'this is a dummy caption for an undecodable image'
+__C.MODEL.OPENROUTER.PLACEHOLDER = 'A person standing in a room.'
 __C.MODEL.OPENROUTER.RETRY = edict()
 __C.MODEL.OPENROUTER.RETRY.MAX_ATTEMPTS = 3
 __C.MODEL.OPENROUTER.RETRY.BACKOFF_BASE = 1.5
@@ -463,6 +463,12 @@ __C.INFERENCE.BEAM_SIZE = 1
 __C.INFERENCE.GREEDY_DECODE = True # Greedy decode or sample decode
 
 __C.INFERENCE.COCO_PATH = './coco-caption'
+
+__C.INFERENCE.SAVE_EVAL_IMAGES_DIR = None
+
+__C.INFERENCE.SAVE_EVAL_IMAGES_MAX = 0
+
+__C.INFERENCE.SAMPLE_PREVIEW = 5
 
 # ---------------------------------------------------------------------------- #
 # Misc options

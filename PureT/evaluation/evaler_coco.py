@@ -151,6 +151,10 @@ class CocoEvaler(object):
         # --- 获取对数据集内部ID列表的引用(与之前获取的方式有一点不同，我觉得有道理，因为之前加了数据样本后需要重新对齐一下) ---
         dataset_image_ids = self.eval_loader.dataset.image_ids
         
+        # 获取损坏类型列表以便在结果中标记
+        corruption_types = list(getattr(cfg.CORRUPTION, "BYTE_STREAM_TYPES", []))
+        corruption_level = str(getattr(cfg.CORRUPTION, "BYTE_STREAM_LEVEL", "S0"))
+        
         sample_limit = getattr(getattr(cfg, "INFERENCE", {}), "SAMPLE_PREVIEW", 5)
         sample_preview = []
 
@@ -263,9 +267,17 @@ class CocoEvaler(object):
                 # --- 关键修复：修改 image_id 以区分不同的损坏样本 ---
                 # 1. 获取原始批次大小和增强因子
                 # 2. 循环并创建带有唯一ID的结果
+                # 判定“不可解码”占位符：兼容旧字符串和当前配置占位符
+                placeholder_set = {
+                    str(getattr(cfg.MODEL.HF, "PLACEHOLDER", "")).strip().lower(),
+                    str(getattr(cfg.MODEL.OPENROUTER, "PLACEHOLDER", "")).strip().lower(),
+                }
+                placeholder_set = {p for p in placeholder_set if p}
+
                 seen_counts = {}
                 for sid, sent in enumerate(sents):
-                    if sent == "this is a dummy caption for an undecodable image":
+                    sent_norm = str(sent).strip().lower()
+                    if sent_norm in placeholder_set:
                         undecodable_count += 1
                     # 使用从数据加载器获得的 ids（已正确映射）
                     if sid < len(ids):
@@ -286,6 +298,12 @@ class CocoEvaler(object):
                     final_image_id = original_image_id
 
                     result = {cfg.INFERENCE.ID_KEY: final_image_id, cfg.INFERENCE.CAP_KEY: sent}
+                    
+                    # 添加损坏类型标记（当有多种损坏类型时）
+                    if len(corruption_types) > 1 and augmentation_idx < len(corruption_types):
+                        corruption_info = f"{corruption_types[augmentation_idx]}_{corruption_level}"
+                        result["corruption"] = corruption_info
+                    
                     results.append(result)
 
                     # 后续的打印逻辑也需要使用新的 unique_id 来查找参考标题

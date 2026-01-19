@@ -1,0 +1,73 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE",
+  "model_name": "ByteCaption_XE",
+  "model_type": "PureT_byteformer",
+  "corrupt_type": [
+    "rbbf",
+    "rbsl"
+  ],
+  "corrupt_level": "S4",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.001,
+      "burst_lambda": 260.0,
+      "bit_error_rate": 0.42
+    },
+    "rbsl": {
+      "trigger_prob": 0.005,
+      "burst_lambda": 520.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.6065573770458659,
+    "Bleu_2": 0.4226323737017247,
+    "Bleu_3": 0.28224136460367216,
+    "Bleu_4": 0.19555175426792348,
+    "ROUGE_L": 0.43919561366150184,
+    "CIDEr": 0.39004603528849086,
+    "METEOR": 0.17077345421788223,
+    "SPICE": 0.08058798260758773,
+    "XE_Loss": 2.6735708713531494,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 40,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "a teddy bear sitting on top of a chair",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 1,
+        "generated": "a group of people standing next to each other",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 1
+      },
+      {
+        "image_id": 2,
+        "generated": "a black and white photo of a man on a skateboard",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a black and white photo of a person holding a remote",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 1
+      },
+      {
+        "image_id": 3,
+        "generated": "a bathroom with a toilet and a sink",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260119_181951",
+  "references_annfile": "D:\\MLLMs\\ByteCaption\\PureT\\data\\coco_karpathy\\captions_test.json",
+  "captions_file": "eval_results\\20260119_181951\\rbbf_rbsl_S4\\captions_test_best.json",
+  "captions_count": 40
+}

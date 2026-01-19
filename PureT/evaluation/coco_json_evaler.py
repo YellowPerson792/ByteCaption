@@ -109,10 +109,16 @@ class CocoJsonEvaler(object):
     def _build_res(self, results):
         """Build result captions for evaluation."""
         res = {}
+        skipped = 0
         for r in results:
             iid = int(r['image_id'])
-            res.setdefault(iid, [])
-            res[iid].append({'caption': r['caption']})
+            if iid in res:
+                # Keep only the first hypothesis per image to satisfy BLEU scorer requirements
+                skipped += 1
+                continue
+            res[iid] = [{'caption': r['caption']}]
+        if skipped:
+            print(f"[WARN] Skipped {skipped} duplicate predictions; BLEU expects one caption per image")
         return res
 
     def eval(self, results):

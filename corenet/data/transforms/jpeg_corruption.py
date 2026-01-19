@@ -14,7 +14,8 @@ and supports lightweight per-run overrides.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, Sequence, Tuple, Optional
+import hashlib
 
 import numpy as np
 
@@ -91,11 +92,13 @@ class JPEGCorruptionPipeline:
         level: Shared severity label (S0–S5, M0–M1 or legacy aliases).
         overrides: Optional per-type overrides, e.g.
                    {"rbbf": {"trigger_prob": 1e-5}}
+        seed: Optional base seed used to deterministically derive per-image RNGs.
     """
 
     corruption_types: Sequence[str] = field(default_factory=list)
     level: str = "S0"
     overrides: Dict[str, Dict[str, float]] = field(default_factory=dict)
+    seed: Optional[int] = None
 
     def __post_init__(self) -> None:
         self.level = normalize_level(self.level)
@@ -124,8 +127,16 @@ class JPEGCorruptionPipeline:
                 params[k] = v
         return params
 
-    def apply(self, data: bytes) -> List[Tuple[bytes, str]]:
-        """Apply all configured corruptions to a single JPEG byte stream."""
+    def _rng_for(self, image_id: Optional[int], corruption_type: str):
+        if self.seed is None:
+            return np.random.default_rng()
+        token = f"{self.seed}-{self.level}-{corruption_type}-{image_id}"
+        digest = hashlib.sha256(token.encode("utf-8")).digest()
+        seed_int = int.from_bytes(digest[:8], byteorder="little", signed=False)
+        return np.random.default_rng(seed_int)
+
+    def apply(self, data: bytes, image_id: Optional[int] = None) -> List[Tuple[bytes, str]]:
+        """Apply all configured corruptions to a single JPEG byte stream deterministically per image."""
         if not self.corruption_types:
             return [(data, "none")]
 
@@ -136,10 +147,11 @@ class JPEGCorruptionPipeline:
                 continue
 
             params = self._resolve_params(corruption_type)
+            rng = self._rng_for(image_id, corruption_type)
             if corruption_type == "rbbf":
-                corrupted = random_bursty_bit_flips(data, **params)
+                corrupted = random_bursty_bit_flips(data, rng=rng, **params)
             elif corruption_type == "rbsl":
-                corrupted = random_bursty_segment_loss(data, **params)
+                corrupted = random_bursty_segment_loss(data, rng=rng, **params)
             elif corruption_type == "metadata_loss":
                 corrupted = metadata_loss(data, **params)
             else:
@@ -156,30 +168,32 @@ def random_bursty_bit_flips(
     trigger_prob: float,
     burst_lambda: float,
     bit_error_rate: float,
+    rng: Optional[np.random.Generator] = None,
 ) -> bytes:
     """Random bursty bit flips (RBBF)."""
     if not data or trigger_prob <= 0.0 or bit_error_rate <= 0.0 or burst_lambda <= 0.0:
         return data
 
+    rng = rng or np.random.default_rng()
     ba = bytearray(data)
     total_bits = len(ba) * 8
     expected_bursts = max(0.0, total_bits * trigger_prob)
-    num_bursts = np.random.poisson(expected_bursts)
+    num_bursts = rng.poisson(expected_bursts)
     if num_bursts == 0:
         return data
 
-    starts = np.random.randint(0, total_bits, size=num_bursts)
+    starts = rng.integers(0, total_bits, size=num_bursts)
     flip_positions: List[int] = []
     for start in starts:
-        length = max(1, int(np.random.poisson(lam=burst_lambda)))
+        length = max(1, int(rng.poisson(lam=burst_lambda)))
         end = min(total_bits, start + length)
         span = end - start
         if span <= 0:
             continue
-        flips_in_burst = np.random.binomial(span, min(max(bit_error_rate, 0.0), 1.0))
+        flips_in_burst = rng.binomial(span, min(max(bit_error_rate, 0.0), 1.0))
         if flips_in_burst == 0:
             continue
-        offsets = np.random.choice(span, size=flips_in_burst, replace=False)
+        offsets = rng.choice(span, size=flips_in_burst, replace=False)
         flip_positions.extend(start + offsets)
 
     for bit_index in flip_positions:
@@ -193,22 +207,24 @@ def random_bursty_segment_loss(
     trigger_prob: float,
     burst_lambda: float,
     max_drop_ratio: float,
+    rng: Optional[np.random.Generator] = None,
 ) -> bytes:
     """Random bursty segment loss (RBSL)."""
     if not data or trigger_prob <= 0.0 or burst_lambda <= 0.0 or max_drop_ratio <= 0.0:
         return data
 
+    rng = rng or np.random.default_rng()
     data_len = len(data)
     max_drop = max(1, int(data_len * max_drop_ratio))
     expected_bursts = max(0.0, data_len * trigger_prob)
-    num_bursts = np.random.poisson(expected_bursts)
+    num_bursts = rng.poisson(expected_bursts)
     if num_bursts == 0:
         return data
 
     segments: List[Tuple[int, int]] = []
     for _ in range(num_bursts):
-        start = int(np.random.randint(0, data_len))
-        length = max(1, int(np.random.poisson(lam=burst_lambda)))
+        start = int(rng.integers(0, data_len))
+        length = max(1, int(rng.poisson(lam=burst_lambda)))
         end = min(data_len, start + length)
         if start < end:
             segments.append((start, end))

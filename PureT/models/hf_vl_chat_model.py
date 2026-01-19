@@ -17,11 +17,18 @@ from transformers import (
     AutoModelForImageTextToText,
     AutoModelForVision2Seq,
     InternVLForConditionalGeneration,
-    Glm4vForConditionalGeneration,
-    Mistral3ForConditionalGeneration,
-    MistralCommonBackend
-    
 )
+try:
+    from transformers import (
+        Glm4vForConditionalGeneration,
+        Mistral3ForConditionalGeneration,
+        MistralCommonBackend
+    )
+except ImportError:
+    Glm4vForConditionalGeneration = None
+    Mistral3ForConditionalGeneration = None
+    MistralCommonBackend = None
+    
 from peft import PeftModel
 
 from lib.config import cfg

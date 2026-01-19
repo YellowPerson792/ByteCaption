@@ -46,6 +46,8 @@ def visual_collate_val(batch: Sequence[Tuple[Any, ...]]):
 def load_val(image_ids_path, gv_feat_path: str = "", max_samples: int = 200):
     corruption_types = list(getattr(cfg.CORRUPTION, "BYTE_STREAM_TYPES", []))
     corruption_level = str(getattr(cfg.CORRUPTION, "BYTE_STREAM_LEVEL", "S0"))
+    save_dir = getattr(cfg.INFERENCE, "SAVE_EVAL_IMAGES_DIR", None)
+    save_max = int(getattr(cfg.INFERENCE, "SAVE_EVAL_IMAGES_MAX", 0))
 
     coco_set = CocoDataset(
         image_ids_path=image_ids_path,
@@ -60,6 +62,8 @@ def load_val(image_ids_path, gv_feat_path: str = "", max_samples: int = 200):
         corruption_level=corruption_level,
         model_type="visual",
         is_training=False,
+        save_eval_images_dir=save_dir,
+        save_eval_images_max=save_max,
     )
 
     num_workers = cfg.DATA_LOADER.NUM_WORKERS
