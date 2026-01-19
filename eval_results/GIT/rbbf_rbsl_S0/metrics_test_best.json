@@ -1,0 +1,73 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_git",
+  "model_name": "ByteCaption_XE_git",
+  "model_type": "GIT",
+  "corrupt_type": [
+    "rbbf",
+    "rbsl"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "bit_error_rate": 0.0
+    },
+    "rbsl": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.48689136813240064,
+    "Bleu_2": 0.38165554504135923,
+    "Bleu_3": 0.2911177477540513,
+    "Bleu_4": 0.22863153336021422,
+    "ROUGE_L": 0.44611972499390473,
+    "CIDEr": 0.6967991126994085,
+    "METEOR": 0.17573137322900412,
+    "SPICE": 0.15435245060378538,
+    "XE_Loss": null,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 20,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "shoes in a basket",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "the sun shining through the clouds",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "toilet in a small building in the middle of a forest.",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "the living room and kitchen.",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "a sandwich in a basket.",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260119_214250",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20260119_214250/rbbf_rbsl_S0/captions_test_best.json",
+  "captions_count": 20
+}

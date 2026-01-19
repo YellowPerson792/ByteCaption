@@ -1,0 +1,73 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_git",
+  "model_name": "ByteCaption_XE_git",
+  "model_type": "GIT",
+  "corrupt_type": [
+    "rbbf",
+    "rbsl"
+  ],
+  "corrupt_level": "S2",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.0002,
+      "burst_lambda": 160.0,
+      "bit_error_rate": 0.24
+    },
+    "rbsl": {
+      "trigger_prob": 0.0008,
+      "burst_lambda": 220.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.36818096268537037,
+    "Bleu_2": 0.2581783563591913,
+    "Bleu_3": 0.17980573099830124,
+    "Bleu_4": 0.11517583227905476,
+    "ROUGE_L": 0.33078521860530763,
+    "CIDEr": 0.24270469718481263,
+    "METEOR": 0.10451409769714565,
+    "SPICE": 0.07415818692524088,
+    "XE_Loss": null,
+    "Undecodable_Count": 8,
+    "Undecodable_Ratio": 0.2,
+    "Total_Samples": 40,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "A person standing in a room.",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 1,
+        "generated": "A person standing in a room.",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 1
+      },
+      {
+        "image_id": 2,
+        "generated": "a red box in the sky",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "a green wall in a city.",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 1
+      },
+      {
+        "image_id": 3,
+        "generated": "a car seat in a parking lot.",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260119_214250",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20260119_214250/rbbf_rbsl_S2/captions_test_best.json",
+  "captions_count": 40
+}

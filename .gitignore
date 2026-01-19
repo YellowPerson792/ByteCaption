@@ -6,8 +6,6 @@ git-base-coco/.locks/
 Ministral-3-8B-Base-2512/**
 
 # Eval outputs and logs
-eval_results/
-batch_reports/
 wandb/
 PureT/experiments/*/OfflineTest_log*.txt
 PureT/experiments/*/result/

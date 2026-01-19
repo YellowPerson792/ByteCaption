@@ -1,0 +1,73 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_ministral",
+  "model_name": "ByteCaption_XE_ministral",
+  "model_type": "MINISTRAL",
+  "corrupt_type": [
+    "rbbf",
+    "rbsl"
+  ],
+  "corrupt_level": "S4",
+  "corruption_params": {
+    "rbbf": {
+      "trigger_prob": 0.001,
+      "burst_lambda": 260.0,
+      "bit_error_rate": 0.42
+    },
+    "rbsl": {
+      "trigger_prob": 0.005,
+      "burst_lambda": 520.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.2848981488936834,
+    "Bleu_2": 0.08471715096599511,
+    "Bleu_3": 0.046965787643154205,
+    "Bleu_4": 0.030588833923548688,
+    "ROUGE_L": 0.19418487546551533,
+    "CIDEr": 0.02069202961123712,
+    "METEOR": 0.054845183255432334,
+    "SPICE": 0.009797482211275315,
+    "XE_Loss": null,
+    "Undecodable_Count": 34,
+    "Undecodable_Ratio": 0.85,
+    "Total_Samples": 40,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 1,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 1
+      },
+      {
+        "image_id": 2,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 1
+      },
+      {
+        "image_id": 3,
+        "generated": "this is a dummy caption for an undecodable image",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260119_194738",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20260119_194738/rbbf_rbsl_S4/captions_test_best.json",
+  "captions_count": 40
+}
