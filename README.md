@@ -1,267 +1,460 @@
-# CoreNet: A library for training deep neural networks
+# ByteCaption: 基于字节流的图像描述生成
 
-CoreNet is a deep neural network toolkit that allows researchers and engineers to train standard and novel small and large-scale models for variety of tasks, including foundation models (e.g., CLIP and LLM), object classification, object detection, and semantic segmentation.
+ByteCaption 是一个创新的图像描述生成项目，结合了 Apple CoreNet 的 ByteFormer 和 PureT 模型，实现从 JPEG 压缩码流直接生成图像描述的端到端训练与评估。
 
-## Table of contents
+## 📖 目录
 
-   * [What's new?](#whats-new)
-   * [Research efforts at Apple using CoreNet](#research-efforts-at-apple-using-corenet)
-   * [Installation](#installation)
-   * [Directory Structure](#directory-structure)
-   * [Maintainers](#maintainers)
-   * [Contributing to CoreNet](#contributing-to-corenet)
-   * [License](#license)
-   * [Relationship with CVNets](#relationship-with-cvnets)
-   * [Citation](#citation)
+- [项目简介](#项目简介)
+- [核心特性](#核心特性)
+- [项目架构](#项目架构)
+- [环境配置](#环境配置)
+- [数据准备](#数据准备)
+- [快速开始](#快速开始)
+- [训练模型](#训练模型)
+- [模型评估](#模型评估)
+- [模型变体](#模型变体)
+- [参考文献](#参考文献)
+- [致谢](#致谢)
 
-## What's new?
+## 项目简介
 
-   * ***October 2024***: Version 0.1.1 of the CoreNet library includes
-      * [KV Prediction](./projects/kv-prediction/)
+ByteCaption 探索了一种新颖的图像描述生成方法：**直接从 JPEG 压缩码流生成描述文本**，而不是传统的从解码后的图像像素生成。该方法具有以下优势：
 
-## Research efforts at Apple using CoreNet
+- **节省计算资源**：跳过图像解码步骤，直接处理压缩数据
+- **提升鲁棒性**：天然抵抗图像压缩损失和传输损坏
+- **创新架构**：结合字节级编码器（ByteFormer）和 Transformer 解码器（PureT）
 
-Below is the list of publications from Apple that uses CoreNet. Also, training and evaluation recipes, as well as links to pre-trained models, can be found inside the [projects](./projects/) folder. Please refer to it for further details.
+本项目基于以下研究成果：
+- **ByteFormer**：Apple 开源的字节级 Transformer，可直接处理文件字节流（来自论文 "Bytes Are All You Need: Transformers Operating Directly on File Bytes"）
+- **PureT**：端到端 Transformer 图像描述模型（来自论文 "End-to-End Transformer Based Model for Image Captioning"，AAAI 2022）
 
-   * [KV Prediction for Improved Time to First Token](https://arxiv.org/abs/2410.08391)
-   * [OpenELM: An Efficient Language Model Family with Open Training and Inference Framework](https://arxiv.org/abs/2404.14619)
-   * [CatLIP: CLIP-level Visual Recognition Accuracy with 2.7x Faster Pre-training on Web-scale Image-Text Data](https://arxiv.org/abs/2404.15653)
-   * [Reinforce Data, Multiply Impact: Improved Model Accuracy and Robustness with Dataset Reinforcement](https://arxiv.org/abs/2303.08983)
-   * [CLIP meets Model Zoo Experts: Pseudo-Supervision for Visual Enhancement](https://arxiv.org/abs/2310.14108)
-   * [FastVit: A Fast Hybrid Vision Transformer using Structural Reparameterization](https://arxiv.org/abs/2303.14189)
-   * [Bytes Are All You Need: Transformers Operating Directly on File Bytes](https://arxiv.org/abs/2306.00238)
-   * [MobileOne: An Improved One millisecond Mobile Backbone](https://arxiv.org/abs/2206.04040)
-   * [RangeAugment: Efficient Online Augmentation with Range Learning](https://arxiv.org/abs/2212.10553)
-   * [Separable Self-attention for Mobile Vision Transformers (MobileViTv2)](https://arxiv.org/abs/2206.02680)
-   * [CVNets: High performance library for Computer Vision, ACM MM'22](https://arxiv.org/abs/2206.02002)
-   * [MobileViT: Light-weight, General-purpose, and Mobile-friendly Vision Transformer, ICLR'22](https://arxiv.org/abs/2110.02178)
+## 核心特性
 
-## Installation
+- ✅ **字节流处理**：直接从 JPEG 码流生成图像描述，无需解码
+- ✅ **多种增强策略**：支持字节损坏、掩码、置换、噪声等数据增强
+- ✅ **灵活的模型架构**：支持 ByteFormer、BLIP、GIT、Qwen-VL、GLM、InternVL、Ministral 等多种视觉-语言模型
+- ✅ **HuggingFace 集成**：完整的 HuggingFace Transformers 生态支持
+- ✅ **全面的评估指标**：支持 BLEU、METEOR、ROUGE-L、CIDEr、SPICE 等标准指标
+- ✅ **分布式训练**：支持单机多卡和多机多卡训练
 
-You will need Git LFS (instructions below) to run tests and Jupyter notebooks 
-([instructions](https://jupyter.org/install)) in this repository,
-and to contribute to it so we recommend that you install and activate it first.
+## 项目架构
 
-On Linux we recommend to use Python 3.10+ and PyTorch (version >= v2.1.0), on
-macOS system Python 3.9+ should be sufficient.
+```
+ByteCaption/
+├── README.md                          # 本文档
+├── requirements.txt                   # Python 依赖
+├── corenet/                          # Apple CoreNet 框架
+│   └── data/
+│       ├── transforms/
+│       │   └── image_bytes.py       # 字节级数据增强
+│       └── collate_fns/
+│           └── byteformer_collate_functions.py  # ByteFormer 专用 collate
+├── PureT/                            # PureT 模型和训练代码
+│   ├── main.py                       # 训练入口（支持 COCO/Flickr8k）
+│   ├── main_val.py                   # 验证入口
+│   ├── byteformer_immigration.py     # ByteFormer HF 封装
+│   ├── datasets_/                    # 数据集封装
+│   │   ├── coco_dataset_hf.py       # COCO 数据集（HuggingFace）
+│   │   └── data_loader_byteformer_coco.py  # ByteFormer collate
+│   └── experiments/                  # 实验配置和输出
+│       ├── ByteCaption_XE/          # 标准 ByteFormer 配置
+│       ├── ByteCaption_XE_blip/     # BLIP 模型配置
+│       ├── ByteCaption_XE_glm/      # GLM 模型配置
+│       └── ByteCaption_XE_qwen/     # Qwen-VL 模型配置
+├── byteformer_hf_migration/          # ByteFormer HuggingFace 迁移
+│   ├── README.md                     # 迁移文档
+│   ├── configs/                      # ByteFormer 配置文件
+│   ├── weights/                      # 预训练权重（需下载）
+│   ├── scripts/                      # 训练和推理脚本
+│   └── utils/                        # 工具函数
+└── tools/                            # 训练工具脚本
+    ├── train_hf_trainer.py          # Qwen-VL 训练脚本
+    ├── train_glm_hf_trainer.py      # GLM 训练脚本
+    ├── train_internvl_swift.py      # InternVL Swift 训练
+    └── train_ministral3_hf_trainer.py  # Ministral 训练脚本
+```
 
-Note that the optional dependencies listed below are required if you'd like to
-make contributions and/or run tests.
+## 环境配置
 
-For Linux (substitute `apt` for your package manager):
+### 系统要求
+
+- Python 3.9+ (Linux) 或 3.10+ (macOS)
+- PyTorch >= 2.3.0
+- CUDA 11.8+ (GPU 训练)
+- 推荐至少 16GB 显存用于训练
+
+### 安装步骤
+
+1. **克隆仓库**
 
 ```bash
+git clone https://github.com/YellowPerson792/ByteCaption.git
+cd ByteCaption
+```
+
+2. **创建虚拟环境（推荐）**
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Linux/macOS
+# 或
+# venv\Scripts\activate  # Windows
+```
+
+3. **安装依赖**
+
+```bash
+pip install -r requirements.txt
+```
+
+4. **设置环境变量**
+
+```bash
+export PYTHONPATH=$(pwd)
+```
+
+5. **安装 Git LFS（可选，用于下载大文件）**
+
+```bash
+# Linux
 sudo apt install git-lfs
-
-git clone git@github.com:apple/corenet.git
-cd corenet
 git lfs install
 git lfs pull
-# The following venv command is optional, but recommended. Alternatively, you can create and activate a conda environment.
-python3 -m venv venv && source venv/bin/activate
-python3 -m pip install --editable .
-```
 
-To install optional dependencies for audio and video processing:
-
-```bash
-sudo apt install libsox-dev ffmpeg
-```
-
-For macOS, assuming you use Homebrew:
-
-```bash
+# macOS
 brew install git-lfs
-
-git clone git@github.com:apple/corenet.git
-cd corenet
-cd \$(pwd -P)  # See the note below.
 git lfs install
 git lfs pull
-# The following venv command is optional, but recommended. Alternatively, you can create and activate a conda environment.
-python3 -m venv venv && source venv/bin/activate
-python3 -m pip install --editable .
 ```
 
-To install optional dependencies for audio and video processing:
+## 数据准备
+
+### 1. COCO 数据集
+
+使用 HuggingFace 的 COCO Karpathy 分割数据集：
 
 ```bash
-brew install sox ffmpeg
+# 数据集将自动下载到：
+# PureT/data/coco_karpathy/AbdoTW___coco_2014_karpathy/{train,validation,test}
 ```
 
-Note that on macOS the file system is case insensitive, and case sensitivity
-can cause issues with Git. You should access the repository on disk as if the
-path were case sensitive, i.e. with the same capitalization as you see when you
-list the directories `ls`. You can switch to such a path with the `cd $(pwd -P)`
-command.
+### 2. 图像 ID 列表
 
+确保以下文件存在：
+- `PureT/data/coco_karpathy/train_ids.json`
+- `PureT/data/coco_karpathy/validation_ids.json`
 
-## Directory Structure
+### 3. 词表生成
 
-This section provides quick access and a brief description for important CoreNet directories.
+首次运行训练时会自动生成词表文件：
+- `PureT/data/coco_karpathy/coco_vocabulary.txt`
 
-<table>
-<thead>
-<tr>
-<th> Description </th>
-<th> Quick Access </th>
-</tr>
-</thead>
-<tbody>
-<!-- Row boilerplate (copy-paste the following commented snippet for adding a new row to the table.)
-<tr> <td> <h3> title </h3> 
-description
-</td> <td> <pre>
-folders
-</pre> </td> </tr>
--->
-<tr> <td> <h3> Getting Started </h3> 
-Working with the examples is an easy way to get started with CoreNet. 
-</td> <td> <pre>
-└── tutorials
-    ├── <a href="tutorials/train_a_new_model_on_a_new_dataset_from_scratch.ipynb">train_a_new_model_on_a_new_dataset_from_scratch.ipynb</a>
-    ├── <a href="tutorials/guide_slurm_and_multi_node_training.md">guide_slurm_and_multi_node_training.md</a>
-    ├── <a href="tutorials/clip.ipynb">clip.ipynb</a>
-    ├── <a href="tutorials/semantic_segmentation.ipynb">semantic_segmentation.ipynb</a>
-    └── <a href="tutorials/object_detection.ipynb">object_detection.ipynb</a>
-</pre> </td> </tr>
+### 4. ByteFormer 预训练权重
 
+下载 ByteFormer 预训练权重并放置在：
+```
+byteformer_hf_migration/weights/imagenet_jpeg_q60_k4_w128.pt
+```
 
-<tr> <td> <h3> Training Recipes </h3>
-CoreNet provides reproducible training recipes, in addition to the pretrained model 
-weights and checkpoints for the publications that are listed in <code>projects/</code> directory.
+## 快速开始
 
-Publication project directories generally contain the following contents:
+### 方式一：使用 ByteFormer + PureT（推荐）
 
-* `README.md` provides documentation, links to the pretrained weights, and citations.
-* `<task_name>/<model_name>.yaml` provides configuration for reproducing the trainings and evaluations.
-</td> <td> <pre>
-└── projects
-    ├── <a href="projects/kv-prediction">kv-prediction</a> (*)
-    ├── <a href="projects/byteformer">byteformer</a>
-    ├── <a href="projects/catlip">catlip</a>
-    ├── <a href="projects/clip">clip</a>
-    ├── <a href="projects/fastvit">fastvit</a>
-    ├── <a href="projects/mobilenet_v1">mobilenet_v1</a>
-    ├── <a href="projects/mobilenet_v2">mobilenet_v2</a>
-    ├── <a href="projects/mobilenet_v3">mobilenet_v3</a>
-    ├── <a href="projects/mobileone">mobileone</a>
-    ├── <a href="projects/mobilevit">mobilevit</a>
-    ├── <a href="projects/mobilevit_v2">mobilevit_v2</a>
-    ├── <a href="projects/openelm">openelm</a>
-    ├── <a href="projects/range_augment">range_augment</a>
-    ├── <a href="projects/resnet">resnet</a>
-    └── <a href="projects/vit">vit</a>
-<br>
-(*) Newly released.
-</pre> </td> </tr>
+这是项目的核心方法，直接从 JPEG 码流生成描述。
 
+```bash
+python PureT/main.py \
+  --folder PureT/experiments/ByteCaption_XE \
+  --dataset coco \
+  --eval_steps 600 \
+  --val_samples 50 \
+  --load_weights \
+  --freeze_backbone \
+  --disable_wandb
+```
 
-<tr> <td> <h3> MLX Examples </h3>
-MLX examples demonstrate how to run CoreNet models efficiently on Apple Silicon.
-Please find further information in the <code>README.md</code> file within the corresponding example directory.
+**参数说明：**
+- `--folder`: 实验配置和输出目录
+- `--dataset`: 数据集名称（coco 或 flickr8k）
+- `--eval_steps`: 每隔多少步评估一次
+- `--val_samples`: 验证时使用的样本数（0 表示全部）
+- `--load_weights`: 加载预训练的 ByteFormer 权重
+- `--freeze_backbone`: 冻结 ByteFormer 编码器，只训练解码器
+- `--disable_wandb`: 禁用 Weights & Biases 日志
 
-</td> <td> <pre>
-└──mlx_example
-    ├── <a href="mlx_examples/clip">clip</a>
-    └── <a href="mlx_examples/open_elm">open_elm</a>
-</pre> </td> </tr>
+### 方式二：使用现代视觉-语言模型
 
+#### Qwen-VL 训练
 
-<tr> <td> <h3> Model Implementations </h3> 
-Models are organized by tasks (e.g. "classification"). You can find all model implementations for each
-task in the corresponding task folder. 
+```bash
+python tools/train_hf_trainer.py \
+  --folder PureT/experiments/ByteCaption_XE_qwen \
+  --dataset coco \
+  --model_id Qwen/Qwen3-VL-8B-Instruct \
+  --processor_id Qwen/Qwen3-VL-8B-Instruct \
+  --local_dir ./Qwen3-VL-8B-Instruct \
+  --train_samples 0 \
+  --val_samples 10 \
+  --lora_r 16 \
+  --lora_alpha 32 \
+  --attn_implementation flash_attention_2 \
+  --disable_wandb
+```
 
-Each model class is decorated by a 
-`@MODEL_REGISTRY.register(name="<model_name>", type="<task_name>")` decorator. 
-To use a model class in CoreNet training or evaluation,
-assign `models.<task_name>.name = <model_name>` in the YAML configuration.
+#### GLM 训练
 
-</td> <td> <pre>
-└── corenet
-    └── modeling
-        └── <a href="corenet/modeling/models">models</a>
-            ├── <a href="corenet/modeling/models/audio_classification">audio_classification</a>
-            ├── <a href="corenet/modeling/models/classification">classification</a>
-            ├── <a href="corenet/modeling/models/detection">detection</a>
-            ├── <a href="corenet/modeling/models/language_modeling">language_modeling</a>
-            ├── <a href="corenet/modeling/models/multi_modal_img_text">multi_modal_img_text</a>
-            └── <a href="corenet/modeling/models/segmentation">segmentation</a>
-</pre> </td> </tr>
+```bash
+python tools/train_glm_hf_trainer.py \
+  --folder PureT/experiments/ByteCaption_XE_glm \
+  --dataset coco \
+  --model_id THUDM/glm-4v-9b \
+  --local_dir ./glm-4v-9b \
+  --lora_r 8 \
+  --lora_alpha 16
+```
 
+#### InternVL 训练（使用 Swift 框架）
 
-<tr> <td> <h3> Datasets </h3> 
-Similarly to the models, datasets are also categorized by tasks.
-</td> <td> <pre>
-└── corenet
-    └── data
-        └── <a href="corenet/data/datasets">datasets</a>
-            ├── <a href="corenet/data/datasets/audio_classification">audio_classification</a>
-            ├── <a href="corenet/data/datasets/classification">classification</a>
-            ├── <a href="corenet/data/datasets/detection">detection</a>
-            ├── <a href="corenet/data/datasets/language_modeling">language_modeling</a>
-            ├── <a href="corenet/data/datasets/multi_modal_img_text">multi_modal_img_text</a>
-            └── <a href="corenet/data/datasets/segmentation">segmentation</a>
-</pre> </td> </tr>
+```bash
+python tools/train_internvl_swift.py \
+  --folder PureT/experiments/ByteCaption_XE_internvl \
+  --dataset coco \
+  --model_id OpenGVLab/InternVL2-8B \
+  --num_train_epochs 3
+```
 
+## 训练模型
 
-<tr> <td> <h3> Other key directories </h3> 
-In this section, we have highlighted the rest of the key directories that implement 
-classes corresponding to the names that are referenced in the YAML configurations.
-</td> <td> <pre>
-└── corenet
-    ├── <a href="corenet/loss_fn">loss_fn</a>
-    ├── <a href="corenet/metrics">metrics</a>
-    ├── <a href="corenet/optims">optims</a>
-    │   └── <a href="corenet/optims/scheduler">scheduler</a>
-    ├── <a href="corenet/train_eval_pipelines">train_eval_pipelines</a>
-    ├── <a href="corenet/data">data</a>
-    │   ├── <a href="corenet/data/collate_fns">collate_fns</a>
-    │   ├── <a href="corenet/data/sampler">sampler</a>
-    │   ├── <a href="corenet/data/text_tokenizer">text_tokenizer</a>
-    │   ├── <a href="corenet/data/transforms">transforms</a>
-    │   └── <a href="corenet/data/video_reader">video_reader</a>
-    └── <a href="corenet/modeling">modeling</a>
-        ├── <a href="corenet/modeling/layers">layers</a>
-        ├── <a href="corenet/modeling/modules">modules</a>
-        ├── <a href="corenet/modeling/neural_augmentor">neural_augmentor</a>
-        └── <a href="corenet/modeling/text_encoders">text_encoders</a>
-</pre> </td> </tr>
+### 单机单卡训练
 
-</tbody>
-</table>
+```bash
+CUDA_VISIBLE_DEVICES=0 python PureT/main.py \
+  --folder PureT/experiments/ByteCaption_XE \
+  --dataset coco \
+  --eval_steps 600 \
+  --val_samples 50 \
+  --load_weights \
+  --freeze_backbone
+```
 
-## Maintainers
-This code is developed and maintained by <a href="https://mchorton.com" target="_blank">Maxwell Horton</a>, <a href="https://www.mohammad.pro" target="_blank">Mohammad Sekhavat</a> Yanzi Jin, and <a href="https://huggingface.co/depthwise" target="_blank">Dmitry Belenko</a>.
+### 单机多卡训练（DDP）
 
-### Previous Maintainers
-* <a href="https://sacmehta.github.io" target="_blank">Sachin Mehta</a>
-* <a href="https://farzadab.github.io" target="_blank">Farzad Abdolhosseini</a>
+```bash
+torchrun --nproc_per_node=4 --master_port=12355 PureT/main.py \
+  --folder PureT/experiments/ByteCaption_XE \
+  --dataset coco \
+  --eval_steps 600 \
+  --val_samples 50 \
+  --load_weights \
+  --freeze_backbone
+```
 
-## Contributing to CoreNet
+### 端到端微调（不冻结编码器）
 
-We welcome PRs from the community! You can find information about contributing to CoreNet in our [contributing](CONTRIBUTING.md) document. 
+```bash
+python PureT/main.py \
+  --folder PureT/experiments/ByteCaption_XE \
+  --dataset coco \
+  --eval_steps 600 \
+  --val_samples 50 \
+  --load_weights
+  # 注意：移除 --freeze_backbone 参数
+```
 
-Please remember to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+### 训练配置
+
+修改 `PureT/experiments/ByteCaption_XE/config_coco.yml` 来自定义训练参数：
+
+```yaml
+# 主要配置项
+SOLVER:
+  MAX_EPOCH: 30
+  BASE_LR: 0.0001
+  GRAD_CLIP: 5.0
+
+DATA_LOADER:
+  BATCH_SIZE: 16
+  NUM_WORKERS: 4
+
+MODEL:
+  TYPE: PureT_byteformer  # 或 PureT (使用 BLIP)
+  D_MODEL: 512
+  HEAD: 8
+  ENC_LAYERS: 6
+  DEC_LAYERS: 6
+```
+
+## 模型评估
+
+### 验证模型性能
+
+```bash
+python PureT/main_val.py \
+  --folder PureT/experiments/ByteCaption_XE \
+  --dataset coco \
+  --val_samples 500 \
+  --resume -1 \
+  --disable_wandb
+```
+
+**参数说明：**
+- `--resume -1`: 加载 best_model.pth
+- `--resume N`: 加载第 N 个 epoch 的模型
+
+### 评估输出
+
+评估结果将保存在：
+- `PureT/experiments/ByteCaption_XE/result/`：包含 COCO 格式的预测结果
+- `PureT/experiments/ByteCaption_XE/log.txt`：训练和评估日志
+
+评估指标包括：
+- **BLEU-1/2/3/4**：N-gram 精确度
+- **METEOR**：考虑同义词和词干的指标
+- **ROUGE-L**：最长公共子序列
+- **CIDEr**：共识度指标
+- **SPICE**：基于场景图的语义指标
+
+## 模型变体
+
+### 1. ByteFormer + PureT（核心方法）
+
+直接从 JPEG 码流生成描述：
+
+```
+配置目录：PureT/experiments/ByteCaption_XE/
+特点：字节级处理，鲁棒性强
+```
+
+### 2. BLIP 模型
+
+传统的图像-文本模型：
+
+```
+配置目录：PureT/experiments/ByteCaption_XE_blip/
+特点：成熟的预训练模型，性能稳定
+```
+
+### 3. GIT 模型
+
+Microsoft 的生成式图像-文本 Transformer：
+
+```
+模型目录：git-base-coco/
+特点：简单高效的生成式架构
+```
+
+### 4. Qwen-VL 系列
+
+阿里云的多模态大模型：
+
+```
+配置目录：PureT/experiments/ByteCaption_XE_qwen/
+特点：强大的多模态理解能力，支持 LoRA 微调
+```
+
+### 5. GLM-4V 系列
+
+清华大学的多模态大模型：
+
+```
+配置目录：PureT/experiments/ByteCaption_XE_glm/
+特点：中英文双语能力，对话式交互
+```
+
+### 6. InternVL 系列
+
+上海 AI 实验室的视觉-语言模型：
+
+```
+配置目录：PureT/experiments/ByteCaption_XE_internvl/
+特点：高分辨率图像理解，性能优秀
+```
+
+## 高级功能
+
+### 字节流增强
+
+项目支持多种字节流增强策略（在 `corenet/data/transforms/image_bytes.py` 中实现）：
+
+- **PIL 编码参数**：质量、格式、优化等
+- **字节损坏**：模拟传输错误
+- **字节掩码**：随机遮盖部分字节
+- **字节置换**：打乱字节顺序
+- **字节噪声**：添加随机噪声
+
+### 调试工具
+
+1. **分析码流长度**
+
+```bash
+python PureT/analyze_stream_length.py \
+  --dataset_path PureT/data/coco_karpathy/validation_ids.json \
+  --max_samples 2000 \
+  --quality 95
+```
+
+2. **编码对比**
+
+```bash
+python PureT/compare_encoding.py
+# 查看 encoding_compare_samples/ 目录下的对比结果
+```
+
+3. **查看评估样本**
+
+训练/验证时会自动保存一些样本到 `evaluation_samples/` 目录，可视化损坏后的图像重建效果。
+
+## 参考文献
+
+### ByteFormer
+
+```bibtex
+@article{patil2023bytes,
+  title={Bytes Are All You Need: Transformers Operating Directly on File Bytes},
+  author={Patil, Maxwell Horton and others},
+  journal={arXiv preprint arXiv:2306.00238},
+  year={2023}
+}
+```
+
+### PureT
+
+```bibtex
+@inproceedings{wang2022puret,
+  title={End-to-End Transformer Based Model for Image Captioning},
+  author={Wang, Yiyu and Xu, Jungang and Sun, Yingfei},
+  booktitle={AAAI},
+  year={2022}
+}
+```
+
+### CoreNet
+
+```bibtex
+@inproceedings{mehta2022cvnets,
+  author = {Mehta, Sachin and Abdolhosseini, Farzad and Rastegari, Mohammad},
+  title = {CVNets: High Performance Library for Computer Vision},
+  year = {2022},
+  booktitle = {Proceedings of the 30th ACM International Conference on Multimedia},
+  series = {MM '22}
+}
+```
+
+## 致谢
+
+本项目基于以下优秀的开源项目：
+
+- [Apple CoreNet](https://github.com/apple/corenet)：提供 ByteFormer 实现和训练框架
+- [PureT](https://github.com/yiyu-wang/PureT)：提供端到端 Transformer 图像描述模型
+- [HuggingFace Transformers](https://github.com/huggingface/transformers)：提供模型生态和工具
+- [COCO Caption](https://github.com/tylin/coco-caption)：提供评估工具
+
+感谢以上项目的作者和贡献者！
 
 ## License
 
-For license details, see [LICENSE](LICENSE). 
+本项目遵循 [MIT License](LICENSE)。
 
-## Relationship with CVNets
+---
 
-CoreNet evolved from CVNets, to encompass a broader range of applications beyond computer vision. Its expansion facilitated the training of foundational models, including LLMs.
-
-## Citation
-
-If you find our work useful, please cite the following paper:
-
-``` 
-@inproceedings{mehta2022cvnets, 
-     author = {Mehta, Sachin and Abdolhosseini, Farzad and Rastegari, Mohammad}, 
-     title = {CVNets: High Performance Library for Computer Vision}, 
-     year = {2022}, 
-     booktitle = {Proceedings of the 30th ACM International Conference on Multimedia}, 
-     series = {MM '22} 
-}
-```
+如有问题或建议，欢迎提交 Issue 或 Pull Request！
