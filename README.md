@@ -252,13 +252,13 @@ torchrun --nproc_per_node=4 --master_port=12355 PureT/main.py \
 ### 端到端微调（不冻结编码器）
 
 ```bash
+# 注意：移除 --freeze_backbone 参数以进行端到端微调
 python PureT/main.py \
   --folder PureT/experiments/ByteCaption_XE \
   --dataset coco \
   --eval_steps 600 \
   --val_samples 50 \
   --load_weights
-  # 注意：移除 --freeze_backbone 参数
 ```
 
 ### 训练配置
