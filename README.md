@@ -131,11 +131,9 @@ git lfs pull
 
 ### 1. COCO 数据集
 
-使用 HuggingFace 的 COCO Karpathy 分割数据集：
-
-```bash
-# 数据集将自动下载到：
-# PureT/data/coco_karpathy/AbdoTW___coco_2014_karpathy/{train,validation,test}
+数据集将在首次运行时自动下载到：
+```
+PureT/data/coco_karpathy/AbdoTW___coco_2014_karpathy/{train,validation,test}
 ```
 
 ### 2. 图像 ID 列表
