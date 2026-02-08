@@ -5,18 +5,18 @@
   "corrupt_type": "rbbf",
   "corrupt_level": "S1",
   "metrics": {
-    "Bleu_1": 0.6224580199855646,
-    "Bleu_2": 0.4453860436784195,
-    "Bleu_3": 0.3155911977341951,
-    "Bleu_4": 0.22777979222212225,
-    "ROUGE_L": 0.45911421187355045,
-    "CIDEr": 0.6890164578187745,
-    "METEOR": 0.20276789248588778,
-    "SPICE": 0.1350094854629006,
+    "Bleu_1": 0.6278491504350128,
+    "Bleu_2": 0.45317152985940407,
+    "Bleu_3": 0.31548499771293176,
+    "Bleu_4": 0.22572863026174686,
+    "ROUGE_L": 0.4633744576812414,
+    "CIDEr": 0.7265205337008008,
+    "METEOR": 0.2062008681513352,
+    "SPICE": 0.13436198456496878,
     "XE_Loss": null,
-    "Undecodable_Count": 148,
-    "Undecodable_Ratio": 0.0296,
-    "Total_Samples": 5000,
+    "Undecodable_Count": 11,
+    "Undecodable_Ratio": 0.022,
+    "Total_Samples": 500,
     "Sample_Preview": [
       {
         "image_id": 1,
@@ -1411,7 +1411,7 @@
     },
     {
       "image_id": 124,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A family sitting at a dinner table with bowls of soup.",
         "A family sitting around a table eating dinner.",
@@ -1697,7 +1697,7 @@
     },
     {
       "image_id": 150,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Two women are on a set of brown stairs.",
         "Two young women walking down brown carpeted stairs.",
@@ -2412,7 +2412,7 @@
     },
     {
       "image_id": 215,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man wearing glasses standing next to an airplane.",
         "A man stands next to a very small plane.",
@@ -2632,7 +2632,7 @@
     },
     {
       "image_id": 235,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A small black dog playing with a frisbee.",
         "A black curly haired dog plays with a frisbee.",
@@ -2798,7 +2798,7 @@
     },
     {
       "image_id": 250,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A woman blow drying her hair, in he mirror.",
         "a woman stands in a bathroom blow drying her hair",
@@ -3194,7 +3194,7 @@
     },
     {
       "image_id": 286,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Motor vehicles on roadway in urban city setting.",
         "A man is riding a motorcycle past some parked cars.",
@@ -3304,7 +3304,7 @@
     },
     {
       "image_id": 296,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Young men playing frisbee in a grassy field.",
         "A group of people on a field with a Frisbee.",
@@ -3645,7 +3645,7 @@
     },
     {
       "image_id": 327,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A simple, fenced in garden containing several kinds of plants.",
         "A plot of dirt with a fence around it with flower pots next to it.",
@@ -3711,7 +3711,7 @@
     },
     {
       "image_id": 333,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A parking meter sitting behind a blue truck.",
         "a scale that takes money for you to park in a spot",
@@ -3854,7 +3854,7 @@
     },
     {
       "image_id": 346,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Woman standing in living room using video game controls.",
         "A woman standing in her living room playing Wii.",
@@ -4030,7 +4030,7 @@
     },
     {
       "image_id": 362,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A picture of a lone clock tower standing in a school yard.",
         "A large clocktower is pictured near a fence.",

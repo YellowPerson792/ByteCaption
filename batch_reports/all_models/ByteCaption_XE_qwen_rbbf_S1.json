@@ -5,13 +5,13 @@
   "corrupt_type": "rbbf",
   "corrupt_level": "S1",
   "metrics": {
-    "Bleu_1": 0.6364541832662983,
-    "Bleu_2": 0.47760829677960265,
-    "Bleu_3": 0.3452114771797939,
-    "Bleu_4": 0.24534017867873542,
-    "ROUGE_L": 0.45557844206695713,
-    "CIDEr": 0.8194750932864201,
-    "METEOR": 0.21248828894217678,
+    "Bleu_1": 0.6372745490975579,
+    "Bleu_2": 0.47950995064743923,
+    "Bleu_3": 0.34699252530631713,
+    "Bleu_4": 0.2468164812108162,
+    "ROUGE_L": 0.45327475550011265,
+    "CIDEr": 0.819436951822517,
+    "METEOR": 0.21087261567921597,
     "SPICE": 0.15771175707553411,
     "XE_Loss": null,
     "Undecodable_Count": 2,
@@ -399,7 +399,7 @@
     },
     {
       "image_id": 32,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A table topped with donuts and a small box of even more donuts.",
         "Various pastries on napkins that include donuts and donut holes.",
@@ -1136,7 +1136,7 @@
     },
     {
       "image_id": 99,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "a kid riding his skate board on the edge of a concrete wall",
         "A man on a skateboard performs a trick on the ledge",

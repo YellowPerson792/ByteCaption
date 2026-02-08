@@ -205,8 +205,6 @@ class CocoDataset(data.Dataset):
                     converted_ids.append(id_str)
             self.image_ids = converted_ids
             print(f"Loaded {len(self.image_ids)} image IDs from JSON file")
-            if len(self.image_ids) > 0:
-                print(f"First 5 image IDs: {self.image_ids[:5]}")
 
         # Optional sequence pkls; if unavailable, auto-build sequences from HF captions
         self.auto_seq: bool = False

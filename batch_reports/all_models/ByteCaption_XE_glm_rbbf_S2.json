@@ -5,18 +5,18 @@
   "corrupt_type": "rbbf",
   "corrupt_level": "S2",
   "metrics": {
-    "Bleu_1": 0.47628319317286394,
-    "Bleu_2": 0.26764317475870536,
-    "Bleu_3": 0.1542196546596569,
-    "Bleu_4": 0.09635342984415964,
-    "ROUGE_L": 0.3398055527121232,
-    "CIDEr": 0.23335992049532625,
-    "METEOR": 0.1250979055384988,
-    "SPICE": 0.0530374652873435,
+    "Bleu_1": 0.4586797541973055,
+    "Bleu_2": 0.2593186746974165,
+    "Bleu_3": 0.14644954146479305,
+    "Bleu_4": 0.08945721049228267,
+    "ROUGE_L": 0.3241026580735169,
+    "CIDEr": 0.2160827414972979,
+    "METEOR": 0.11717359743692612,
+    "SPICE": 0.04392937652128937,
     "XE_Loss": null,
-    "Undecodable_Count": 584,
-    "Undecodable_Ratio": 0.1168,
-    "Total_Samples": 5000,
+    "Undecodable_Count": 57,
+    "Undecodable_Ratio": 0.114,
+    "Total_Samples": 500,
     "Sample_Preview": [
       {
         "image_id": 1,
@@ -179,7 +179,7 @@
     },
     {
       "image_id": 12,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A meal is lying on a plate on a table.",
         "part of a sandwich sitting on a table",
@@ -267,7 +267,7 @@
     },
     {
       "image_id": 20,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Two very attractive women enjoy a glass of white wine.",
         "A woman and her friend sitting on a table drinking wine.",
@@ -784,7 +784,7 @@
     },
     {
       "image_id": 67,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A narrow hotel room with two made up beds.",
         "a large modern hotel room with double beds",
@@ -806,7 +806,7 @@
     },
     {
       "image_id": 69,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A large airplane is on the airport runway.",
         "A giant airplane sitting on the tarmac of an airport.",
@@ -817,7 +817,7 @@
     },
     {
       "image_id": 70,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A building with a black and gold clock on it.",
         "A large clock towers next to a forest filled with green trees.",
@@ -828,7 +828,7 @@
     },
     {
       "image_id": 71,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "The meal consists of chopped chicken with cheese and brocolli.",
         "A styrofoam plate with shredded chicken and a dish of broccoli with cheese sauce.",
@@ -861,7 +861,7 @@
     },
     {
       "image_id": 74,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A young alpaca under a tree in the country.",
         "a brown bull is standing in his pen and some trees",
@@ -993,7 +993,7 @@
     },
     {
       "image_id": 86,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "there are many men preparing to cut a red ribbon",
         "a number of people wearing suits cutting a ribbon",
@@ -1015,7 +1015,7 @@
     },
     {
       "image_id": 88,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A snowboarder buried up to his waste in snow.",
         "A person standing in the snow with their hand up to their face.",
@@ -1037,7 +1037,7 @@
     },
     {
       "image_id": 90,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A person near a bike and a car on a street.",
         "A parked motorcycle with a cat and a person leaning on top of it.",
@@ -1235,7 +1235,7 @@
     },
     {
       "image_id": 108,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "An elderly  man and woman look at something out of the camera's view.",
         "An older woman sitting in a wheel chair next to an older man.",
@@ -1389,7 +1389,7 @@
     },
     {
       "image_id": 122,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man is posing for a great photo shop.",
         "A guy on a bike looking out from behind a wall.",
@@ -1411,7 +1411,7 @@
     },
     {
       "image_id": 124,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A family sitting at a dinner table with bowls of soup.",
         "A family sitting around a table eating dinner.",
@@ -1466,7 +1466,7 @@
     },
     {
       "image_id": 129,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man with eyeglasses  working on a laptop computer",
         "a man using a laptop computer and a shelf of books",
@@ -1499,7 +1499,7 @@
     },
     {
       "image_id": 132,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Two men walk down the street in a city.",
         "a couple of people walk next to some trees",
@@ -1598,7 +1598,7 @@
     },
     {
       "image_id": 141,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man riding skis down a snow covered slope.",
         "A person that is on skis standing in the snow.",
@@ -1818,7 +1818,7 @@
     },
     {
       "image_id": 161,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man standing next to a light and a sign.",
         "A man standing next to a traffic light in Australia",
@@ -1840,7 +1840,7 @@
     },
     {
       "image_id": 163,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A bunch of groceries are piled onto a table.",
         "Table filled with a bunch of different types of food.",
@@ -1972,7 +1972,7 @@
     },
     {
       "image_id": 175,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "a motorcycle is hanging in the air with plants on it",
         "The motorcycle was used for decoration by the water.",
@@ -2016,7 +2016,7 @@
     },
     {
       "image_id": 179,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man surfs outside in the rushing rapids.",
         "A woman surfs down the river on a surfboard.",
@@ -2126,7 +2126,7 @@
     },
     {
       "image_id": 189,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A woman holding food up to her mouth.",
         "A very cute lady holding a hot dog to her face.",
@@ -2192,7 +2192,7 @@
     },
     {
       "image_id": 195,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "An adorable little blonde girl standing on top of a box.",
         "The young child is standing up high looking down at the camera.",
@@ -2225,7 +2225,7 @@
     },
     {
       "image_id": 198,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "a snowboarder and a snow skier are posing for a picture",
         "Two guys stand in the snow on a mountain.",
@@ -2269,7 +2269,7 @@
     },
     {
       "image_id": 202,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "there is a white van that is stopped on the road",
         "Several people standing outside a parked white van",
@@ -2445,7 +2445,7 @@
     },
     {
       "image_id": 218,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A large pepperoni and mushroom pizza being cut",
         "A person is slicing an oven bake pizza.",
@@ -2511,7 +2511,7 @@
     },
     {
       "image_id": 224,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "The tennis player is extending his reach to hit the racket.",
         "A man swings his acket to hit a tennis ball",
@@ -2676,7 +2676,7 @@
     },
     {
       "image_id": 239,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A city street line with very tall buildings.",
         "Looking down a street in New York City with Central Park on the right and buildings on the left.",
@@ -2974,7 +2974,7 @@
     },
     {
       "image_id": 266,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A clock that is on top of a pole.",
         "A clock sitting in the middle of a sidewalk near a street.",
@@ -3029,7 +3029,7 @@
     },
     {
       "image_id": 271,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Snowboarder sitting for a majestic scenic photo",
         "A woman sitting on top of a snow covered slope.",
@@ -3073,7 +3073,7 @@
     },
     {
       "image_id": 275,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A bird that is playing in the snow.",
         "A grey bird in the middle of a snow-covered ground",
@@ -3249,7 +3249,7 @@
     },
     {
       "image_id": 291,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Many oranges have been placed inside a bowl.",
         "A bowl full of oranges that still have stems",
@@ -3326,7 +3326,7 @@
     },
     {
       "image_id": 298,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Two refrigerators sitting next to each other in a kitchen with items stored on top of them.",
         "Two refrigerators side by side in a kitchen.",
@@ -3513,7 +3513,7 @@
     },
     {
       "image_id": 315,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "There s a van with grafting on thevoutsidevif the van",
         "A box truck painted with graffiti parked on the road.",
@@ -3568,7 +3568,7 @@
     },
     {
       "image_id": 320,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A person riding on the back of a white horse through a dirt field.",
         "A man with a helmet on a horse in a corral.",
@@ -3634,7 +3634,7 @@
     },
     {
       "image_id": 326,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A teddy bear is positioned to read a text book.",
         "A teddy bear sits in a chair with an open book.",
@@ -3678,7 +3678,7 @@
     },
     {
       "image_id": 330,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Lit up night traffic is zooming by a clock tower.",
         "A fast moving image of cars on a busy street with a tower clock in the background.",
@@ -3689,7 +3689,7 @@
     },
     {
       "image_id": 331,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A person wearing a banana headdress and necklace",
         "A lady dressed in a blue and purple outfit wearing a hat made of fruit.",
@@ -3744,7 +3744,7 @@
     },
     {
       "image_id": 336,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A bathroom sink underneath a medicine cabinet next to a window.",
         "A bathroom with empty bottles in the window",
@@ -3810,7 +3810,7 @@
     },
     {
       "image_id": 342,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A mouse sitting on the side of a computer monitor.",
         "A bathroom key on a keychain made from a mouse.",
@@ -4052,7 +4052,7 @@
     },
     {
       "image_id": 364,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A young boy holding a teddy bear by it's ears.",
         "A child is holding up a large teddy bear.",
@@ -4063,7 +4063,7 @@
     },
     {
       "image_id": 365,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A woman in striped shirt holding a plate with a bagel on it.",
         "Woman in maroon shirt holding up a bagel.",
@@ -4096,7 +4096,7 @@
     },
     {
       "image_id": 368,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "a couple of street signs are on a pole",
         "a tall pole with street signs standing next to  a tall tree",
@@ -4151,7 +4151,7 @@
     },
     {
       "image_id": 373,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A variety of cars on a street with buildings.",
         "A variety of shops and stores on a busy city street.",
@@ -4327,7 +4327,7 @@
     },
     {
       "image_id": 389,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Two wooden benches sitting on top of a lush green grass covered park.",
         "Two wooden benches are next to one another near a busy street.",
@@ -4492,7 +4492,7 @@
     },
     {
       "image_id": 404,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man riding on the back of a green motorcycle.",
         "A man is doing a trick on his dirtbike in midair.",
@@ -4514,7 +4514,7 @@
     },
     {
       "image_id": 406,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A batter that is watching the ball go past them to the catcher.",
         "A young boy watches a pitch go by in a little league game",
@@ -4679,7 +4679,7 @@
     },
     {
       "image_id": 421,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Cars parked at side of road in front of a building at dusk or night.",
         "A large monumental building with a clock tower.",
@@ -4844,7 +4844,7 @@
     },
     {
       "image_id": 436,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Two boys in beds with a bookcase in between them.",
         "Two children in a black and white photo sitting up in bed.",
@@ -4855,7 +4855,7 @@
     },
     {
       "image_id": 437,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Two little girls sitting on the side of a white boat.",
         "Two girls sitting on device on side of a boat.",
@@ -4965,7 +4965,7 @@
     },
     {
       "image_id": 447,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Two slices of pizza with toppings and a beverage on a table.",
         "a close up of a plate with two slices of pizza",
@@ -5075,7 +5075,7 @@
     },
     {
       "image_id": 457,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Man laying on bed with shirt open looking into device for picture.",
         "A may laying in on a bed with his right breasteses hanging out.",
@@ -5306,7 +5306,7 @@
     },
     {
       "image_id": 478,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "The scene is three large racks of skis on a mountain.",
         "Skis stacked up on racks at the top of a mountain",
@@ -5361,7 +5361,7 @@
     },
     {
       "image_id": 483,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A group of men carrying surfboards on a beach.",
         "Three surfers on a beach heading for the waves.",
@@ -5394,7 +5394,7 @@
     },
     {
       "image_id": 486,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "the woman prepares her horse for a jumping competition",
         "a jockey is seen riding his horse on a grass field",
@@ -5471,7 +5471,7 @@
     },
     {
       "image_id": 493,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A woman standing while holding a pole on snow",
         "A girl posing with ski equipment in the snow",
@@ -5504,7 +5504,7 @@
     },
     {
       "image_id": 496,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A fighter jet flying through a blue sky with smoke behind it.",
         "An aeroplane is soaring high in the sky.",
@@ -5515,7 +5515,7 @@
     },
     {
       "image_id": 497,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A large pink frosted cake sitting next to cups of coffee.",
         "A welcome cake sitting on a table surrounded by cups and other dishes.",

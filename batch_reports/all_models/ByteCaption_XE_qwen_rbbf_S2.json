@@ -5,14 +5,14 @@
   "corrupt_type": "rbbf",
   "corrupt_level": "S2",
   "metrics": {
-    "Bleu_1": 0.4618473895577692,
-    "Bleu_2": 0.2743289679807654,
-    "Bleu_3": 0.1583530821047793,
-    "Bleu_4": 0.09453651524455181,
-    "ROUGE_L": 0.3347688711378367,
-    "CIDEr": 0.2166998046429007,
-    "METEOR": 0.1217067979105943,
-    "SPICE": 0.05513843295166839,
+    "Bleu_1": 0.45700034133971573,
+    "Bleu_2": 0.2749504974166006,
+    "Bleu_3": 0.16001340005054815,
+    "Bleu_4": 0.09606821337552811,
+    "ROUGE_L": 0.32643341042259166,
+    "CIDEr": 0.21568897205359114,
+    "METEOR": 0.12122286485186178,
+    "SPICE": 0.05525748057071601,
     "XE_Loss": null,
     "Undecodable_Count": 11,
     "Undecodable_Ratio": 0.11,
@@ -44,7 +44,7 @@
       },
       {
         "image_id": 5,
-        "generated": "this is a dummy caption for an undecodable image",
+        "generated": "The image cannot be identified",
         "reference": "a sandwich in a plastic food basket on a table",
         "augmentation_idx": 0
       }
@@ -102,7 +102,7 @@
     },
     {
       "image_id": 5,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "a sandwich in a plastic food basket on a table",
         "Sandwich and a lollipop in a bright orange serving tray sitting on a table.",
@@ -157,7 +157,7 @@
     },
     {
       "image_id": 10,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "some children are riding on a mini orange train",
         "Several children are riding on a toy train ride.",
@@ -168,7 +168,7 @@
     },
     {
       "image_id": 11,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A green vase filed with red roses sitting on top of table.",
         "A bouquet of roses in a red walled road.",
@@ -399,7 +399,7 @@
     },
     {
       "image_id": 32,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A table topped with donuts and a small box of even more donuts.",
         "Various pastries on napkins that include donuts and donut holes.",
@@ -454,7 +454,7 @@
     },
     {
       "image_id": 37,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "there is a woman sitting on a bed using a lap top",
         "a woman in glasses using an apple fruit",
@@ -487,7 +487,7 @@
     },
     {
       "image_id": 40,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A few bags laying around in a living room.",
         "A living room with a couch, two tables and a painting.",
@@ -575,7 +575,7 @@
     },
     {
       "image_id": 48,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "a long skinny bed with a floral blanket on it",
         "A small bed sits under a tent where the sunlight peeks through.",
@@ -619,7 +619,7 @@
     },
     {
       "image_id": 52,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A blue and white train is moving on the rails.",
         "A five car blue and white train with passengers",
@@ -740,7 +740,7 @@
     },
     {
       "image_id": 63,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man in foodservice holding baskets with food.",
         "Smiling man, in red jacket and white apron and cap, holds two red trays with sandwiches.",
@@ -784,7 +784,7 @@
     },
     {
       "image_id": 67,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A narrow hotel room with two made up beds.",
         "a large modern hotel room with double beds",
@@ -1048,7 +1048,7 @@
     },
     {
       "image_id": 91,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A gray and white sitting in front of a TV.",
         "A cat is looking at the other cat on the computer screen.",

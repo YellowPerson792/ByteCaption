@@ -5,18 +5,18 @@
   "corrupt_type": "rbbf",
   "corrupt_level": "S1",
   "metrics": {
-    "Bleu_1": 0.6789255341215376,
-    "Bleu_2": 0.5029737999963547,
-    "Bleu_3": 0.3668698503407034,
-    "Bleu_4": 0.26971108431388124,
-    "ROUGE_L": 0.49322890009528636,
-    "CIDEr": 0.8620413984940253,
-    "METEOR": 0.2287529383524659,
-    "SPICE": 0.15854898253575353,
+    "Bleu_1": 0.6911947085571122,
+    "Bleu_2": 0.5181498552127559,
+    "Bleu_3": 0.3804172263242256,
+    "Bleu_4": 0.2804344508908272,
+    "ROUGE_L": 0.5012585724656724,
+    "CIDEr": 0.9613123601697328,
+    "METEOR": 0.2374366029276827,
+    "SPICE": 0.16818551476374205,
     "XE_Loss": null,
-    "Undecodable_Count": 113,
-    "Undecodable_Ratio": 0.0226,
-    "Total_Samples": 5000,
+    "Undecodable_Count": 9,
+    "Undecodable_Ratio": 0.018,
+    "Total_Samples": 500,
     "Sample_Preview": [
       {
         "image_id": 1,
@@ -883,7 +883,7 @@
     },
     {
       "image_id": 76,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man in costume standing next to a building.",
         "He is dressed in the times that his tours encompass.",
@@ -2082,7 +2082,7 @@
     },
     {
       "image_id": 185,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A train traveling down tracks next to a  building.",
         "A train going down the train tracks in the city.",
@@ -4294,7 +4294,7 @@
     },
     {
       "image_id": 386,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Sheep are in a field near a fence and on a tractor.",
         "a large group of sheep eating from a manger",
@@ -4635,7 +4635,7 @@
     },
     {
       "image_id": 417,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A couple of cats taking a nap on top of a bed.",
         "Two kittens are cuddling and enjoying a soft pillow",
@@ -4767,7 +4767,7 @@
     },
     {
       "image_id": 429,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A stop sign posted in a foreign language",
         "A stop sign in Arabic by a body of water.",
@@ -4888,7 +4888,7 @@
     },
     {
       "image_id": 440,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "Two long metal tables sitting inside of a kitchen.",
         "a commercial kitchen with an oven and a refrigerator",
@@ -5295,7 +5295,7 @@
     },
     {
       "image_id": 477,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A filthy sink and toilet are seen from above.",
         "A toilet with a wooden cover, and a dirty sink.",
@@ -5438,7 +5438,7 @@
     },
     {
       "image_id": 490,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A couple of large giraffe in the tall grass.",
         "Two giraffe standing on top of a tall grass field.",
@@ -5515,7 +5515,7 @@
     },
     {
       "image_id": 497,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A large pink frosted cake sitting next to cups of coffee.",
         "A welcome cake sitting on a table surrounded by cups and other dishes.",

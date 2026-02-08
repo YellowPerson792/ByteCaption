@@ -1,22 +1,3 @@
-"""
-创建批量报告的鲁棒性可视化分析图表
-
-该脚本读取批量评估的JSON报告，生成以下可视化内容：
-- 各损坏类型的曲线图（指标 vs 严重程度）
-- 相对于S0的性能下降热力图
-- 聚合鲁棒性得分条形图
-- 解码失败曲线图（无法解码的百分比 vs 严重程度）
-- 汇总表格和论文级别的 tables.md
-
-主要输出：
-    curves_{corrupt_type}.png - 性能曲线图
-    heatmap_drop_{corrupt_type}.png - 性能下降热力图
-    robustness_score.png - 鲁棒性得分对比图
-    decode_failure_curve_{corrupt_type}.png - 解码失败率曲线
-    summary_metrics_table.md - 详细指标表格
-    tables.md - 完整的报告文档
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -103,6 +84,13 @@ MODEL_LABELS = {
     "ByteCaption_XE_ministral": "Ministral-3-8B",
 }
 
+# 占位文本（用于判定无效输入）
+PLACEHOLDER_SENTINELS = {
+    "the image cannot be identified",
+    "a person standing in a room",
+    "this is a dummy caption for an undecodable image",
+}
+
 # 指标缩放因子 - 将原始指标值乘以此因子（用于转换为百分比）
 # 例如：CIDEr从0-1转换为0-100
 SCALE_METRICS = {
@@ -118,8 +106,7 @@ FONT_SIZES = {
     "subtitle": 14,          # 列标题（如"RBBF", "RBSL"）
     "axes_label": 14,        # 坐标轴标签字体大小
     "tick_label": 14,        # 刻度标签字体大小
-    "legend": 10,            # 图例字体大小
-    "heatmap_title": 14,     # 热力图小标题
+    "legend": 12,            # 图例字体大小
     "robustness_title": 14,  # 鲁棒性得分图标题
 }
 
@@ -211,6 +198,57 @@ def get_metric_value(run: Dict, metric: str) -> float | None:
     return float(val) * scale
 
 
+def _normalize_caption(text: str | None) -> str:
+    if not isinstance(text, str):
+        return ""
+    # 统一大小写并去掉末尾常见标点
+    return text.strip().lower().rstrip(".!?:;,\u3002")
+
+
+def count_placeholder_captions(samples: list | None) -> int:
+    """统计占位文本出现的次数，用于计算有效输入率"""
+    if not isinstance(samples, list):
+        return 0
+    count = 0
+    for sample in samples:
+        if not isinstance(sample, dict):
+            continue
+        candidate = sample.get("caption") or sample.get("generated")
+        norm = _normalize_caption(candidate)
+        if norm in PLACEHOLDER_SENTINELS:
+            count += 1
+    return count
+
+
+def _is_pixel_model(model_name: str | None) -> bool:
+    """Heuristic: treat all non-ByteCaption models as pixel-domain."""
+    if not model_name:
+        return False
+    return model_name != "ByteCaption_XE"
+
+
+def compute_valid_input_rate(run: Dict) -> float | None:
+    """????????1 - (????) / ???"""
+    metrics = run.get("metrics") or {}
+    samples = run.get("caption_samples") or []
+    model_name = run.get("model_name")
+
+    if _is_pixel_model(model_name):
+        total = 500
+    else:
+        total = metrics.get("Total_Samples")
+        if total is None and isinstance(samples, list):
+            total = len(samples)
+
+    if not total or total <= 0:
+        return None
+
+    placeholder_count = count_placeholder_captions(samples)
+    invalid = min(placeholder_count, total)
+    valid = total - invalid
+    return valid / total
+
+
 def build_series(
     runs: Iterable[Dict],
     model_name: str,
@@ -236,17 +274,20 @@ def apply_plot_style() -> None:
     - legend.fontsize: 图例字体大小
     - xtick/ytick.labelsize: 刻度标签字体大小
     - axes.spines: 控制图表边框的显示（top/right设为False隐藏上和右边框）
+    - axes.linewidth: 坐标轴线宽
     """
     plt.rcParams.update(
         {
             "font.size": FONT_SIZES["default"],           # 默认字体大小
-            "axes.titlesize": FONT_SIZES["heatmap_title"],      # 图表标题字体大小
             "axes.labelsize": FONT_SIZES["axes_label"],      # 坐标轴标签字体大小
             "legend.fontsize": FONT_SIZES["legend"],      # 图例字体大小
             "xtick.labelsize": FONT_SIZES["tick_label"],      # X轴刻度标签字体大小
             "ytick.labelsize": FONT_SIZES["tick_label"],      # Y轴刻度标签字体大小
             "axes.spines.top": False,  # 隐藏顶部边框
             "axes.spines.right": False,# 隐藏右侧边框
+            "axes.linewidth": 0.6,     # 坐标轴线宽
+            "xtick.major.width": 0.6,  # X轴刻度线宽
+            "ytick.major.width": 0.6,  # Y轴刻度线宽
         }
     )
 
@@ -286,316 +327,6 @@ def build_model_avg(runs: List[Dict], corrupt_type: str, metric: str) -> List[fl
     series_list = [build_series(runs, m, corrupt_type, metric) for m in models_without_bcm]
     avg = np.nanmean(series_list, axis=0)
     return list(avg)
-
-
-def plot_curves(runs: List[Dict], metrics: List[str], output_dir: Path) -> None:
-    """生成性能曲线图（左右合并布局）
-    
-    可调整参数说明：
-    - figsize: 图表尺寸 (宽度, 高度*指标数量)
-    - linewidth: 线条粗细，高亮模型vs普通模型
-    - alpha: 线条透明度 (0-1)
-    - marker: 数据点标记样式 ('o'圆点, 's'方块, '^'三角等)
-    - grid: 网格线显示与透明度
-    - legend位置: bbox_to_anchor调整图例位置
-    """
-    models = iter_models(runs)
-    corrupt_types = iter_corrupt_types(runs)
-    if not models or not corrupt_types:
-        return
-
-    color_map = build_color_map(models)
-    # 为模型平均值添加高亮对比色（类似BCM）
-    color_map["Model_Avg"] = "#E67E22"
-
-    # 创建左右合并布局图表
-    fig, axes = plt.subplots(
-        len(metrics),
-        len(corrupt_types),
-        figsize=(11, 3.5 * len(metrics)),  # 增加高度以填充留白
-    )
-    
-    # 确保axes是2D数组
-    if len(metrics) == 1:
-        axes = axes.reshape(1, -1)
-    if len(corrupt_types) == 1:
-        axes = axes.reshape(-1, 1)
-    
-    # 字母标记列表
-    subplot_labels = [chr(97 + i) for i in range(len(metrics) * len(corrupt_types))]
-    label_idx = 0
-    
-    for col, corrupt_type in enumerate(corrupt_types):
-        for row, metric in enumerate(metrics):
-            ax = axes[row, col]
-            
-            # 只绘制BCM（ByteCaption_XE）
-            model = "ByteCaption_XE"
-            ys = build_series(runs, model, corrupt_type, metric)
-            if not all(np.isnan(y) for y in ys):
-                x_vals = list(range(len(LEVEL_ORDER)))
-                ax.fill_between(x_vals, 0, ys, alpha=0.16, color=color_map[model])
-                ax.plot(
-                    x_vals,
-                    ys,
-                    marker="o",
-                    linewidth=2.4,
-                    alpha=1.0,
-                    color=color_map[model],
-                    label=model_label(model),
-                )
-
-            # 只保留BCM与Avg曲线（不绘制其它模型）
-            
-            # 绘制模型平均值（Avg）
-            avg_ys = build_model_avg(runs, corrupt_type, metric)
-            if not all(np.isnan(y) for y in avg_ys):
-                x_vals = list(range(len(LEVEL_ORDER)))
-                ax.fill_between(x_vals, 0, avg_ys, alpha=0.20, color=color_map["Model_Avg"])
-                ax.plot(
-                    x_vals,
-                    avg_ys,
-                    marker="s",
-                    linewidth=2.0,
-                    alpha=0.8,
-                    color=color_map["Model_Avg"],
-                    label="Avg (w/o BCM)",
-                    linestyle="--",
-                )
-
-            # 计算y轴的最大值，从0开始（仅考虑BCM与Avg）
-            all_ys = list(ys) + list(avg_ys)
-            max_y = max([y for y in all_ys if not np.isnan(y)], default=0)
-            # 禁用自动外边距，确保色块紧贴y轴
-            ax.margins(x=0, y=0)
-            # 明确设置y轴范围从0开始
-            ax.set_ylim(bottom=0, top=max_y * 1.15)
-            # 禁用自动缩放，锁定范围
-            ax.autoscale(enable=False)
-
-            # 只在左列显示y轴标签（粗体，labelpad使其靠近坐标轴）
-            if col == 0:
-                ax.set_ylabel(metric, fontweight='bold', fontsize=12, labelpad=3)
-            else:
-                ax.set_ylabel("")
-            # 所有子图都显示S0-S5刻度标签
-            ax.set_xticks(list(range(len(LEVEL_ORDER))))
-            ax.set_xticklabels(LEVEL_ORDER)
-            # 只在最下面一行显示X轴标签文字（粗体）
-            if row == len(metrics) - 1:
-                ax.set_xlabel("Corruption severity", fontweight='bold', fontsize=12)
-            else:
-                ax.set_xlabel("")
-            
-            # 在子图上添加标签（如"(a) RBBF × CIDEr"）
-            label_text = f"({subplot_labels[label_idx]}) {corrupt_type.upper()} × {metric}"
-            ax.text(0.7, 0.9, label_text,
-                   transform=ax.transAxes,
-                   fontsize=13, fontweight='bold',
-                   ha='center', va='top',
-                   bbox=dict(boxstyle='round,pad=0.6', facecolor='white', alpha=0.9, edgecolor='gray', linewidth=1.5))
-            label_idx += 1
-
-    # 添加统一的大标题
-    fig.suptitle("Metrics Curves across Corruption Levels", fontsize=FONT_SIZES["title"], y=0.98, fontweight="bold")
-
-    # 移除列标题（已由子图标签替代）
-    
-    # 图例放到底部，两行排列
-    handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(
-        handles,
-        labels,
-        loc="lower center",
-        ncol=6,
-        frameon=True,
-        framealpha=0.95,
-        bbox_to_anchor=(0.5, 0.01),
-        fontsize=FONT_SIZES["legend"],
-        edgecolor='gray',
-    )
-
-    # 为底部图例预留空间，优化留白分布
-    fig.tight_layout(rect=[0, 0.05, 1, 1])
-    outfile = output_dir / "curves_combined.svg"
-    fig.savefig(outfile, format="svg")
-    plt.close(fig)
-
-
-def compute_drop_matrix(
-    runs: Iterable[Dict],
-    metric: str,
-    corrupt_type: str,
-    models: List[str],
-) -> np.ndarray:
-    matrix = np.full((len(models), len(DROP_LEVELS)), np.nan)
-    for i, model in enumerate(models):
-        series = build_series(runs, model, corrupt_type, metric)
-        s0 = series[0]
-        if s0 is None or np.isnan(s0) or s0 == 0:
-            continue
-        for j, level in enumerate(DROP_LEVELS, start=1):
-            sx = series[j]
-            if sx is None or np.isnan(sx):
-                continue
-            matrix[i, j - 1] = (s0 - sx) / s0 * 100.0
-    return matrix
-
-
-def plot_relative_metrics(runs: List[Dict], metrics: List[str], output_dir: Path) -> None:
-    """生成性能下降曲线图（左右合并布局）
-    
-    显示相对于S0的性能下降百分比曲线（S1-S5）
-    """
-    models = iter_models(runs)
-    corrupt_types = iter_corrupt_types(runs)
-    if not models or not corrupt_types:
-        return
-
-    color_map = build_color_map(models)
-    # 为模型平均值添加高亮对比色
-    color_map["Model_Avg"] = "#E67E22"
-
-    # 创建左右合并布局图表
-    fig, axes = plt.subplots(
-        len(metrics),
-        len(corrupt_types),
-        figsize=(11, 3.5 * len(metrics)),
-    )
-    
-    # 确保axes是2D数组
-    if len(metrics) == 1:
-        axes = axes.reshape(1, -1)
-    if len(corrupt_types) == 1:
-        axes = axes.reshape(-1, 1)
-    
-    # 字母标记列表
-    subplot_labels = [chr(97 + i) for i in range(len(metrics) * len(corrupt_types))]
-    label_idx = 0
-    
-    for col, corrupt_type in enumerate(corrupt_types):
-        for row, metric in enumerate(metrics):
-            ax = axes[row, col]
-            
-            # 绘制每个模型的性能下降曲线
-            for model in models:
-                series = build_series(runs, model, corrupt_type, metric)
-                s0 = series[0]
-                if s0 is None or np.isnan(s0) or s0 == 0:
-                    continue
-                # 计算相对量：S0=100，S1-S5为相对S0的比值*100
-                relative_values = [100.0]  # S0时为100
-                for sx in series[1:]:  # S1-S5
-                    if sx is None or np.isnan(sx):
-                        relative_values.append(np.nan)
-                    else:
-                        relative_values.append((sx / s0) * 100.0)
-                
-                if all(np.isnan(v) for v in relative_values):
-                    continue
-                
-                is_highlight = model == "ByteCaption_XE"
-                ax.plot(
-                    list(range(len(relative_values))),
-                    relative_values,
-                    marker="o",
-                    linewidth=2.4 if is_highlight else 1.4,
-                    alpha=1.0 if is_highlight else 0.65,
-                    color=color_map[model],
-                    label=model_label(model),
-                )
-            
-            # 绘制模型平均的相对性能
-            avg_relative = [100.0]  # S0时为100
-            for level_idx in range(1, len(LEVEL_ORDER)):  # S1-S5
-                values_at_level = []
-                for model in models:
-                    if model == "ByteCaption_XE":
-                        continue
-                    series = build_series(runs, model, corrupt_type, metric)
-                    s0 = series[0]
-                    if s0 is None or np.isnan(s0) or s0 == 0:
-                        continue
-                    sx = series[level_idx]
-                    if sx is None or np.isnan(sx):
-                        continue
-                    values_at_level.append((sx / s0) * 100.0)
-                
-                if values_at_level:
-                    avg_relative.append(np.mean(values_at_level))
-                else:
-                    avg_relative.append(np.nan)
-            
-            if not all(np.isnan(v) for v in avg_relative):
-                ax.plot(
-                    list(range(len(avg_relative))),
-                    avg_relative,
-                    marker="s",
-                    linewidth=2.0,
-                    alpha=0.8,
-                    color=color_map["Model_Avg"],
-                    label="Avg (w/o BCM)",
-                    linestyle="--",
-                )
-            
-            # 设置X轴刻度（包括S0-S5）
-            ax.set_xticks(list(range(len(LEVEL_ORDER))))
-            ax.set_xticklabels(LEVEL_ORDER)
-            # 只在最下面一行显示X轴标签文字
-            if row == len(metrics) - 1:
-                ax.set_xlabel("Corruption severity")
-            else:
-                ax.set_xlabel("")
-            
-            # 只在左列显示Y轴标签，包含指标名称
-            ax.set_ylabel(f"Relative {metric} (%)" if col == 0 else "")
-            # 设置Y轴范围，100%以上留一点空间
-            ax.set_ylim(0, 115)
-            ax.set_title("")  # 移除子图标题
-            
-            # 添加子图标记（a, b, c, d）
-            ax.text(
-                -0.12, 1.08,
-                f"({subplot_labels[label_idx]})",
-                transform=ax.transAxes,
-                fontsize=FONT_SIZES["default"],
-                fontweight="bold",
-                va="top",
-                ha="left",
-            )
-            label_idx += 1
-    
-    fig.suptitle("Relative Metrics across Corruption Levels", fontsize=FONT_SIZES["title"], y=0.96)
-    
-    # 列标题：RBBF / RBSL
-    for col, corrupt_type in enumerate(corrupt_types):
-        fig.text(
-            (col + 0.5) / len(corrupt_types),
-            0.9,
-            corrupt_type.upper(),
-            ha="center",
-            va="center",
-            fontsize=FONT_SIZES["subtitle"],
-        )
-    
-    # 图例放到底部
-    handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(
-        handles,
-        labels,
-        loc="lower center",
-        ncol=6,
-        frameon=True,
-        framealpha=0.95,
-        bbox_to_anchor=(0.5, 0.01),
-        fontsize=FONT_SIZES["legend"],
-    )
-
-    # 为底部图例预留空间
-    fig.tight_layout(rect=[0, 0.08, 1, 1])
-    outfile = output_dir / "relative_curves_combined.svg"
-    fig.savefig(outfile, format="svg")
-    plt.close(fig)
 
 
 def compute_robustness_scores(
@@ -645,13 +376,19 @@ def plot_robustness_scores(
     colors = [color_map[m] for m in models]
 
     # 调整图表尺寸
-    fig, ax = plt.subplots(figsize=(11, 7))
-    ax.bar(labels, scores, color=colors, alpha=0.85)
+    fig, ax = plt.subplots(figsize=(10, 7))
+    ax.bar(labels, scores, color=colors, alpha=0.77)
     ax.set_ylabel("Robustness Score (%)", fontweight='bold', fontsize=12)
     ax.set_ylim(0, max(scores) * 1.15)
     
+    # 显示四周边框
+    ax.spines['top'].set_visible(True)
+    ax.spines['right'].set_visible(True)
+    ax.spines['bottom'].set_visible(True)
+    ax.spines['left'].set_visible(True)
+    
     # X轴标签旋转角度
-    ax.tick_params(axis="x", labelrotation=30)
+    ax.tick_params(axis="x", labelrotation=27, labelsize=14)
     
     # 添加统一的大标题（粗体，与其他图一致）
     fig.suptitle("Robustness Score", fontsize=FONT_SIZES["title"], y=0.98, fontweight="bold")
@@ -680,6 +417,9 @@ def write_summary_csv(
 def build_run_index(runs: Iterable[Dict]) -> Dict[Tuple[str, str, str], Dict]:
     index: Dict[Tuple[str, str, str], Dict] = {}
     for run in runs:
+        valid_rate = compute_valid_input_rate(run)
+        if valid_rate is not None:
+            run.setdefault("metrics", {})["Valid_Input_Rate"] = valid_rate
         model = run.get("model_name")
         corrupt = run.get("corrupt_type")
         level = run.get("corrupt_level")
@@ -735,6 +475,11 @@ def build_metrics_table_html(
     max_vals: Dict[str, Dict[str, float | None]] = {
         lvl: {metric: None for metric in TABLE_METRICS} for lvl in LEVEL_ORDER
     }
+
+    models_without_bcm = [m for m in models if m != "ByteCaption_XE"]
+    avg_vals: Dict[str, Dict[str, float | None]] = {
+        lvl: {metric: None for metric in TABLE_METRICS} for lvl in LEVEL_ORDER
+    }
     for lvl in LEVEL_ORDER:
         for metric in TABLE_METRICS:
             values = []
@@ -751,6 +496,24 @@ def build_metrics_table_html(
                     values.append(round(val, 1))
             max_vals[lvl][metric] = max(values) if values else None
 
+            # 计算非BCM模型的平均值（仅用于“Avg (w/o BCM)”行）
+            if models_without_bcm:
+                avg_candidates = []
+                for model in models_without_bcm:
+                    v = get_index_metric(
+                        index,
+                        model,
+                        corrupt_type,
+                        lvl,
+                        metric,
+                        SCALE_METRICS.get(metric, 1.0),
+                    )
+                    if v is not None:
+                        avg_candidates.append(round(v, 1))
+                avg_vals[lvl][metric] = (
+                    float(np.mean(avg_candidates)) if avg_candidates else None
+                )
+
     lines = []
     lines.append("<table>")
     lines.append("  <thead>")
@@ -764,9 +527,23 @@ def build_metrics_table_html(
     lines.append("    </tr>")
     lines.append("  </thead>")
     lines.append("  <tbody>")
+    avg_inserted = False
     for group, group_models in split_models_by_group(models):
-        lines.append(f'  <tr><th colspan="7">{group}</th></tr>')
+        is_bcm_only_group = len(group_models) == 1 and group_models[0] == "ByteCaption_XE"
+        if not is_bcm_only_group:
+            lines.append(f'  <tr><th colspan="7">{group}</th></tr>')
         for model in group_models:
+            if model == "ByteCaption_XE" and not avg_inserted:
+                row_avg = ["  <tr><td>Avg (w/o BCM)</td>"]
+                for lvl in LEVEL_ORDER:
+                    c_val = avg_vals[lvl]["CIDEr"]
+                    s_val = avg_vals[lvl]["SPICE"]
+                    c_txt = format_value(c_val, 1)
+                    s_txt = format_value(s_val, 1)
+                    row_avg.append(f"<td>{c_txt} / {s_txt}</td>")
+                row_avg.append("</tr>")
+                lines.append("".join(row_avg))
+                avg_inserted = True
             row = [f"  <tr><td>{model_label(model)}</td>"]
             for lvl in LEVEL_ORDER:
                 c_val = get_index_metric(
@@ -799,17 +576,27 @@ def build_metrics_table_html(
     return "\n".join(lines)
 
 
-def build_failure_table_html(
+def build_valid_input_table_html(
     index: Dict[Tuple[str, str, str], Dict],
     corrupt_type: str,
     models: List[str],
 ) -> str:
+    models_without_bcm = [m for m in models if m != "ByteCaption_XE"]
+    avg_vals: Dict[str, float | None] = {lvl: None for lvl in LEVEL_ORDER}
+    for lvl in LEVEL_ORDER:
+        candidates = []
+        for model in models_without_bcm:
+            val = get_index_metric(index, model, corrupt_type, lvl, "Valid_Input_Rate", 100.0)
+            if val is not None:
+                candidates.append(val)
+        avg_vals[lvl] = float(np.mean(candidates)) if candidates else None
+
     lines = []
     lines.append("<table>")
     lines.append("  <thead>")
     lines.append("    <tr>")
     lines.append('      <th rowspan="2">Model</th>')
-    lines.append(f'      <th colspan="6">{corrupt_type.upper()} (Decode Success %)</th>')
+    lines.append(f'      <th colspan="6">{corrupt_type.upper()} (Valid Input Rate %)</th>')
     lines.append("    </tr>")
     lines.append("    <tr>")
     for lvl in LEVEL_ORDER:
@@ -817,15 +604,26 @@ def build_failure_table_html(
     lines.append("    </tr>")
     lines.append("  </thead>")
     lines.append("  <tbody>")
+    avg_inserted = False
     for group, group_models in split_models_by_group(models):
-        lines.append(f'  <tr><th colspan="7">{group}</th></tr>')
+        is_bcm_only_group = len(group_models) == 1 and group_models[0] == "ByteCaption_XE"
+        if not is_bcm_only_group:
+            lines.append(f'  <tr><th colspan="7">{group}</th></tr>')
         for model in group_models:
+            if model == "ByteCaption_XE" and not avg_inserted:
+                row_avg = ["  <tr><td>Avg (w/o BCM)</td>"]
+                for lvl in LEVEL_ORDER:
+                    val = avg_vals[lvl]
+                    cell = "-" if val is None else f"{val:.1f}%"
+                    row_avg.append(f"<td>{cell}</td>")
+                row_avg.append("</tr>")
+                lines.append("".join(row_avg))
+                avg_inserted = True
+
             row = [f"  <tr><td>{model_label(model)}</td>"]
             for lvl in LEVEL_ORDER:
-                val = get_index_metric(index, model, corrupt_type, lvl, "Undecodable_Ratio", 100.0)
-                # 转换为成功率：100 - 失败率
-                success_val = None if val is None else (100.0 - val)
-                cell = "-" if success_val is None else f"{success_val:.1f}%"
+                val = get_index_metric(index, model, corrupt_type, lvl, "Valid_Input_Rate", 100.0)
+                cell = "-" if val is None else f"{val:.1f}%"
                 row.append(f"<td>{cell}</td>")
             row.append("</tr>")
             lines.append("".join(row))
@@ -843,8 +641,8 @@ def write_summary_metrics_tables(
     tables = [
         build_metrics_table_html(index, "rbbf", models),
         build_metrics_table_html(index, "rbsl", models),
-        build_failure_table_html(index, "rbbf", models),
-        build_failure_table_html(index, "rbsl", models),
+        build_valid_input_table_html(index, "rbbf", models),
+        build_valid_input_table_html(index, "rbsl", models),
     ]
     out_path = output_dir / "summary_metrics_table.md"
     out_path.write_text("\n\n".join(tables) + "\n", encoding="utf-8")
@@ -873,7 +671,7 @@ def write_tables_md(output_dir: Path) -> Path:
         "",
         "## Valid Input Rate across Corruption Levels",
         "",
-        "![Combined Valid Input Rate](decode_success_curve_combined.svg)",
+        "![Combined Valid Input Rate](valid_input_rate_combined.svg)",
     ]
     out_path = output_dir / "tables.md"
     out_path.write_text("\n".join(sections) + "\n", encoding="utf-8")
@@ -897,7 +695,7 @@ def plot_valid_input_curves(runs: List[Dict], output_dir: Path) -> None:
     index = build_run_index(runs)
     color_map = build_color_map(models)
     # 为模型平均值添加高亮对比色（与曲线图一致）
-    color_map["Model Avg"] = "#E67E22"
+    color_map["Model Avg"] = "#157AB5B7"
 
     # 创建左右合并布局图表
     fig, axes = plt.subplots(1, len(corrupt_types), figsize=(10, 5))
@@ -919,9 +717,9 @@ def plot_valid_input_curves(runs: List[Dict], output_dir: Path) -> None:
             for model in models:
                 if model == "ByteCaption_XE":
                     continue
-                val = get_index_metric(index, model, corrupt_type, lvl, "Undecodable_Ratio", 100.0)
+                val = get_index_metric(index, model, corrupt_type, lvl, "Valid_Input_Rate", 100.0)
                 if val is not None:
-                    values.append(100.0 - val)
+                    values.append(val)
             avg_success.append(np.mean(values) if values else np.nan)
 
         # 构建堆叠柱：下半为成功率，上半为失败率（100-成功率）
@@ -936,7 +734,7 @@ def plot_valid_input_curves(runs: List[Dict], output_dir: Path) -> None:
         
         ax.set_xticks(list(range(len(LEVEL_ORDER))))
         ax.set_xticklabels(LEVEL_ORDER)
-        ax.set_xlabel("Corruption severity", fontweight='bold', fontsize=12)
+        ax.set_xlabel("Corruption Severity", fontweight='bold', fontsize=12)
         # 只在左列显示Y轴标签
         ax.set_ylabel("Valid Input Rate (%)" if col == 0 else "", fontweight='bold', fontsize=12)
         ax.set_ylim(0, 105)
@@ -954,7 +752,7 @@ def plot_valid_input_curves(runs: List[Dict], output_dir: Path) -> None:
         )
     
     # 添加统一的大标题（改为 Valid Input Rate）
-    fig.suptitle("Valid Input Rate across Corruption Levels", fontsize=FONT_SIZES["title"], y=0.98, fontweight="bold")
+    fig.suptitle("Valid Input Rate across Corruption Severity", fontsize=FONT_SIZES["title"], y=0.98, fontweight="bold")
     
     # 在标题下面显示图例，两项即可
     handles, labels = axes[0].get_legend_handles_labels()
@@ -980,8 +778,6 @@ def main() -> None:
 
     metrics = args.metrics
 
-    plot_curves(runs, metrics, output_dir)
-    plot_relative_metrics(runs, metrics, output_dir)
     plot_robustness_scores(runs, metrics, output_dir)
     write_summary_csv(runs, metrics, output_dir)
     plot_valid_input_curves(runs, output_dir)

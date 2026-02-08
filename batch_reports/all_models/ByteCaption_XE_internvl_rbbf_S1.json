@@ -5,18 +5,18 @@
   "corrupt_type": "rbbf",
   "corrupt_level": "S1",
   "metrics": {
-    "Bleu_1": 0.6639490188144718,
-    "Bleu_2": 0.49404008882854533,
-    "Bleu_3": 0.36273043308116587,
-    "Bleu_4": 0.26834942384742333,
-    "ROUGE_L": 0.4901036927188852,
-    "CIDEr": 0.8303783212408216,
-    "METEOR": 0.21883331514407392,
-    "SPICE": 0.15722022778914807,
+    "Bleu_1": 0.6571659591670391,
+    "Bleu_2": 0.49184504955046976,
+    "Bleu_3": 0.36370816140113604,
+    "Bleu_4": 0.2724919883421992,
+    "ROUGE_L": 0.47969789195944657,
+    "CIDEr": 0.8578367452869734,
+    "METEOR": 0.22346310489553428,
+    "SPICE": 0.1531763738462629,
     "XE_Loss": null,
-    "Undecodable_Count": 117,
-    "Undecodable_Ratio": 0.0234,
-    "Total_Samples": 5000,
+    "Undecodable_Count": 15,
+    "Undecodable_Ratio": 0.03,
+    "Total_Samples": 500,
     "Sample_Preview": [
       {
         "image_id": 1,
@@ -740,7 +740,7 @@
     },
     {
       "image_id": 63,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man in foodservice holding baskets with food.",
         "Smiling man, in red jacket and white apron and cap, holds two red trays with sandwiches.",
@@ -1026,7 +1026,7 @@
     },
     {
       "image_id": 89,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A golden clock rhino sculpture sitting on top of a fireplace.",
         "A clock on top of a rhino on a shelf",
@@ -1268,7 +1268,7 @@
     },
     {
       "image_id": 111,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A computer workstation with a keyboard and multiple mice.",
         "A keyboard and two mice on the table",
@@ -2082,7 +2082,7 @@
     },
     {
       "image_id": 185,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A train traveling down tracks next to a  building.",
         "A train going down the train tracks in the city.",
@@ -2225,7 +2225,7 @@
     },
     {
       "image_id": 198,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "a snowboarder and a snow skier are posing for a picture",
         "Two guys stand in the snow on a mountain.",
@@ -2511,7 +2511,7 @@
     },
     {
       "image_id": 224,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "The tennis player is extending his reach to hit the racket.",
         "A man swings his acket to hit a tennis ball",
@@ -3359,7 +3359,7 @@
     },
     {
       "image_id": 301,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A person on a motorcycle passing a mountain on a road.",
         "a fast bike driven on curb next to a mountain",
@@ -4030,7 +4030,7 @@
     },
     {
       "image_id": 362,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A picture of a lone clock tower standing in a school yard.",
         "A large clocktower is pictured near a fence.",
@@ -4173,7 +4173,7 @@
     },
     {
       "image_id": 375,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A black cat laying next to a box of donuts.",
         "The cat is inside the house, poised next to the box of chocolate doughnuts.",
@@ -4756,7 +4756,7 @@
     },
     {
       "image_id": 428,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A table with a sandwich and two cups of coffee.",
         "Sliced sandwich with tomatoes on a plate on a table.",
@@ -5108,7 +5108,7 @@
     },
     {
       "image_id": 460,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A metallic refrigerator freezer sitting in a kitchen.",
         "A kitchen has a granite counter top and stainless steel appliances.",
@@ -5130,7 +5130,7 @@
     },
     {
       "image_id": 462,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A very large airplane sitting on a runway.",
         "An airplane with people under the wings at a field.",
@@ -5350,7 +5350,7 @@
     },
     {
       "image_id": 482,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A man holding a hotdog in one hand and a bun i the other.",
         "This man is holding a breadstick and a bun.",
@@ -5416,7 +5416,7 @@
     },
     {
       "image_id": 488,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A yellow and blue plant flying in a gray sky.",
         "A small airplane is flying in the sky.",
@@ -5526,7 +5526,7 @@
     },
     {
       "image_id": 498,
-      "caption": "this is a dummy caption for an undecodable image",
+      "caption": "The image cannot be identified",
       "references": [
         "A kitchen counter with a pizza ready for the oven.",
         "An uncooked pizza sits on the counter.",

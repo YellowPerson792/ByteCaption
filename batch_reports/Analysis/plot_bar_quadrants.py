@@ -12,6 +12,36 @@ from typing import Dict, List, Iterable
 # 从原始脚本借用的辅助函数
 LEVEL_ORDER = ["S0", "S1", "S2", "S3", "S4", "S5"]
 
+# ===== 统一字体样式配置（与 visualize_batch_reports.py 对齐）=====
+FONT_SIZES = {
+    "default": 14,
+    "title": 18,
+    "axes_label": 14,
+    "tick_label": 14,
+    "legend": 10,
+}
+
+
+def apply_plot_style() -> None:
+    """统一图表字体与轴样式。"""
+    plt.rcParams.update(
+        {
+            "font.size": FONT_SIZES["default"],
+            "axes.titlesize": FONT_SIZES["title"],
+            "axes.labelsize": FONT_SIZES["axes_label"],
+            "legend.fontsize": FONT_SIZES["legend"],
+            "xtick.labelsize": FONT_SIZES["tick_label"],
+            "ytick.labelsize": FONT_SIZES["tick_label"],
+            "axes.spines.top": True,       # 显示顶部边框
+            "axes.spines.right": True,     # 显示右侧边框
+            "axes.spines.bottom": True,    # 显示底部边框
+            "axes.spines.left": True,      # 显示左侧边框
+            "axes.linewidth": 0.6,         # 边框线宽
+            "xtick.major.width": 0.6,      # X轴刻度线宽
+            "ytick.major.width": 0.6,      # Y轴刻度线宽
+        }
+    )
+
 
 def load_runs(input_dir: Path) -> List[Dict]:
     """从目录加载所有JSON运行数据"""
@@ -121,6 +151,7 @@ def plot_bar_quadrants(runs: List[Dict], output_path: Path):
     metrics = ["CIDEr", "SPICE"]
     corrupt_types = ["rbbf", "rbsl"]
     
+    apply_plot_style()
     fig, ax = plt.subplots(figsize=(11, 7))
     
     # 色彩方案
@@ -143,8 +174,8 @@ def plot_bar_quadrants(runs: List[Dict], output_path: Path):
     configs = [
         ("CIDEr", "rbbf", 1, "(a) RBBF × Rel-CIDEr"),    # 左上
         ("CIDEr", "rbsl", 1, "(b) RBSL × Rel-CIDEr"),     # 右上
-        ("SPICE", "rbbf", -1, "(d) RBBF × Rel-SPICE"),    # 左下
-        ("SPICE", "rbsl", -1, "(c) RBSL × Rel-SPICE"),    # 右下
+        ("SPICE", "rbbf", -1, "(c) RBBF × Rel-SPICE"),    # 左下
+        ("SPICE", "rbsl", -1, "(d) RBSL × Rel-SPICE"),    # 右下
     ]
     
     # 柱子宽度
@@ -170,13 +201,13 @@ def plot_bar_quadrants(runs: List[Dict], output_path: Path):
             bcm_val = bcm_vals[i] * y_sign
             x_bcm = x_center - bar_width/2
             ax.bar(x_bcm, bcm_val, width=bar_width, color=color_bcm,
-                  alpha=0.8, edgecolor='darkblue', linewidth=0.5, zorder=2)
+                  alpha=0.81, zorder=2)
             
             # Avg柱子（右侧）
             avg_val = avg_vals[i] * y_sign
             x_avg = x_center + bar_width/2
             ax.bar(x_avg, avg_val, width=bar_width, color=color_avg,
-                  alpha=0.8, edgecolor='darkorange', linewidth=0.5, zorder=2)
+                  alpha=0.81, zorder=2)
         
         # 添加象限标签
         if corrupt_type == "rbbf":
@@ -189,7 +220,12 @@ def plot_bar_quadrants(runs: List[Dict], output_path: Path):
         else:
             label_y = -75
         
-        ax.text(label_x, label_y, label, fontsize=12, fontweight='bold',
+        ax.text(
+            label_x,
+            label_y,
+            label,
+            fontsize=FONT_SIZES["tick_label"],
+            fontweight="bold",
                bbox=dict(boxstyle='round,pad=0.6', facecolor='white', alpha=0.9),
                ha='center', va='center', zorder=5)
     
@@ -202,12 +238,12 @@ def plot_bar_quadrants(runs: List[Dict], output_path: Path):
     x_orig = np.arange(len(LEVEL_ORDER))
     x_ticks = list(-x_orig) + list(x_orig)
     ax.set_xticks(sorted(set(x_ticks)))
-    ax.set_xticklabels([LEVEL_ORDER[abs(int(x))] for x in sorted(set(x_ticks))], fontsize=11)
+    ax.set_xticklabels([LEVEL_ORDER[abs(int(x))] for x in sorted(set(x_ticks))])
     
     # Y轴刻度
     y_ticks = [-100, -75, -50, -25, 0, 25, 50, 75, 100]
     ax.set_yticks(y_ticks)
-    ax.set_yticklabels([str(abs(y)) for y in y_ticks], fontsize=10)
+    ax.set_yticklabels([str(abs(y)) for y in y_ticks])
     
     # 网格
     ax.grid(True, alpha=0.25, linestyle=':', linewidth=0.8, color='gray', zorder=0)
@@ -215,22 +251,25 @@ def plot_bar_quadrants(runs: List[Dict], output_path: Path):
     ax.set_facecolor('#FAFAFA')
     
     # 添加坐标轴参考线（粗黑线）
-    ax.axhline(y=0, color='black', linewidth=2, alpha=0.8, zorder=2)
-    ax.axvline(x=0, color='black', linewidth=2, alpha=0.8, zorder=2)
+    ax.axhline(y=0, color='black', linewidth=1.6, alpha=0.8, zorder=2)
+    ax.axvline(x=0, color='black', linewidth=1.6, alpha=0.8, zorder=2)
     
     # 标签和标题
-    ax.set_xlabel("Corruption Severity", fontsize=13, fontweight='semibold')
-    ax.set_ylabel("Relative Metric (%)", fontsize=13, fontweight='semibold')
-    ax.set_title("Relative Metrics: BCM vs Avg over Four Quadrants",
-                fontsize=16, fontweight='bold', pad=20)
+    ax.set_xlabel("Corruption Severity", fontweight="semibold")
+    ax.set_ylabel("Relative Metric (%)", fontweight="semibold")
+    ax.set_title(
+        "Relative Captioning Metrics: BCM vs Avg (w/o BCM)",
+        fontweight="bold",
+        pad=20,
+    )
     
     # 图例
     from matplotlib.patches import Patch
     legend_elements = [
-        Patch(facecolor=color_bcm, alpha=0.8, edgecolor='darkblue', label='BCM (Ours)'),
-        Patch(facecolor=color_avg, alpha=0.8, edgecolor='darkorange', label='Avg (w/o BCM)')
+        Patch(facecolor=color_bcm, alpha=0.8, label='BCM (Ours)'),
+        Patch(facecolor=color_avg, alpha=0.8, label='Avg (w/o BCM)')
     ]
-    ax.legend(handles=legend_elements, loc='upper right', fontsize=11, framealpha=0.95)
+    ax.legend(handles=legend_elements, loc='upper right', framealpha=0.95)
     
     # 调整布局
     plt.tight_layout()
