@@ -1,0 +1,67 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_openrouter",
+  "model_name": "ByteCaption_XE_openrouter",
+  "model_type": "OPENROUTER",
+  "corrupt_type": [
+    "rbsl"
+  ],
+  "corrupt_level": "S1",
+  "corruption_params": {
+    "rbsl": {
+      "trigger_prob": 0.0005,
+      "burst_lambda": 100.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.4002287251093805,
+    "Bleu_2": 0.20907628776058879,
+    "Bleu_3": 0.10064610077853378,
+    "Bleu_4": 0.04244935138882592,
+    "ROUGE_L": 0.3081016187184841,
+    "CIDEr": 0.331624918847424,
+    "METEOR": 0.13116112893408174,
+    "SPICE": 0.0933036367743477,
+    "XE_Loss": null,
+    "Undecodable_Count": 18,
+    "Undecodable_Ratio": 0.3,
+    "Total_Samples": 60,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "A person standing in a room.",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "A person standing in a room.",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "Open toilet seat in a rustic, worn bathroom",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "Colorful living room with patterned furniture and artwork",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "Outdoor table with food baskets and empty chair",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260208_122133",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20260208_122133/rbsl_S1/captions_test_best.json",
+  "captions_count": 60
+}

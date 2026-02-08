@@ -1,0 +1,67 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_ministral",
+  "model_name": "ByteCaption_XE_ministral",
+  "model_type": "MINISTRAL",
+  "corrupt_type": [
+    "rbsl"
+  ],
+  "corrupt_level": "S0",
+  "corruption_params": {
+    "rbsl": {
+      "trigger_prob": 0.0,
+      "burst_lambda": 0.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.7524590163922091,
+    "Bleu_2": 0.5906499489078488,
+    "Bleu_3": 0.4464691184510693,
+    "Bleu_4": 0.34569152095957545,
+    "ROUGE_L": 0.5609062372734192,
+    "CIDEr": 1.2327404218719793,
+    "METEOR": 0.27699309324724486,
+    "SPICE": 0.2033880711227679,
+    "XE_Loss": null,
+    "Undecodable_Count": 0,
+    "Undecodable_Ratio": 0.0,
+    "Total_Samples": 60,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "A dog laying on top of a bed next to a backpack.",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "A black and white photo of a street scene.",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "A white toilet sitting in a bathroom next to a wall.",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "A living room with a couch, chair, and coffee table.",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "A table with a sandwich and a drink on it.",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260208_120645",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20260208_120645/rbsl_S0/captions_test_best.json",
+  "captions_count": 60
+}

@@ -1,0 +1,67 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_ministral",
+  "model_name": "ByteCaption_XE_ministral",
+  "model_type": "MINISTRAL",
+  "corrupt_type": [
+    "rbsl"
+  ],
+  "corrupt_level": "S2",
+  "corruption_params": {
+    "rbsl": {
+      "trigger_prob": 0.0008,
+      "burst_lambda": 220.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.48383955995725253,
+    "Bleu_2": 0.293334757447293,
+    "Bleu_3": 0.18881526338791627,
+    "Bleu_4": 0.12411634305414901,
+    "ROUGE_L": 0.36342031796749,
+    "CIDEr": 0.2770787840618618,
+    "METEOR": 0.12153176503317854,
+    "SPICE": 0.06787572595684663,
+    "XE_Loss": null,
+    "Undecodable_Count": 18,
+    "Undecodable_Ratio": 0.3,
+    "Total_Samples": 60,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "A person standing in a room.",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "A picture of a city with a lot of buildings.",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "A picture of a man in a suit and tie.",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "A black and white photo of a person.",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "A person sitting on a bench in a park.",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260208_120645",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20260208_120645/rbsl_S2/captions_test_best.json",
+  "captions_count": 60
+}

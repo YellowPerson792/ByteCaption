@@ -1,0 +1,67 @@
+{
+  "model_folder": "PureT/experiments/ByteCaption_XE_blip",
+  "model_name": "ByteCaption_XE_blip",
+  "model_type": "BLIP",
+  "corrupt_type": [
+    "rbsl"
+  ],
+  "corrupt_level": "S1",
+  "corruption_params": {
+    "rbsl": {
+      "trigger_prob": 0.0005,
+      "burst_lambda": 100.0,
+      "max_drop_ratio": 1.0
+    }
+  },
+  "metrics": {
+    "Bleu_1": 0.49198532983380905,
+    "Bleu_2": 0.34447950070987515,
+    "Bleu_3": 0.24060488704280322,
+    "Bleu_4": 0.17990829507199313,
+    "ROUGE_L": 0.3856989547598984,
+    "CIDEr": 0.519483346512437,
+    "METEOR": 0.15637978201453975,
+    "SPICE": 0.10891009878535453,
+    "XE_Loss": null,
+    "Undecodable_Count": 12,
+    "Undecodable_Ratio": 0.2,
+    "Total_Samples": 60,
+    "Sample_Preview": [
+      {
+        "image_id": 1,
+        "generated": "a picture of a person playing a video game",
+        "reference": "This wire metal rack holds several pairs of shoes and sandals",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 2,
+        "generated": "A person standing in a room.",
+        "reference": "A traffic light over a street surrounded by tall buildings.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 3,
+        "generated": "this is a toilet",
+        "reference": "A toilet seat sits on top of a hole in the ground.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 4,
+        "generated": "this is a picture of a living room",
+        "reference": "A coffee table sits in the middle of a living room.",
+        "augmentation_idx": 0
+      },
+      {
+        "image_id": 5,
+        "generated": "a bunch of flowers sitting on top of a table",
+        "reference": "a sandwich in a plastic food basket on a table",
+        "augmentation_idx": 0
+      }
+    ]
+  },
+  "rname": "test_best",
+  "timestamp": "20260208_120537",
+  "references_annfile": "/root/autodl-tmp/ByteCaption/PureT/data/coco_karpathy/captions_test.json",
+  "captions_file": "eval_results/20260208_120537/rbsl_S1/captions_test_best.json",
+  "captions_count": 60
+}
